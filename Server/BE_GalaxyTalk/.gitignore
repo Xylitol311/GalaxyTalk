@@ -53,6 +53,7 @@ temp/
 # application-env.properties
 .env
 *.env
+**/application-secret.yml
 
 # 컴파일된 파일
 *.class

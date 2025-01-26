@@ -1,23 +1,38 @@
 package com.example.match.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        // Redis 템플릿 객체 생성
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        // Redis 연결 설정
-        template.setConnectionFactory(connectionFactory);
-        // 키를 문자열로 직렬화
-        template.setKeySerializer(new StringRedisSerializer());
-        // 값을 JSON으로 직렬화
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
+@Value("${spring.data.redis.host}")
+private String host;
+    @Value("${spring.data.redis.port}")
+    private int port;
+
+    @Value("${spring.data.redis.password}")
+    private String password;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
+        connectionFactory.setPassword(password);
+        return connectionFactory;
     }
 
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
+    }
 }
