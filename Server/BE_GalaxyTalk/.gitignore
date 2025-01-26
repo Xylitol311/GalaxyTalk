@@ -14,7 +14,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-# IDE 관련 파일 - Eclipse
+# IDE 관련 파일 - 공통
 .classpath
 .project
 .settings/
@@ -24,10 +24,7 @@ out/
 
 # IDE 관련 파일 - Spring Tool Suite (STS)
 .apt_generated
-.classpath
 .factorypath
-.project
-.settings/
 .springBeans
 .sts4-cache
 bin/
