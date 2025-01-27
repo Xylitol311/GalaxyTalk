@@ -1,11 +1,13 @@
 package com.example.match.controller;
 
+import com.example.match.domain.MatchResponse;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchRequestDto;
 import com.example.match.service.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,12 @@ public class MatchController {
         UserMatchStatus status = convertToStatus(request); //redis에 저장할 객체로 변환
         matchService.startMatching(status);
         return ResponseEntity.ok().build();
+    }
+
+    // 매칭 수락 여부 응답
+    @MessageMapping("/match/response")
+    public void handleMatchResponse(MatchResponse response) {
+        matchService.processMatchResponse(response);
     }
 
     // 매칭 요청 정보를 redis에 저장할 객체 형태로 변환
