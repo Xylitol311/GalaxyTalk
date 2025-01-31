@@ -2,8 +2,8 @@
 > description
 
 ## Progress
-- [] todo
-- [] todo
-- [] todo
+- [ ] todo
+- [ ] todo
+- [ ] todo
 
 ## ETC
