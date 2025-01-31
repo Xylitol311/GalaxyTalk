@@ -1,0 +1,10 @@
+/node_modules
+/dist
+/build
+/android
+/ios
+/public
+*.md
+package.json
+package-lock.json
+yarn.lock
