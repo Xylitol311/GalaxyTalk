@@ -38,7 +38,6 @@ public class MatchController {
         status.setUserId(dto.getUserId());
         status.setConcern(dto.getConcern());
         status.setPreferredMbti(dto.getPreferredMbti());
-        status.setAge(dto.getAge());
         status.setStatus(MatchStatus.WAITING);
         status.setAccepted(false);
         return status;
