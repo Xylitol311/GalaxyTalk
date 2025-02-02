@@ -10,3 +10,11 @@ spring:
 
 server:
   port: 8083
+
+ai:
+  service:
+    url: localhost:8085
+
+chat:
+  service:
+    url: localhost:8084
