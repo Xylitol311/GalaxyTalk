@@ -13,7 +13,7 @@ public class RefreshTokenService {
 
     //사용자 식별 아이디, 리프레시 토큰, 엑세스 토큰 저장
     @Transactional
-    public void saveTokenInfo(String refreshToken, String accessToken) {
+    public void saveTokenInfo(String refreshToken) {
         refreshTokenRepository.save(new RefreshTokenDTO(refreshToken));
     }
 

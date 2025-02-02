@@ -1,5 +1,6 @@
 package com.galaxytalk.auth.config;
 
+import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.jwt.CustomLogoutFilter;
 import com.galaxytalk.auth.jwt.CustomSuccessHandler;
 import com.galaxytalk.auth.jwt.JWTFilter;
@@ -66,7 +67,8 @@ public class SpringSecurityConfig {
         http
                 //특정 url들에 대한 접근 방법을 설정할 수 있다. 동작되는 순서는 상단부터 적용되므로, 순서를 주의
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers( "/login/**","/api/oauth/**").permitAll()
+                        .requestMatchers( "/login/**","/api/oauth/signup").permitAll()
+                        .requestMatchers( "/api/oauth/**").hasRole("USER")
                         .anyRequest().authenticated()); // permitAll -> 허용, 그외 인증 필요
 
         //세션 설정 : STATELESS
@@ -79,7 +81,6 @@ public class SpringSecurityConfig {
 
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
 
                         CorsConfiguration configuration = new CorsConfiguration();
 

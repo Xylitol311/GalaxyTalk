@@ -2,6 +2,7 @@ package com.galaxytalk.auth.jwt;
 
 import com.galaxytalk.auth.dto.CustomOAuth2User;
 
+import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -33,7 +34,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException, IOException {
 
-        System.out.println("성공할 경우 받은 데이터 처리");
+        System.out.println("데이터 처리하고 토큰 만들기....");
 
 
         //성공할 경우 받은 데이터 처리
@@ -57,11 +58,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(createCookie("RefreshToken",refreshToken));
         response.setStatus(HttpStatus.OK.value());
 
-        response.sendRedirect("http://localhost:3000/");
-
         //리프레시 토큰 레디스에 넣기
-        refreshTokenService.saveTokenInfo(refreshToken, accessToken);
+        refreshTokenService.saveTokenInfo(refreshToken);
 
+
+        if(role.equals("ROLE_GUEST")) {
+            response.sendRedirect("http://localhost:3000/signup");
+        }else{
+            response.sendRedirect("http://localhost:3000/");
+            System.out.println("회원가입이 아닌 홈으로 옴");
+        }
     }
 
     //쿠기 만드는 메서드

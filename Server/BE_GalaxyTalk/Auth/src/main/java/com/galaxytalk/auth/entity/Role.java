@@ -1,7 +1,10 @@
 package com.galaxytalk.auth.entity;
 
 public enum Role {
-    ADMIN,
-    USER
+    ROLE_ADMIN,
+    ROLE_USER,
+    ROLE_GUEST,
+    ROLE_WITHDRAW
+
 }
 

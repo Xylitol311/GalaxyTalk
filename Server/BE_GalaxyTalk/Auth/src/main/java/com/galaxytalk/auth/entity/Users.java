@@ -41,12 +41,12 @@ public class Users {
     @Column(nullable = false)
     private int birthyear;
 
-    @Column(nullable = false)
+    @Column
     private String mbti;
 
     // 행성 1 : 유저 N 관계, 지연로딩 설정, planet_id 로 join
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "planet_id", nullable = false)
+    @JoinColumn(name = "planet_id")
     private Planets planets;
 
     @Column(nullable = false)
@@ -68,4 +68,5 @@ public class Users {
 
     @Column
     private LocalDateTime withdrawnAt;
+
 }

@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 //로그아웃시 작동되는 필터
 //클라이언트에서 http://localhost:8080/api/oauth/logout POST로 요청
@@ -49,50 +51,54 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //get refresh token
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("RefreshToken")) {
-                refresh = cookie.getValue();
+        // 쿠키 가져오기
+        Map<String, String> cookies = new HashMap<>();
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                cookies.put(cookie.getName(), cookie.getValue());
             }
         }
 
-        //refresh null check
-        if (refresh == null) {
+        String refresh = cookies.get("RefreshToken");
+        String access = cookies.get("AccessToken");
 
+        // 토큰 검증
+        if (refresh == null || access == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        //expired check
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            // Log the error for debugging
-            System.out.println("Expired JWT exception: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        if (!validateToken(refresh, response, HttpServletResponse.SC_BAD_REQUEST)) return;
+        if (!validateToken(access, response, HttpServletResponse.SC_UNAUTHORIZED)) return;
 
-
-        //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
+        // 로그아웃 진행 - Refresh 토큰 DB에서 제거
         refreshTokenService.removeRefreshToken(refresh);
 
-        //토큰 Cookie에서 삭제
-        Cookie refreshCookie = new Cookie("RefreshToken", null);
-        Cookie accessCookie = new Cookie("AccessToken", null);
-        refreshCookie.setMaxAge(0);
-        accessCookie.setMaxAge(0);
-        refreshCookie.setPath("/");
-        accessCookie.setPath("/");
-
-
-        response.addCookie(refreshCookie);
-        response.addCookie(accessCookie);
+        // 토큰 쿠키 삭제
+        deleteCookie(response, "RefreshToken");
+        deleteCookie(response, "AccessToken");
 
         response.setStatus(HttpServletResponse.SC_OK);
     }
+
+    private boolean validateToken(String token, HttpServletResponse response, int errorCode) throws IOException {
+        try {
+            jwtUtil.isExpired(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+
+            response.setStatus(errorCode);
+            return false;
+        }
+    }
+
+    private void deleteCookie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+    }
+
 }

@@ -33,7 +33,6 @@ public class JWTFilter extends OncePerRequestFilter {
         //cookie들을 불러온 뒤 Authorization Key에 담긴 쿠키를 찾음
         String accessToken = null;
 
-        System.out.println("필터를 들리는 것????");
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {  // 이 체크 추가 필요
@@ -44,7 +43,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
                     accessToken = cookie.getValue();
 
-                    System.out.println("엑세스 토큰 있음");
                 }
             }
         }
@@ -74,8 +72,6 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUserId(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
-        System.out.println("user이름은 " + username);
-        System.out.println("role이름은" + role);
 
         //userDTO를 생성하여 값 set
         UserDTO userDTO = new UserDTO();
@@ -84,6 +80,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
           //UserDetails에 회원 정보 객체 담기
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
+
+        System.out.println("너의 ROLE은 무엇이냐!!!");
+        System.out.println(role);
+
 
         //스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
