@@ -10,7 +10,6 @@ import java.util.Map;
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
 public class MatchResponseDto {
     private String type;
     private String message;
