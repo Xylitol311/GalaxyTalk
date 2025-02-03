@@ -1,0 +1,73 @@
+package com.galaxytalk.auth.service;
+
+import com.galaxytalk.auth.dto.CustomOAuth2User;
+import com.galaxytalk.auth.dto.NaverResponse;
+import com.galaxytalk.auth.dto.OAuth2Response;
+import com.galaxytalk.auth.dto.UserDTO;
+import com.galaxytalk.auth.entity.Planets;
+import com.galaxytalk.auth.entity.Role;
+import com.galaxytalk.auth.entity.Users;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+/*
+로그인 성공 후 데이터를 전달 받기 위한 구현체 (작성하지 않을 경우 오류 발생)
+어떤 데이터를 받을 건지, 어떻게 받을건지는 직접 설정해줘야함
+ */
+
+@Service
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+    //DefaultOAuth2UserService OAuth2UserService의 구현체
+
+    private final UserService userService;
+
+    public CustomOAuth2UserService(UserService userService) {
+        this.userService = userService;
+    }
+
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+
+        System.out.println("로그인 성공 후 정보 받기 ....");
+
+        //Naver로 부터 전달 받은 값
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        OAuth2Response oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+
+        //serialNumber로 유저 검색하기
+        String userSerialNumber = oAuth2Response.getProviderId();
+        Users user = userService.getUserBySerialNumber(userSerialNumber);
+
+
+        // user 정보가 없을 경우 회원가입 처리
+        if (user == null) {
+
+            user = new Users();
+            user.setSerialNumber(userSerialNumber);
+            user.setAgeInterval(oAuth2Response.getAgeInterval());
+            user.setBirthday(oAuth2Response.getBirthday());
+            user.setBirthyear(Integer.parseInt(oAuth2Response.getBirthyear()));
+            user.setEmail(oAuth2Response.getEmail());
+
+            //!!권한 추후에 분기처리하기
+            Role role = Role.ROLE_GUEST;
+            user.setRole(role);
+
+            //JPA 데이터 저장
+            userService.saveUser(user);
+        }
+
+
+        //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
+        UserDTO userDTO = new UserDTO();
+        userDTO.setName(oAuth2Response.getProviderId());
+        userDTO.setRole(user.getRole().toString());
+
+        return new CustomOAuth2User(userDTO);
+    }
+}
