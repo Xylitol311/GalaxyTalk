@@ -9,15 +9,14 @@ import jakarta.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+@Getter
 @Component
 @RequiredArgsConstructor
 public class MatchingQueueManager {
     // MBTI별 매칭 큐
-    @Getter
     private final Map<MBTI, Queue<UserMatchStatus>> mbtiQueues = new EnumMap<>(MBTI.class);
 
     // 대기 시간이 긴 유저들을 위한 큐
-    @Getter
     private final Queue<UserMatchStatus> longWaitQueue = new ConcurrentLinkedQueue<>();
 
     // 큐 크기 상수

@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
@@ -28,11 +27,6 @@ public class MatchService {
     private final MatchingQueueManager queueManager;
     private final WebClient aiServiceClient;
     private final WebClient chatServiceClient;
-
-
-    // 외부 서버 API 엔드포인트 상수 정의
-    private static final String AI_SERVER_URL = "http://ai-server/similarity";
-    private static final String CHAT_SERVER_URL = "http://chat-server/room";
 
     // 매칭 관련 상수
     private static final double SIMILARITY_THRESHOLD = 0.7;
