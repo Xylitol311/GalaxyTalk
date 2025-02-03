@@ -118,40 +118,56 @@ public class AuthController {
 
     //회원정보 조회
     @GetMapping
-    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+    public ResponseEntity<?> getUserInfo(@RequestHeader("X-User-ID") String userId) {
 
-
-        // 1. 쿠키에서 AccessToken 추출
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return new ResponseEntity<>("쿠키가 비어있습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        String accessToken = Arrays.stream(cookies)
-                .filter(cookie -> "AccessToken".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
-
-        if (accessToken == null) {
-            return new ResponseEntity<>("토큰이 확인되지 않습니다.", HttpStatus.UNAUTHORIZED);
-        }
-
-        // 2. AccessToken에서 시리얼 번호 추출
-        String serialNumber = jwtUtil.getUserId(accessToken);
-
-        // 3. 시리얼 번호로 사용자 정보 조회
-        Users user = userService.getUserBySerialNumber(serialNumber);
-
+        // 8081에서는 Gateway가 해석한 userId를 바로 사용
+        Users user = userService.getUserBySerialNumber(userId);
 
         if (user == null) {
             return new ResponseEntity<>("유저가 확인되지 않습니다", HttpStatus.BAD_REQUEST);
         }
 
         UserSend getUser = new UserSend(user);
-
         return ResponseEntity.status(HttpStatus.OK).body(getUser);
     }
+//    @GetMapping
+//    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+//
+//
+//        // 1. 쿠키에서 AccessToken 추출
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies == null) {
+//            return new ResponseEntity<>("쿠키가 비어있습니다.", HttpStatus.BAD_REQUEST);
+//        }
+//
+//
+//        String accessToken = Arrays.stream(cookies)
+//                .filter(cookie -> "AccessToken".equals(cookie.getName()))
+//                .findFirst()
+//                .map(Cookie::getValue)
+//                .orElse(null);
+//
+//        if (accessToken == null) {
+//
+//            return new ResponseEntity<>("토큰이 확인되지 않습니다.", HttpStatus.UNAUTHORIZED);
+//        }
+//
+//        // 2. AccessToken에서 시리얼 번호 추출
+//        String serialNumber = jwtUtil.getUserId(accessToken);
+//
+//        // 3. 시리얼 번호로 사용자 정보 조회
+//        Users user = userService.getUserBySerialNumber(serialNumber);
+//
+//
+//        if (user == null) {
+//            return new ResponseEntity<>("유저가 확인되지 않습니다", HttpStatus.BAD_REQUEST);
+//        }
+//
+//
+//        UserSend getUser = new UserSend(user);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(getUser);
+//    }
 
 
     //회원정보 수정

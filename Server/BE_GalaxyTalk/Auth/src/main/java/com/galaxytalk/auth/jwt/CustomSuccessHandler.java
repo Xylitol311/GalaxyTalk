@@ -56,6 +56,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //만들어진 토큰은 클라이언트데 쿠키에 담아서 주기
         response.addCookie(createCookie("AccessToken", accessToken));
         response.addCookie(createCookie("RefreshToken",refreshToken));
+
         response.setStatus(HttpStatus.OK.value());
 
         //리프레시 토큰 레디스에 넣기
