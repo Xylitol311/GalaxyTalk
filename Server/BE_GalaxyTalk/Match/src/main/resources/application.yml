@@ -18,3 +18,7 @@ ai:
 chat:
   service:
     url: localhost:8084
+
+auth:
+  service:
+    url: localhost:8081

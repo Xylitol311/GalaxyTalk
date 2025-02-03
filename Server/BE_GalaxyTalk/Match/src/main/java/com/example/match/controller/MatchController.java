@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Set;
@@ -45,6 +42,7 @@ public class MatchController {
             // MBTI 유효성 검증
             validateMbti(request.getPreferredMbti());
 
+            // UserMatchStatus 객체 생성 및 매칭 시작
             UserMatchStatus status = convertToStatus(request, userId);
             matchService.startMatching(status);
 
@@ -54,17 +52,71 @@ public class MatchController {
                     null
             ));
         } catch (IllegalArgumentException e) {
-            log.error("Invalid MBTI value: {}", request.getPreferredMbti());
+            log.error("Invalid request for user {}: {}", userId, e.getMessage());
             return ResponseEntity.badRequest().body(new ApiResponse(
                     false,
-                    "잘못된 MBTI 값입니다.",
+                    e.getMessage(),
                     null
             ));
         } catch (Exception e) {
-            log.error("Error during match start", e);
+            log.error("Error processing matching request for user {}", userId, e);
             return ResponseEntity.internalServerError().body(new ApiResponse(
                     false,
-                    "매칭 시작 중 오류가 발생했습니다.",
+                    "매칭 처리 중 오류가 발생했습니다.",
+                    null
+            ));
+        }
+    }
+
+    /**
+     * 매칭 취소 요청
+     */
+    @DeleteMapping("/cancel")
+    public ResponseEntity<ApiResponse> cancelMatching(
+            @RequestHeader("X-User-Id") String userId) {
+        try {
+            matchService.cancelMatching(userId);
+            return ResponseEntity.ok(new ApiResponse(
+                    true,
+                    "매칭이 취소되었습니다.",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Error canceling match for user {}", userId, e);
+            return ResponseEntity.internalServerError().body(new ApiResponse(
+                    false,
+                    "매칭 취소 중 오류가 발생했습니다.",
+                    null
+            ));
+        }
+    }
+
+    /**
+     * 매칭 시작 시간 조회
+     */
+    @GetMapping("/start-time")
+    public ResponseEntity<ApiResponse> getMatchingStartTime(
+            @RequestHeader("X-User-Id") String userId) {
+        try {
+            Long startTime = matchService.getMatchingStartTime(userId);
+            if (startTime == null) {
+                return ResponseEntity.ok(new ApiResponse(
+                        false,
+                        "매칭 중인 유저가 아닙니다.",
+                        null
+                ));
+            }
+
+            return ResponseEntity.ok(new ApiResponse(
+                    true,
+                    "매칭 시작 시간 조회 성공",
+                    startTime
+            ));
+        } catch (Exception e) {
+            log.error("Error getting start time for user {}", userId, e);
+            return ResponseEntity.internalServerError().body(new ApiResponse(
+                    false,
+                    "매칭 시작 시간 조회 중 오류가 발생했습니다.",
                     null
             ));
         }
@@ -114,7 +166,6 @@ public class MatchController {
         UserMatchStatus status = new UserMatchStatus();
         status.setUserId(userId);
         status.setConcern(dto.getConcern());
-        status.setMbti(dto.getMbti());  // 사용자의 MBTI
         status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
         status.setStatus(MatchStatus.WAITING);
         status.setAccepted(false);

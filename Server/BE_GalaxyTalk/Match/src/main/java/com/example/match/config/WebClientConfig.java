@@ -19,6 +19,8 @@ public class WebClientConfig {
 
     @Value("${chat.service.url}")
     private String chatServiceUrl;
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
 
     @Bean
     public WebClient aiServiceClient() {
@@ -34,6 +36,16 @@ public class WebClientConfig {
     public WebClient chatServiceClient() {
         return WebClient.builder()
                 .baseUrl(chatServiceUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .filter(logRequest())
+                .filter(logResponse())
+                .build();
+    }
+
+    @Bean
+    public WebClient authServiceClient() {
+        return WebClient.builder()
+                .baseUrl(authServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .filter(logRequest())
                 .filter(logResponse())
