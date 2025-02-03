@@ -25,13 +25,8 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(aiServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(ExchangeFilterFunction.ofRequestProcessor(
-                        clientRequest -> {
-                            log.debug("AI Service Request: {} {}",
-                                    clientRequest.method(), clientRequest.url());
-                            return Mono.just(clientRequest);
-                        }
-                ))
+                .filter(logRequest())
+                .filter(logResponse())
                 .build();
     }
 
@@ -40,13 +35,22 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(chatServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(ExchangeFilterFunction.ofRequestProcessor(
-                        clientRequest -> {
-                            log.debug("Chat Service Request: {} {}",
-                                    clientRequest.method(), clientRequest.url());
-                            return Mono.just(clientRequest);
-                        }
-                ))
+                .filter(logRequest())
+                .filter(logResponse())
                 .build();
+    }
+
+    private ExchangeFilterFunction logRequest() {
+        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+            log.debug("Request: {} {}", clientRequest.method(), clientRequest.url());
+            return Mono.just(clientRequest);
+        });
+    }
+
+    private ExchangeFilterFunction logResponse() {
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
+            log.debug("Response Status: {}", clientResponse.statusCode());
+            return Mono.just(clientResponse);
+        });
     }
 }

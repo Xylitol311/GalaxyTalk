@@ -1,11 +1,20 @@
 package com.example.match.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class MatchRequestDto {
-    private String userId;
+    @NotBlank(message = "고민 내용은 필수입니다.")
+    @Size(min = 10, max = 1000, message = "고민 내용은 10자 이상 1000자 이하로 작성해주세요.")
     private String concern;
+
+    @NotBlank(message = "MBTI는 필수입니다.")
+    @Size(min = 4, max = 4, message = "MBTI는 4자리여야 합니다.")
+    private String mbti;
+
+    @NotBlank(message = "선호하는 MBTI는 필수입니다.")
+    @Size(min = 4, max = 4, message = "MBTI는 4자리여야 합니다.")
     private String preferredMbti;
-    private int age;
 }
