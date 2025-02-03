@@ -33,6 +33,12 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  galaxy-auth:
+    build: ./BE_GalaxyTalk/Auth
+    restart: always
+    ports:
+      - "30000:8080"
+
 volumes:
   mysql_data:
   mongodb_data:
