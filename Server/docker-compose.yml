@@ -37,7 +37,7 @@ services:
     build: ./BE_GalaxyTalk/Auth
     restart: always
     ports:
-      - "30000:8080"
+      - "30001:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
 
