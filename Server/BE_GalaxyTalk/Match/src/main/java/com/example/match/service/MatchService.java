@@ -154,9 +154,7 @@ public class MatchService {
                 UserMatchStatus user2 = users.get(j);
 
                 double similarity = externalApiService.calculateSimilarity(user1, user2);
-                if (similarity >= SIMILARITY_THRESHOLD) {
-                    pairs.add(new MatchPair(user1, user2, similarity));
-                }
+                pairs.add(new MatchPair(user1, user2, similarity));
             }
         }
 
