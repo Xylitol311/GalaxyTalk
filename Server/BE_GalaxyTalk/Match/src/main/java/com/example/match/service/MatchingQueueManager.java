@@ -65,8 +65,10 @@ public class MatchingQueueManager {
             mbtiQueues.get(userMbti).offer(user);
 
             // 선호하는 MBTI 큐에 추가
-            MBTI preferredMbti = MBTI.valueOf(user.getPreferredMbti());
-            mbtiQueues.get(preferredMbti).offer(user);
+            if (user.getPreferredMbti() != null) {
+                MBTI preferredMbti = MBTI.valueOf(user.getPreferredMbti());
+                mbtiQueues.get(preferredMbti).offer(user);
+            }
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid MBTI value");
         }

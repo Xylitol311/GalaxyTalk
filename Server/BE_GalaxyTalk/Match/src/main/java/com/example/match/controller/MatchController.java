@@ -24,6 +24,7 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @Validated
+@RequestMapping("/api/match")
 public class MatchController {
     private final MatchService matchService;
     private final Validator validator;
@@ -34,13 +35,15 @@ public class MatchController {
      * 2. UserMatchStatus 객체 생성
      * 3. 매칭 서비스 호출
      */
-    @PostMapping("/api/match/start")
+    @PostMapping("/start")
     public ResponseEntity<ApiResponse> startMatching(
             @RequestHeader("X-User-Id") String userId,
             @Valid @RequestBody MatchRequestDto request) {
         try {
             // MBTI 유효성 검증
-            validateMbti(request.getPreferredMbti());
+            if (request.getPreferredMbti() != null) {
+                validateMbti(request.getPreferredMbti());
+            }
 
             // UserMatchStatus 객체 생성 및 매칭 시작
             UserMatchStatus status = convertToStatus(request, userId);
@@ -166,7 +169,9 @@ public class MatchController {
         UserMatchStatus status = new UserMatchStatus();
         status.setUserId(userId);
         status.setConcern(dto.getConcern());
-        status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
+        if (dto.getPreferredMbti() != null) {
+            status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
+        }
         status.setStatus(MatchStatus.WAITING);
         status.setAccepted(false);
         status.setStartTime(Instant.now().toEpochMilli());
