@@ -1,7 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.MatchResponseDto;
+import com.example.match.dto.MessageResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class MatchServiceIntegrationTest {
 
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
-    private BlockingQueue<MatchResponseDto> blockingQueue;
+    private BlockingQueue<MessageResponseDto> blockingQueue;
 
     @BeforeEach
     void setup() {
@@ -60,12 +60,12 @@ public class MatchServiceIntegrationTest {
         stompSession.subscribe("/topic/matching/" + userId, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return MatchResponseDto.class;
+                return MessageResponseDto.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.add((MatchResponseDto) payload);
+                blockingQueue.add((MessageResponseDto) payload);
             }
         });
 
@@ -78,7 +78,7 @@ public class MatchServiceIntegrationTest {
         await()
                 .atMost(5, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
-                    MatchResponseDto response = blockingQueue.poll();
+                    MessageResponseDto response = blockingQueue.poll();
                     assertNotNull(response, "매칭 응답을 받지 못했습니다");
                     assertEquals("WAITING", response.getType(), "잘못된 응답 타입입니다");
                     assertEquals("매칭 대기 시작", response.getMessage(), "잘못된 메시지입니다");

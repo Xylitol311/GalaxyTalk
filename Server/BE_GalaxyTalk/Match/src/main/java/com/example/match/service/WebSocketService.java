@@ -1,7 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.MatchResponseDto;
+import com.example.match.dto.MessageResponseDto;
 import com.example.match.dto.UserStatusDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,7 +17,7 @@ public class WebSocketService {
     public void notifyUser(String userId, String type, String message) {
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + userId,
-                new MatchResponseDto(type, message, null)
+                new MessageResponseDto(type, message, null)
         );
     }
 
@@ -27,11 +27,11 @@ public class WebSocketService {
 
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user1Id,
-                new MatchResponseDto("MATCH_SUCCESS", message, data)
+                new MessageResponseDto("MATCH_SUCCESS", message, data)
         );
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user2Id,
-                new MatchResponseDto("MATCH_SUCCESS", message, data)
+                new MessageResponseDto("MATCH_SUCCESS", message, data)
         );
     }
 

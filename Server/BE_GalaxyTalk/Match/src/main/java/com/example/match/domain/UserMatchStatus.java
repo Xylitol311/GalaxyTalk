@@ -2,6 +2,7 @@ package com.example.match.domain;
 
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -16,5 +17,6 @@ public class UserMatchStatus {
     private boolean accepted;        // 매칭 수락 여부
     private long startTime;          // 매칭 시작 시간 (밀리초)
     private Map<String, Object> additionalInfo;  // 추가 정보
+    private List<String> machingQueues;
 }
 

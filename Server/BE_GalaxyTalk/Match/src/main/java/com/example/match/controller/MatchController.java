@@ -4,7 +4,7 @@ import com.example.match.constant.MBTI;
 import com.example.match.domain.MatchResponse;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.ApiResponse;
+import com.example.match.dto.ApiResponseDto;
 import com.example.match.dto.MatchRequestDto;
 import com.example.match.service.MatchService;
 import jakarta.validation.ConstraintViolation;
@@ -35,8 +35,8 @@ public class MatchController {
      * 2. UserMatchStatus 객체 생성
      * 3. 매칭 서비스 호출
      */
-    @PostMapping("/start")
-    public ResponseEntity<ApiResponse> startMatching(
+    @PostMapping
+    public ResponseEntity<ApiResponseDto> startMatching(
             @RequestHeader("X-User-Id") String userId,
             @Valid @RequestBody MatchRequestDto request) {
         try {
@@ -49,21 +49,21 @@ public class MatchController {
             UserMatchStatus status = convertToStatus(request, userId);
             matchService.startMatching(status);
 
-            return ResponseEntity.ok(new ApiResponse(
+            return ResponseEntity.ok(new ApiResponseDto(
                     true,
                     "매칭이 시작되었습니다.",
                     null
             ));
         } catch (IllegalArgumentException e) {
             log.error("Invalid request for user {}: {}", userId, e.getMessage());
-            return ResponseEntity.badRequest().body(new ApiResponse(
+            return ResponseEntity.badRequest().body(new ApiResponseDto(
                     false,
                     e.getMessage(),
                     null
             ));
         } catch (Exception e) {
             log.error("Error processing matching request for user {}", userId, e);
-            return ResponseEntity.internalServerError().body(new ApiResponse(
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
                     false,
                     "매칭 처리 중 오류가 발생했습니다.",
                     null
@@ -74,21 +74,64 @@ public class MatchController {
     /**
      * 매칭 취소 요청
      */
-    @DeleteMapping("/cancel")
-    public ResponseEntity<ApiResponse> cancelMatching(
+    @DeleteMapping
+    public ResponseEntity<ApiResponseDto> cancelMatching(
             @RequestHeader("X-User-Id") String userId) {
         try {
             matchService.cancelMatching(userId);
-            return ResponseEntity.ok(new ApiResponse(
+            return ResponseEntity.ok(new ApiResponseDto(
                     true,
                     "매칭이 취소되었습니다.",
                     null
             ));
         } catch (Exception e) {
             log.error("Error canceling match for user {}", userId, e);
-            return ResponseEntity.internalServerError().body(new ApiResponse(
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
                     false,
                     "매칭 취소 중 오류가 발생했습니다.",
+                    null
+            ));
+        }
+    }
+
+    @GetMapping("/user-status")
+    public ResponseEntity<ApiResponseDto> getWaitingUser(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        try {
+            matchService.getWaitingUser(userId);
+
+            return ResponseEntity.ok(new ApiResponseDto(
+                    true,
+                    "매칭 대기 중인 유저 조회 성공",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Error getting user information waiting for matching {}", userId, e);
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
+                    false,
+                    "매칭 시작 시간 조회 중 오류가 발생했습니다.",
+                    null
+            ));
+        }
+    }
+
+    @GetMapping("/waiting-users")
+    public ResponseEntity<ApiResponseDto> getWaitingUsers(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        try {
+
+            return ResponseEntity.ok(new ApiResponseDto(
+                    true,
+                    "매칭 대기 중인 유저 조회 성공",
+                    null
+            ));
+        } catch (Exception e) {
+            log.error("Error getting user information waiting for matching {}", userId, e);
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
+                    false,
+                    "매칭 시작 시간 조회 중 오류가 발생했습니다.",
                     null
             ));
         }
@@ -98,26 +141,26 @@ public class MatchController {
      * 매칭 시작 시간 조회
      */
     @GetMapping("/start-time")
-    public ResponseEntity<ApiResponse> getMatchingStartTime(
+    public ResponseEntity<ApiResponseDto> getMatchingStartTime(
             @RequestHeader("X-User-Id") String userId) {
         try {
             Long startTime = matchService.getMatchingStartTime(userId);
             if (startTime == null) {
-                return ResponseEntity.ok(new ApiResponse(
+                return ResponseEntity.ok(new ApiResponseDto(
                         false,
                         "매칭 중인 유저가 아닙니다.",
                         null
                 ));
             }
 
-            return ResponseEntity.ok(new ApiResponse(
+            return ResponseEntity.ok(new ApiResponseDto(
                     true,
                     "매칭 시작 시간 조회 성공",
                     startTime
             ));
         } catch (Exception e) {
             log.error("Error getting start time for user {}", userId, e);
-            return ResponseEntity.internalServerError().body(new ApiResponse(
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
                     false,
                     "매칭 시작 시간 조회 중 오류가 발생했습니다.",
                     null

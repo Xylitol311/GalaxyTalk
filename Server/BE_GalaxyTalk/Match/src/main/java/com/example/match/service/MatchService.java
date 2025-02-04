@@ -205,6 +205,22 @@ public class MatchService {
         matchProcessor.processMatchResponse(response);
     }
 
+    /**
+     * 매칭 대기 중인 유저 정보 조회
+     *
+     */
+    public void getWaitingUser(String userId) {
+
+    }
+
+    /**
+     * 매칭 대기 중인 유저 정보 조회
+     *
+     */
+    public void getUsers(String userId) {
+
+    }
+
     @Getter
     private static class MatchPair {
         private final UserMatchStatus user1;

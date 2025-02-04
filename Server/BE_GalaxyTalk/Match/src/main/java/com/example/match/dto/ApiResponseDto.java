@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 @Data
 @AllArgsConstructor
-public class MatchResponseDto {
-    private String type;
+@NoArgsConstructor
+public class ApiResponseDto {
+    private boolean success;
     private String message;
-    private Map<String, Object> data;
+    private Object data;
 }
