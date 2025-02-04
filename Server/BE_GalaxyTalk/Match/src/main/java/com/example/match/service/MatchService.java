@@ -28,9 +28,6 @@ public class MatchService {
     private final MatchingQueueManager queueManager;
     private final MatchProcessor matchProcessor;
 
-    // 매칭 관련 상수
-    private static final double SIMILARITY_THRESHOLD = 0.7;
-
     /**
      * 매칭 시작 처리
      * 1. 유저 상태 Redis에 저장

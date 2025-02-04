@@ -17,6 +17,6 @@ public class UserMatchStatus {
     private boolean accepted;        // 매칭 수락 여부
     private long startTime;          // 매칭 시작 시간 (밀리초)
     private Map<String, Object> additionalInfo;  // 추가 정보
-    private List<String> machingQueues;
+    private List<String> machingQueues; // 유저가 들어가있는 매칭 큐 목록(Lazy Deletion 및 중복 관리에 활용)
 }
 

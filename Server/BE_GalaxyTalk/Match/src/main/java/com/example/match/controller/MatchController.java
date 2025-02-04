@@ -149,7 +149,7 @@ public class MatchController {
                 return ResponseEntity.ok(new ApiResponseDto(
                         false,
                         "매칭 중인 유저가 아닙니다.",
-                        null
+                        startTime
                 ));
             }
 
