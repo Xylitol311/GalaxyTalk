@@ -8,7 +8,6 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class MatchResponseDto {
     private String type;
     private String message;
