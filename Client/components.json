@@ -13,7 +13,7 @@
     "aliases": {
         "components": "@/shared",
         "utils": "@/shared/lib/utils",
-        "ui": "@/shared/ui",
+        "ui": "@/shared/ui/shadcn",
         "lib": "@/shared/lib",
         "hooks": "@/shared/model/hooks"
     },
