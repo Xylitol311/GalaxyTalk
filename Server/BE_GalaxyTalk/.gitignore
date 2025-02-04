@@ -1,23 +1,11 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Maven 빌드 디렉토리
+/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# Gradle 빌드 디렉토리
+/build/
+.gradle/
 
-### IntelliJ IDEA ###
+# IDE 관련 파일 - IntelliJ IDEA
 .idea
 *.iws
 *.iml
@@ -26,12 +14,52 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### NetBeans ###
+# IDE 관련 파일 - 공통
+.classpath
+.project
+.settings/
+
+# IDE 관련 파일 - VS Code
+.vscode/
+
+# IDE 관련 파일 - Spring Tool Suite (STS)
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+bin/
+
+# IDE 관련 파일 - NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
+/logs/
+tmp/
+temp/
+
+# 환경 변수 파일
+# application-env.properties
+.env
+*.env
+**/application-secret.yml
+
+# 컴파일된 파일
+*.class
+*.jar
+*.war
+*.ear
+
+
+# 기타
+*.sw?
+.#*
+*~
