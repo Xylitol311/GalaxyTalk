@@ -36,7 +36,7 @@ services:
       start_period: 10s
 
   mongodb:
-    image: mongo:latest
+    image: mongo:6.0.9
     container_name: my-mongodb
     ports:
       - "27017:27017"
@@ -49,10 +49,13 @@ services:
     # MongoDB가 제대로 기동했는지 확인하기 위한 헬스체크 추가
     healthcheck:
       # mongo 클라이언트를 통해 db.adminCommand('ping') 명령어 실행
-      test: [ "CMD", "mongo", "admin",
-              "--username", "${MONGO_INITDB_ROOT_USERNAME}",
-              "--password", "${MONGO_INITDB_ROOT_PASSWORD}",
-              "--quiet", "--eval", "db.adminCommand('ping')" ]
+      test: [
+        "CMD", "mongosh",
+        "--username", "${MONGO_INITDB_ROOT_USERNAME}",
+        "--password", "${MONGO_INITDB_ROOT_PASSWORD}",
+        "--authenticationDatabase", "admin",
+        "--eval", "db.adminCommand('ping').ok === 1 ? quit(0) : quit(1)"
+      ]
       interval: 30s
       timeout: 10s
       retries: 3
