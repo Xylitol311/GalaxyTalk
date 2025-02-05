@@ -155,12 +155,16 @@ public class MatchProcessor {
 
     /**
      * 매칭 성공 시 채팅방 생성 요청
+     * - Lazy Deletion 사용:
+     *   여기서는 Redis에서 유저 정보를 삭제하지만,
+     *   큐에는 그대로 남아있을 수 있음 (GC나 매칭 시점에서 제거됨)
      */
     private void cleanupMatch(String matchId) {
         List<String> userIds = redisService.getMatchInfo(matchId);
         if (userIds == null) return;
 
         for (String userId : userIds) {
+            // 매칭 성공 -> Redis에서 제거
             redisService.deleteUserStatus(userId);
         }
         redisService.deleteMatchInfo(matchId);

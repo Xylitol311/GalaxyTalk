@@ -19,12 +19,14 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class MatchingQueueManagerTest {
     @Mock
+    private RedisService redisService;
+    @Mock
     private MatchingQueueManager matchingQueueManager;
 
     @BeforeEach
     void setUp() {
         // 직접 초기화할 경우 @Mock을 통해 필요한 의존성을 주입
-        matchingQueueManager = new MatchingQueueManager();
+        matchingQueueManager = new MatchingQueueManager(redisService);
     }
 
     @Test

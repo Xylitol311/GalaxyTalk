@@ -129,6 +129,7 @@ public class MatchService {
 
     /**
      * 매칭 가능한 유저 필터링
+     * - Lazy Deletion 체크: Redis에서 user를 다시 조회하여 null이 아닌지, WAITING 상태인지 확인
      */
     private List<UserMatchStatus> filterAvailableUsers(List<UserMatchStatus> users) {
         return users.stream()
@@ -166,14 +167,17 @@ public class MatchService {
         Set<String> matchedUsers = new HashSet<>();
 
         for (MatchPair pair : sortedPairs) {
+            // 이미 매칭이 돼서 matchedUsers에 저장된 유저면 패스
             if (matchedUsers.contains(pair.user1.getUserId()) ||
                     matchedUsers.contains(pair.user2.getUserId())) {
                 continue;
             }
 
+            // 매칭을 시도할 두 유저의 정보를 레디스에서 가져옴
             UserMatchStatus currentUser1 = redisService.getUserStatus(pair.user1.getUserId());
             UserMatchStatus currentUser2 = redisService.getUserStatus(pair.user2.getUserId());
 
+            // 유효한 사용자(매칭 취소, 완료되지 않음)면서 매칭 대기 중인 유저인 경우만 매칭 진행
             if (currentUser1 != null && currentUser2 != null &&
                     currentUser1.getStatus() == MatchStatus.WAITING &&
                     currentUser2.getStatus() == MatchStatus.WAITING) {

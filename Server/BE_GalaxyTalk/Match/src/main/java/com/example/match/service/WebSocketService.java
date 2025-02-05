@@ -39,7 +39,8 @@ public class WebSocketService {
         UserStatusDto statusDto = new UserStatusDto(
                 user.getUserId(),
                 user.getConcern(),
-                user.getMbti()
+                user.getMbti(),
+                user.getStatus()
         );
         messagingTemplate.convertAndSend("/topic/matching/users/new", statusDto);
     }
