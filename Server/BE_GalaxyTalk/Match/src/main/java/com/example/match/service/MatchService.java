@@ -1,9 +1,9 @@
 package com.example.match.service;
 
 import com.example.match.constant.MBTI;
-import com.example.match.dto.MatchResponseRequestDto;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
+import com.example.match.dto.MatchResponseRequestDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -45,8 +46,10 @@ public class MatchService {
         }
 
         user.setMbti(userMbti);
+        user.setEnergy(userResponse.getEnergy());
         user.setStatus(MatchStatus.WAITING);
-        user.setStartTime(System.currentTimeMillis());
+        user.setAccepted(false);
+        user.setStartTime(Instant.now().toEpochMilli());
 
         // Redis에 유저 상태 저장
         redisService.saveUserStatus(user);

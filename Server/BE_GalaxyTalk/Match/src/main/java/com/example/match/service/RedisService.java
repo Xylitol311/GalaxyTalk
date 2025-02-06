@@ -1,5 +1,6 @@
 package com.example.match.service;
 
+import com.example.match.domain.MatchResultStatus;
 import com.example.match.domain.UserMatchStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,8 +40,8 @@ public class RedisService {
     /**
      * 매칭 정보 저장
      */
-    public void saveMatchInfo(String matchId, List<String> userIds) {
-        redisTemplate.opsForValue().set(MATCH_KEY_PREFIX + matchId, userIds);
+    public void saveMatchInfo(String matchId, MatchResultStatus matchResult) {
+        redisTemplate.opsForValue().set(MATCH_KEY_PREFIX + matchId, matchResult);
     }
 
     /**

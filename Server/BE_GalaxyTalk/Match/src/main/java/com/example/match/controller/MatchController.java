@@ -1,11 +1,10 @@
 package com.example.match.controller;
 
 import com.example.match.constant.MBTI;
-import com.example.match.domain.MatchResponse;
-import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.ApiResponseDto;
 import com.example.match.dto.MatchRequestDto;
+import com.example.match.dto.MatchResponseRequestDto;
 import com.example.match.service.MatchService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
@@ -17,7 +16,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.Set;
 
 @Slf4j
@@ -173,7 +171,7 @@ public class MatchController {
      * WebSocket을 통한 실시간 응답 처리
      */
     @MessageMapping("/match/response")
-    public void handleMatchResponse(MatchResponse response) {
+    public void handleMatchResponse(MatchResponseRequestDto response) {
         try {
             validateMatchResponse(response);
             matchService.processMatchResponse(response);
@@ -187,8 +185,8 @@ public class MatchController {
     /**
      * WebSocket 요청의 유효성 검증
      */
-    private void validateMatchResponse(MatchResponse response) {
-        Set<ConstraintViolation<MatchResponse>> violations = validator.validate(response);
+    private void validateMatchResponse(MatchResponseRequestDto response) {
+        Set<ConstraintViolation<MatchResponseRequestDto>> violations = validator.validate(response);
         if (!violations.isEmpty()) {
             throw new IllegalArgumentException("Invalid match response data");
         }
@@ -215,9 +213,6 @@ public class MatchController {
         if (dto.getPreferredMbti() != null) {
             status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
         }
-        status.setStatus(MatchStatus.WAITING);
-        status.setAccepted(false);
-        status.setStartTime(Instant.now().toEpochMilli());
         return status;
     }
 }

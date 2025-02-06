@@ -8,5 +8,6 @@ import lombok.Setter;
 public class UserResponseDto {
     private String userId;
     private String username;
+    private int energy;
     private String mbti;
 }

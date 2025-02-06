@@ -21,17 +21,16 @@ public class WebSocketService {
         );
     }
 
-    public void notifyMatch(String user1Id, String user2Id, String matchId) {
-        Map<String, Object> data = Map.of("matchId", matchId);
+    public void notifyMatch(Map<String, Object> user1Data, Map<String, Object> user2Data) {
         String message = "매칭이 성사되었습니다.";
 
         messagingTemplate.convertAndSend(
-                "/topic/matching/" + user1Id,
-                new MessageResponseDto("MATCH_SUCCESS", message, data)
+                "/topic/matching/" + user1Data.get("userId"),
+                new MessageResponseDto("MATCH_SUCCESS", message, user1Data)
         );
         messagingTemplate.convertAndSend(
-                "/topic/matching/" + user2Id,
-                new MessageResponseDto("MATCH_SUCCESS", message, data)
+                "/topic/matching/" + user2Data.get("userId"),
+                new MessageResponseDto("MATCH_SUCCESS", message, user2Data)
         );
     }
 

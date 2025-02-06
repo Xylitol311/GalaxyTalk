@@ -1,7 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.SimilarityResponse;
+import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,8 +38,8 @@ public class ExternalApiService {
                 .uri("/calculate-similarity")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(SimilarityResponse.class)
-                .map(SimilarityResponse::getSimilarityScore)
+                .bodyToMono(SimilarityResponseDto.class)
+                .map(SimilarityResponseDto::getSimilarityScore)
                 .defaultIfEmpty(0.0)
                 .block();
     }
