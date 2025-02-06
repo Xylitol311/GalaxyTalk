@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -35,16 +36,22 @@ public class WebSocketService {
     }
 
     public void broadcastNewUser(UserMatchStatus user) {
-        UserStatusDto statusDto = new UserStatusDto(
-                user.getUserId(),
-                user.getConcern(),
-                user.getMbti(),
-                user.getStatus()
-        );
-        messagingTemplate.convertAndSend("/topic/matching/users/new", statusDto);
+        String message = "새로운 유저가 접속했습니다.";
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", user.getUserId());
+        data.put("concern", user.getConcern());
+        data.put("mbti", user.getMbti());
+        data.put("status", user.getStatus());
+
+        messagingTemplate.convertAndSend("/topic/matching/users/new",
+                new MessageResponseDto("NEW_USER", message, data));
     }
 
     public void broadcastUserExit(String userId) {
-        messagingTemplate.convertAndSend("/topic/matching/users/exit", userId);
+        String message = "해당 유저가 매칭 큐에서 제외되었습니다.";
+        Map<String, Object> data = Map.of("userId", userId);
+        messagingTemplate.convertAndSend("/topic/matching/users/exit",
+                new MessageResponseDto("EXIT_USER", message, data));
     }
 }
