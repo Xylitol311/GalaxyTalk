@@ -48,8 +48,8 @@ public class RedisService {
     /**
      * 매칭 정보 조회
      */
-    public List<String> getMatchInfo(String matchId) {
-        return (List<String>) redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
+    public MatchResultStatus getMatchInfo(String matchId) {
+        return (MatchResultStatus) redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
     }
 
     /**

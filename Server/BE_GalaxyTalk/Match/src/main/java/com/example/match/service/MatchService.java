@@ -3,7 +3,7 @@ package com.example.match.service;
 import com.example.match.constant.MBTI;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.MatchResponseRequestDto;
+import com.example.match.dto.MatchApproveRequestDto;
 import com.example.match.dto.UserResponseDto;
 import com.example.match.dto.UserStatusDto;
 import lombok.Getter;
@@ -213,16 +213,19 @@ public class MatchService {
      * 매칭 수락/거절 응답 처리
      * 유저의 응답에 따라 수락 또는 거절 프로세스 실행
      */
-    public void processMatchResponse(MatchResponseRequestDto response) {
-        matchProcessor.processMatchResponse(response);
-    }
+    public void processMatchApproval(String userId, MatchApproveRequestDto response) {
+        UserMatchStatus user = redisService.getUserStatus(userId);
 
-    /**
-     * 매칭 대기 중인 유저 정보 조회
-     *
-     */
-    public void getWaitingUser(String userId) {
+        if (user == null) {
+            throw new IllegalArgumentException("해당 유저 정보를 찾을 수 없습니다.");
+        }
 
+        if (!response.getMatchId().equals(user.getMatchId())) {
+            throw new IllegalArgumentException("잘못된 매칭 ID입니다.");
+        }
+
+        // MatchProcessor를 통해 매칭 승인/거절 처리
+        matchProcessor.processMatchResponse(user, response);
     }
 
     /**

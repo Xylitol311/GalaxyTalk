@@ -1,6 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
+import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.MessageResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,6 +35,29 @@ public class WebSocketService {
         );
     }
 
+    public void notifyUsersWithChatRoom(UserMatchStatus user1, UserMatchStatus user2, ChatRoomResponseDto.ChatRoomData chatRoomData) {
+        String message = "매칭이 완료되었습니다. 채팅방 정보입니다.";
+
+        Map<String, Object> user1Data = new HashMap<>();
+        user1Data.put("chatRoomId", chatRoomData.getChatRoomId());
+        user1Data.put("sessionId", chatRoomData.getSessionId());
+        user1Data.put("token", chatRoomData.getTokenA());
+
+        Map<String, Object> user2Data = new HashMap<>();
+        user2Data.put("chatRoomId", chatRoomData.getChatRoomId());
+        user2Data.put("sessionId", chatRoomData.getSessionId());
+        user2Data.put("token", chatRoomData.getTokenB());
+
+        messagingTemplate.convertAndSend(
+                "/topic/matching/" + user1.getUserId(),
+                new MessageResponseDto("CHAT_START", message, user1Data)
+        );
+        messagingTemplate.convertAndSend(
+                "/topic/matching/" + user2.getUserId(),
+                new MessageResponseDto("CHAT_START", message, user2Data)
+        );
+    }
+
     public void broadcastNewUser(UserMatchStatus user) {
         String message = "새로운 유저가 접속했습니다.";
 
@@ -53,4 +77,5 @@ public class WebSocketService {
         messagingTemplate.convertAndSend("/topic/matching/users/exit",
                 new MessageResponseDto("EXIT_USER", message, data));
     }
+
 }
