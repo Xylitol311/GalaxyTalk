@@ -11,10 +11,10 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 @Configuration
 public class MongoDBConfig extends AbstractMongoClientConfiguration {
 
-    @Value("${spring.data.mongodb.uri}")
+    @Value("${MONGO_INITDB_URI}")
     private String mongoUri;
 
-    @Value("${spring.data.mongodb.database}")
+    @Value("${MONGO_INITDB_DATABASE}")
     private String database;
 
     @Override

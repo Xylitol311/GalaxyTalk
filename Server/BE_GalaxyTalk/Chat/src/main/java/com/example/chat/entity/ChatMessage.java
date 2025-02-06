@@ -1,4 +1,4 @@
-package com.example.chat.entitiy;
+package com.example.chat.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,10 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatMessage {
-    @Id
-    private String id;
-    private String sessionId;    // OpenVidu 세션 ID
     private String senderId;     // 메시지 발신자 ID
     private String content;      // 메시지 내용
-    private LocalDateTime timestamp;  // 메시지 전송 시간
+    private LocalDateTime createdAt; // 메시지 전송 시간
 }
