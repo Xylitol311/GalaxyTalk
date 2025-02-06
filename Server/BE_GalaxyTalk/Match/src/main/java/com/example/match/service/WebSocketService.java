@@ -2,7 +2,6 @@ package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MessageResponseDto;
-import com.example.match.dto.UserStatusDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

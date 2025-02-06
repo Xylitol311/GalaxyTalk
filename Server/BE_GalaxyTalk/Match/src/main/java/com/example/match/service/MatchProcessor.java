@@ -35,6 +35,9 @@ public class MatchProcessor {
         String matchId = UUID.randomUUID().toString();
         updateMatchStatus(user1, user2, matchId, similarity);
 
+        redisService.removeUserFromWaitingQueue(user1.getUserId());
+        redisService.removeUserFromWaitingQueue(user2.getUserId());
+
         Map<String, Object> user1Data = new HashMap<>();
         user1Data.put("userId", user1.getUserId());
         user1Data.put("matchId", matchId);

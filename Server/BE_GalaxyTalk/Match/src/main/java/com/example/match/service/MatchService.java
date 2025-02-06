@@ -5,6 +5,7 @@ import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchResponseRequestDto;
 import com.example.match.dto.UserResponseDto;
+import com.example.match.dto.UserStatusDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,9 @@ public class MatchService {
         // 매칭 큐에 추가
         queueManager.addToQueue(user);
 
+        // ZSET에 유저 추가
+        redisService.addUserToWaitingQueue(user);
+
         // 대기 상태 알림
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
         // 새로운 유저 입장 알림
@@ -69,6 +73,9 @@ public class MatchService {
     public void cancelMatching(String userId) {
         // Redis에서 유저 정보 삭제
         redisService.deleteUserStatus(userId);
+
+        // ZSET에서 매칭 대기 유저 제거
+        redisService.removeUserFromWaitingQueue(userId);
 
         // 유저 퇴장 알림
         webSocketService.broadcastUserExit(userId);
@@ -219,11 +226,26 @@ public class MatchService {
     }
 
     /**
-     * 매칭 대기 중인 유저 정보 조회
+     * 매칭 대기 중인 유저 목록 조회
      *
      */
-    public void getUsers(String userId) {
+    public List<UserStatusDto> getWaitingUsers() {
+        List<String> randomUserIds = redisService.getRandomWaitingUsers(20);
+        List<UserStatusDto> waitingUsers = new ArrayList<>();
 
+        for (String userId : randomUserIds) {
+            UserMatchStatus userStatus = redisService.getUserStatus(userId);
+            if (userStatus != null) {
+                waitingUsers.add(new UserStatusDto(
+                        userStatus.getUserId(),
+                        userStatus.getConcern(),
+                        userStatus.getMbti(),
+                        userStatus.getStatus(),
+                        userStatus.getStartTime()
+                ));
+            }
+        }
+        return waitingUsers;
     }
 
     @Getter

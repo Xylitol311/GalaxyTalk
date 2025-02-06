@@ -5,6 +5,7 @@ import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.ApiResponseDto;
 import com.example.match.dto.MatchRequestDto;
 import com.example.match.dto.MatchResponseRequestDto;
+import com.example.match.dto.UserStatusDto;
 import com.example.match.service.MatchService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -92,6 +94,7 @@ public class MatchController {
         }
     }
 
+
     @GetMapping("/user-status")
     public ResponseEntity<ApiResponseDto> getWaitingUser(
             @RequestHeader("X-User-Id") String userId
@@ -114,16 +117,21 @@ public class MatchController {
         }
     }
 
+    /**
+     * 매칭 대기 중인 유저 목록 조회
+     * - 실시간으로 매칭 대기 유저를 클라이언트 화면에 표시하기 위한 기능
+     */
     @GetMapping("/waiting-users")
     public ResponseEntity<ApiResponseDto> getWaitingUsers(
             @RequestHeader("X-User-Id") String userId
     ) {
         try {
+            List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
 
             return ResponseEntity.ok(new ApiResponseDto(
                     true,
                     "매칭 대기 중인 유저 조회 성공",
-                    null
+                    userStatusDtos
             ));
         } catch (Exception e) {
             log.error("Error getting user information waiting for matching {}", userId, e);
