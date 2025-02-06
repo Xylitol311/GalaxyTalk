@@ -1,7 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.constant.MBTI;
-import com.example.match.domain.MatchResponse;
+import com.example.match.dto.MatchResponseRequestDto;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.UserResponseDto;
@@ -106,7 +106,7 @@ public class MatchService {
             return CompletableFuture.completedFuture(null);
         }
 
-        processMatching(batch);
+        processMatching(batch, mbti);
         return CompletableFuture.completedFuture(null);
     }
 
@@ -115,7 +115,7 @@ public class MatchService {
      * 배치 단위로 매칭 처리
      * 가장 높은 유사도를 가진 페어를 찾아 매칭
      */
-    private void processMatching(List<UserMatchStatus> users) {
+    private void processMatching(List<UserMatchStatus> users, MBTI mbti) {
         // 매칭 가능한 유저만 필터링
         List<UserMatchStatus> availableUsers = filterAvailableUsers(users);
         if (availableUsers.size() < 2) return;
@@ -124,7 +124,7 @@ public class MatchService {
         List<MatchPair> sortedPairs = calculateAllPairsSimilarity(availableUsers);
 
         // 매칭 쌍 생성 및 처리
-        processMatchPairs(sortedPairs);
+        processMatchPairs(sortedPairs, mbti);
     }
 
     /**
@@ -163,7 +163,7 @@ public class MatchService {
     /**
      * 매칭 쌍 처리
      */
-    private void processMatchPairs(List<MatchPair> sortedPairs) {
+    private void processMatchPairs(List<MatchPair> sortedPairs, MBTI mbti) {
         Set<String> matchedUsers = new HashSet<>();
 
         for (MatchPair pair : sortedPairs) {
@@ -182,17 +182,18 @@ public class MatchService {
                     currentUser1.getStatus() == MatchStatus.WAITING &&
                     currentUser2.getStatus() == MatchStatus.WAITING) {
 
-                matchProcessor.createMatch(pair.user1, pair.user2);
+                matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUsers.add(pair.user1.getUserId());
                 matchedUsers.add(pair.user2.getUserId());
             } else {
+                // 취소, 완료된 사용자인 경우 현재 mbti 큐에서 삭제
                 if (currentUser1 == null) {
                     queueManager.removeFromQueueIfInvalid(
-                            MBTI.valueOf(pair.user1.getMbti()), pair.user1);
+                            mbti, pair.user1);
                 }
                 if (currentUser2 == null) {
                     queueManager.removeFromQueueIfInvalid(
-                            MBTI.valueOf(pair.user2.getMbti()), pair.user2);
+                            mbti, pair.user2);
                 }
             }
         }
@@ -202,7 +203,7 @@ public class MatchService {
      * 매칭 수락/거절 응답 처리
      * 유저의 응답에 따라 수락 또는 거절 프로세스 실행
      */
-    public void processMatchResponse(MatchResponse response) {
+    public void processMatchResponse(MatchResponseRequestDto response) {
         matchProcessor.processMatchResponse(response);
     }
 
