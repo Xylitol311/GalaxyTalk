@@ -31,9 +31,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // OpenVidu
-    implementation 'io.openvidu:openvidu-java-client:2.28.0'
+    implementation 'io.openvidu:openvidu-java-client:2.31.0'
 
     // JSON 처리
     implementation 'com.fasterxml.jackson.core:jackson-databind'

@@ -1,12 +1,12 @@
 package com.example.chat.service;
 
 import com.example.chat.dto.ChatRequest;
+import com.example.chat.dto.UserStatusRequest;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.dto.MatchResultRequest;
 import com.example.chat.entity.Participant;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.repository.ChatRepository;
-import com.example.chat.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final MongoTemplate mongoTemplate;
-    private final MessageRepository messageRepository;
     private final ChatRepository chatRepository;
+    private final ExternalApiService externalApiService;
 
     /**
      * 매칭된 두 유저 정보를 mongodb에 저장해 새로운 방을 생성합니다.
@@ -62,6 +62,10 @@ public class ChatService {
         chatRoom.setMessages(messages);
         chatRoom.setSimilarityScore(matchRequest.getSimilarityScore());
         chatRoom.setCreatedAt(LocalDateTime.now());
+        
+        // 두 사용자 auth api에 채팅 상태로 변경 요청
+        updateUserStatus(participant1.getUserId(), "chatting");
+        updateUserStatus(participant2.getUserId(), "chatting");
 
         return chatRepository.save(chatRoom).getId();
     }
@@ -103,5 +107,29 @@ public class ChatService {
                         .sorted(Comparator.comparing(ChatMessage::getCreatedAt))
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다: " + chatRoomId));
+    }
+
+
+    public ChatRoom getChatRoomWithParticipants(String chatRoomId) {
+        return chatRepository.findChatRoomById(chatRoomId);
+    }
+
+    public void endChatRoom(ChatRoom chatRoom) {
+        // 종료 시간 기록
+        chatRepository.updateEndedAt(chatRoom.getId(), LocalDateTime.now());
+
+        String participant1 = chatRoom.getParticipants().get(0).getUserId();
+        String participant2 = chatRoom.getParticipants().get(1).getUserId();
+
+        // 두 유저 상태 변경 auth api에 idle로 변경 요청
+        updateUserStatus(participant1, "idle");
+        updateUserStatus(participant2, "idle");
+    }
+
+    private void updateUserStatus(String userId, String status) {
+        externalApiService.updateUserStatus(new UserStatusRequest(
+                userId,
+                status
+        ));
     }
 }

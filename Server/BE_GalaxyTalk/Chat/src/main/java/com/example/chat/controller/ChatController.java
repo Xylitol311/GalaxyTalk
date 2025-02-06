@@ -5,7 +5,10 @@ import com.example.chat.dto.ChatRequest;
 import com.example.chat.dto.ChatResponse;
 import com.example.chat.dto.MatchResultRequest;
 import com.example.chat.entity.ChatMessage;
+import com.example.chat.entity.ChatRoom;
 import com.example.chat.service.ChatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +75,7 @@ public class ChatController {
         // 응답 예시 (200, ok)
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
-                "요청 성공.",
+                "연결 성공",
                 response
         ));
     }
@@ -88,7 +91,7 @@ public class ChatController {
         ChatMessage savedMessage = chatService.saveMessage(chatRequest);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
-                "요청 성공.",
+                "메세지 전송 성공",
                 null
         ));
     }
@@ -103,8 +106,38 @@ public class ChatController {
         List<ChatMessage> messages = chatService.getPreviousMessages(chatRoomId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
-                "요청 성공.",
+                "이전 대화 조회 성공",
                 messages
+        ));
+    }
+
+    /**
+     * 채팅방 나가기 API
+     * @param chatRoomId 나갈 채팅방 ID
+     * @return 채팅방 나가기 처리 결과
+     */
+    @DeleteMapping("/{chatRoomId}/leave")
+    public ResponseEntity<ApiResponseDto> leaveChat(
+            @PathVariable String chatRoomId) throws OpenViduJavaClientException, OpenViduHttpException {
+
+        // 1. 채팅방의 세션 ID와 참여자 목록 조회
+        ChatRoom chatRoom = chatService.getChatRoomWithParticipants(chatRoomId);
+        Session session = openvidu.getActiveSession(chatRoom.getSessionId());
+
+        if (session != null) {
+            // 2. 세션의 모든 활성 연결 종료
+            for (Connection connection : session.getActiveConnections()) {
+                session.forceDisconnect(connection);
+            }
+        }
+
+        // 3. 채팅방 종료 처리 (종료 시간 기록, 유저 상태 업데이트)
+        chatService.endChatRoom(chatRoom);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "채팅방 나가기 성공",
+                null
         ));
     }
 }
