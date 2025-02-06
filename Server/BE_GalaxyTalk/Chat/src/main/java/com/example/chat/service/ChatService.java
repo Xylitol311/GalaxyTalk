@@ -109,7 +109,6 @@ public class ChatService {
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다: " + chatRoomId));
     }
 
-
     public ChatRoom getChatRoomWithParticipants(String chatRoomId) {
         return chatRepository.findChatRoomById(chatRoomId);
     }
@@ -126,10 +125,20 @@ public class ChatService {
         updateUserStatus(participant2, "idle");
     }
 
+    /**
+     * user가 속한 active sessionId를 가져옵니다.
+     * @param userId
+     * @return sessionId
+     */
+    public String getSessionId(String userId) {
+        return chatRepository.findActiveSessionIdByUserId(userId).orElse(null);
+    }
+
     private void updateUserStatus(String userId, String status) {
         externalApiService.updateUserStatus(new UserStatusRequest(
                 userId,
                 status
         ));
     }
+
 }

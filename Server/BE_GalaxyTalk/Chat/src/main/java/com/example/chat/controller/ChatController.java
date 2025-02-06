@@ -1,9 +1,6 @@
 package com.example.chat.controller;
 
-import com.example.chat.dto.ApiResponseDto;
-import com.example.chat.dto.ChatRequest;
-import com.example.chat.dto.ChatResponse;
-import com.example.chat.dto.MatchResultRequest;
+import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.service.ChatService;
@@ -53,22 +50,16 @@ public class ChatController {
         String chatRoomId = chatService.createChatRoom(matchResultRequest, sessionId);
 
         // 첫 번째 사용자 토큰 생성
-        ConnectionProperties propertiesA = new ConnectionProperties.Builder()
-                .role(OpenViduRole.PUBLISHER)
-                .build();
-        Connection connectionA = session.createConnection(propertiesA);
+        String tokenA = generateToken(session);
 
         // 두 번째 사용자 토큰 생성
-        ConnectionProperties propertiesB = new ConnectionProperties.Builder()
-                .role(OpenViduRole.PUBLISHER)
-                .build();
-        Connection connectionB = session.createConnection(propertiesB);
+        String tokenB = generateToken(session);
 
         // DTO 응답 반환
         ChatResponse response = new ChatResponse(
                 sessionId,
-                connectionA.getToken(),
-                connectionB.getToken(),
+                tokenA,
+                tokenB,
                 chatRoomId
         );
 
@@ -139,5 +130,42 @@ public class ChatController {
                 "채팅방 나가기 성공",
                 null
         ));
+    }
+
+    /**
+     * 채팅방 재연결
+     * @param userId
+     * @return sessionId, token
+     */
+    @PostMapping("/reconnect")
+    public ResponseEntity<ApiResponseDto> reconnect(@RequestParam String userId) throws OpenViduJavaClientException, OpenViduHttpException {
+        // 1. user가 속한 active session 찾기
+        String sessionId = chatService.getSessionId(userId);
+
+        // 2. 기존 세션 가져오기
+        Session session = openvidu.getActiveSession(sessionId);
+
+        // 3. 재연결 응답 객체 생성
+        ReconnectResponse reconnectResponse = new ReconnectResponse(
+                sessionId,
+                generateToken(session)
+        );
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "재연결 성공",
+                reconnectResponse
+        ));
+    }
+
+    /**
+     * 세션과 property 정보를 받아 token을 생성합니다.
+     */
+    private String generateToken(Session session) throws OpenViduJavaClientException, OpenViduHttpException {
+        ConnectionProperties properties = new ConnectionProperties.Builder()
+                .role(OpenViduRole.PUBLISHER)
+                .build();
+
+        return session.createConnection(properties).getToken();
     }
 }
