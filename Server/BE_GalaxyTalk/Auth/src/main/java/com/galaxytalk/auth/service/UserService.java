@@ -21,11 +21,6 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    // ID로 유저 조회
-    public Optional<Users> getUserById(Long id) {
-
-        return userRepository.findById(id);
-    }
 
     // Serial Number로 유저 조회
     public Users getUserBySerialNumber(String serialNumber) {
@@ -39,25 +34,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-//    // 유저 정보 업데이트
-//    @Transactional
-//    public Users updateUser(Long id, Users updatedUser) {
-//        return userRepository.findById(id)
-//                .map(user -> {
-//                    user.setSerialNumber(updatedUser.getSerialNumber());
-//                    user.setUsername(updatedUser.getUsername());
-//                    user.setEmail(updatedUser.getEmail());
-//                    // 추가 필드 업데이트 가능
-//                    return userRepository.save(user);
-//                }).orElseThrow(() -> new RuntimeException("User not found"));
-//    }
-
-//    // 유저 삭제(Soft delete 처리)
-//    @Transactional
-//    public void deleteUser(Long id) {
-//
-//        userRepository.deleteById(id);
-//    }
 
 
 }

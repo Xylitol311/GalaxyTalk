@@ -29,18 +29,6 @@ public class Users {
     @Column(nullable = false, unique=true)
     private String serialNumber;
 
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String ageInterval;
-
-    @Column(nullable = false)
-    private String birthday;
-
-    @Column(nullable = false)
-    private int birthyear;
-
     @Column
     private String mbti;
 

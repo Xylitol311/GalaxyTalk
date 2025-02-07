@@ -28,6 +28,10 @@ ext {
 }
 
 dependencies {
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
     // Spring Cloud Gateway
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -42,8 +46,6 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-//    // Actuator (Gateway 모니터링 및 관리)
-//    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 //    // Config Client (Config Server 연동 시)
 //    implementation 'org.springframework.cloud:spring-cloud-starter-config'

@@ -1,4 +1,4 @@
-package com.galaxytalk.auth.dto;
+package com.galaxytalk.auth.entity;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @Getter
 @NoArgsConstructor
 @RedisHash(value = "jwtToken", timeToLive = 60*60*24*3) //3일 후 자동 삭제
-public class RefreshTokenDTO {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class RefreshTokenDTO {
     @Indexed
     private String refreshToken;
 
-    public RefreshTokenDTO(String refreshToken) {
+    public RefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
 }

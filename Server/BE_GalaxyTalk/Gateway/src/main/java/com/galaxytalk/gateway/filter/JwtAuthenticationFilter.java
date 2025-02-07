@@ -1,68 +1,120 @@
 package com.galaxytalk.gateway.filter;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.galaxytalk.gateway.dto.ApiResponseDto;
+import com.galaxytalk.gateway.jwt.JWTUtil;
+
+
+import io.jsonwebtoken.ExpiredJwtException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
 @Component
 public class JwtAuthenticationFilter implements WebFilter {
 
-    private final SecretKeySpec secretKey;
+    private final JWTUtil jwtUtil;
 
-    public JwtAuthenticationFilter(@Value("${spring.jwt.secret}") String secret) {
-
-            // 인코딩 및 암호화 방식
-            secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
-
+    public JwtAuthenticationFilter(JWTUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
+        System.out.println("JwtAuthenticationFilter 실행됨");
+
+        System.out.println("Request Method: " + request.getMethod());
+        System.out.println("Request Headers: " + request.getHeaders());
+        System.out.println("Request Cookies: " + request.getCookies());
+
+        // ✅ OPTIONS 요청은 바로 필터 체인을 실행하고 종료
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            return chain.filter(exchange);
+        }
+
         // 1. 쿠키에서 AccessToken 추출
         String token = request.getCookies().getFirst("AccessToken") != null ?
                 request.getCookies().getFirst("AccessToken").getValue() : null;
 
-        if (token != null) {
-            try {
-                // 2. JWT에서 userId 추출
-                Claims claims = Jwts.parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parseSignedClaims(token)
-                        .getPayload();
-
-                String userId = claims.get("userId", String.class);
-
-                // 3. 새로운 요청 객체 생성 (헤더에 userId 추가)
-                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                        .header("X-User-ID", userId)
-                        .build();
-
-                return chain.filter(exchange.mutate().request(modifiedRequest).build());
-
-            } catch (Exception e) {
-                ServerHttpResponse response = exchange.getResponse();
-                response.setStatusCode(HttpStatus.UNAUTHORIZED);
-                return response.setComplete();
-            }
+        // 에러처리) token이 존재하지 않을 때
+        if (token == null) {
+            return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
 
-        return chain.filter(exchange);
+        // 에러처리) token의 유효기간이 지났을 때
+        try {
+            if (jwtUtil.isExpired(token)) {
+                return onError(exchange, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (ExpiredJwtException e){
+            return onError(exchange, HttpStatus.UNAUTHORIZED);
+        }
+
+        // 2. 토큰에서 userId와 role 추출
+        String userId = jwtUtil.getSerialNumber(token);
+        String role = jwtUtil.getRole(token);
+
+        // 3. 새로운 요청 객체 생성 (헤더에 userId 추가)
+        ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                .header("X-User-ID", userId)
+                .build();
+
+        System.out.println("User ID: " + userId);
+        System.out.println("Role: " + role);
+
+        // 4. Security Context에 Authentication 저장
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userId, null, AuthorityUtils.createAuthorityList(role)
+        );
+        SecurityContext securityContext = new SecurityContextImpl(authentication);
+
+        if(CorsUtils.isPreFlightRequest(request)){
+            return chain.filter(exchange);
+        }
+
+        // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
+        return chain.filter(exchange.mutate().request(modifiedRequest).build())
+                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+
     }
+
+    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus status) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(status);
+        response.getHeaders().add("Content-Type", "application/json");
+
+        // ApiResponseDto를 JSON 문자열로 변환
+        try {
+            String errorResponse = new ObjectMapper().writeValueAsString(ApiResponseDto.noAccessToken);
+
+            // 에러 응답을 작성
+            DataBuffer buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
+            return response.writeWith(Mono.just(buffer));
+        } catch (JsonProcessingException e) {
+            // 예외 처리: JSON 변환 오류 발생 시
+            e.printStackTrace();
+            return response.setComplete();
+        }
+    }
+
 }
 
