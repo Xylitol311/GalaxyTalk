@@ -17,10 +17,23 @@ public class WebClientConfig {
     @Value("${AUTH_SERVICE_URL}")
     private String authServiceUrl;
 
+    @Value("${COMMENT_SERVICE_URL}")
+    private String commentServiceUrl;
+
     @Bean
     public WebClient authServiceClient() {
         return WebClient.builder()
                 .baseUrl(authServiceUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .filter(logRequest())
+                .filter(logResponse())
+                .build();
+    }
+
+    @Bean
+    public WebClient commentServiceClient() {
+        return WebClient.builder()
+                .baseUrl(commentServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .filter(logRequest())
                 .filter(logResponse())

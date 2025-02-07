@@ -4,11 +4,10 @@ import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.service.ChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.openvidu.java.client.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -155,6 +154,25 @@ public class ChatController {
                 true,
                 "재연결 성공",
                 reconnectResponse
+        ));
+    }
+
+    /**
+     * 사용자의 이전 대화 내용에 대한 정보를 가져옵니다.
+     * @param userId
+     * @return chatRoomId, myConcern, participantConcern, participantPlanet, roomCreatedAt, participantReview
+     */
+    @GetMapping("/messages")
+    public ResponseEntity<ApiResponseDto> getPreviousChats(@RequestHeader("X-User-Id") String userId,
+                                                           @RequestParam(value = "cursor", required = false) String cursor,
+                                                           @RequestParam(value = "limit", defaultValue = "10") int limit) {
+
+        Slice<PreviousChatResponse> sliceResult = chatService.getPreviousChat(userId, cursor, limit);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "이전 대화 정보 요청 성공",
+                CursorResponse.from(sliceResult, PreviousChatResponse::getChatRoomId)
         ));
     }
 

@@ -1,6 +1,7 @@
 package com.example.chat.service;
 
 import com.example.chat.dto.ChatRequest;
+import com.example.chat.dto.PreviousChatResponse;
 import com.example.chat.dto.UserStatusRequest;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.dto.MatchResultRequest;
@@ -10,6 +11,7 @@ import com.example.chat.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -134,11 +136,62 @@ public class ChatService {
             .orElse(null);
     }
 
+    /**
+     * 내가 했던 채팅방 정보를 가져옵니다.
+     * 이 때 endedAt이 Null이 아닌, 종료된 대화의 채팅만 가져옵니다.
+     * pagination 객체 형태로 전달합니다.
+     * @param userId, page, size
+     * @return Page<PreviousChatResponse>
+     */
+    public Slice<PreviousChatResponse> getPreviousChat(String userId, String cursor, int limit) {
+        PageRequest pageRequest = PageRequest.of(0, limit + 1, Sort.by("_id").ascending());
+
+        // cursor가 null이거나 빈 문자열인 경우 처리
+        ObjectId objectIdCursor = (cursor != null && !cursor.trim().isEmpty())
+                ? new ObjectId(cursor) : new ObjectId("000000000000000000000000");
+
+        Slice<ChatRoom> chatRooms = chatRepository.findAllChatDetailsByUserId(
+                userId,
+                objectIdCursor,
+                pageRequest
+        );
+
+        List<PreviousChatResponse> responseList = new ArrayList<>();
+
+        for (ChatRoom chatRoom : chatRooms) {
+            PreviousChatResponse previousChatResponse = new PreviousChatResponse();
+            previousChatResponse.setChatRoomId(chatRoom.getId());
+            previousChatResponse.setChatRoomCreatedAt(chatRoom.getCreatedAt().toString());
+
+            List<Participant> participants = chatRoom.getParticipants();
+
+            Participant me = participants.stream()
+                    .filter(p -> p.getUserId().equals(userId))
+                    .findFirst()
+                    .orElseThrow();
+
+            Participant other = participants.stream()
+                    .filter(p -> !p.getUserId().equals(userId))
+                    .findFirst()
+                    .orElseThrow();
+
+            String otherUserId = other.getUserId();
+            previousChatResponse.setMyConcern(me.getConcern());
+            previousChatResponse.setParticipantConcern(other.getConcern());
+
+            previousChatResponse.setParticipantPlanet(externalApiService.getUserPlanet(otherUserId));
+            previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
+
+            responseList.add(previousChatResponse);
+        }
+
+        return new SliceImpl<>(responseList, pageRequest, chatRooms.hasNext());
+    }
+
     private void updateUserStatus(String userId, String status) {
         externalApiService.updateUserStatus(new UserStatusRequest(
                 userId,
                 status
         ));
     }
-
 }
