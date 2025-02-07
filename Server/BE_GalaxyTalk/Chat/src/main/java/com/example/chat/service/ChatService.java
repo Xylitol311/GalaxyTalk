@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,6 +37,7 @@ public class ChatService {
      * @param matchRequest
      * @return chatRoomId
      */
+    @Transactional
     public String createChatRoom(MatchResultRequest matchRequest, String sessionId) {
         ChatRoom chatRoom = new ChatRoom();
 
@@ -64,8 +66,8 @@ public class ChatService {
         chatRoom.setCreatedAt(LocalDateTime.now());
         
         // 두 사용자 auth api에 채팅 상태로 변경 요청
-        updateUserStatus(participant1.getUserId(), "chatting");
-        updateUserStatus(participant2.getUserId(), "chatting");
+//        updateUserStatus(participant1.getUserId(), "chatting");
+//        updateUserStatus(participant2.getUserId(), "chatting");
 
         return chatRepository.save(chatRoom).getId();
     }
@@ -113,6 +115,7 @@ public class ChatService {
         return chatRepository.findChatRoomById(chatRoomId);
     }
 
+    @Transactional
     public void endChatRoom(ChatRoom chatRoom) {
         // 종료 시간 기록
         chatRepository.updateEndedAt(chatRoom.getId(), LocalDateTime.now());
@@ -121,8 +124,8 @@ public class ChatService {
         String participant2 = chatRoom.getParticipants().get(1).getUserId();
 
         // 두 유저 상태 변경 auth api에 idle로 변경 요청
-        updateUserStatus(participant1, "idle");
-        updateUserStatus(participant2, "idle");
+//        updateUserStatus(participant1, "idle");
+//        updateUserStatus(participant2, "idle");
     }
 
     /**

@@ -3,70 +3,85 @@ package com.example.chat.controller;
 import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.ChatRoom;
+import com.example.chat.entity.Participant;
 import com.example.chat.service.ChatService;
-import io.openvidu.java.client.*;
+import io.livekit.server.RoomServiceClient;
+import livekit.LivekitModels;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.livekit.server.*;
+import io.livekit.server.AccessToken;
+import livekit.LivekitModels.Room;
 
 import jakarta.annotation.PostConstruct;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
+@Slf4j
 public class ChatController {
 
-    @Value("${OPENVIDU_URL}")
-    private String openviduUrl;
+    @Value("${LIVEKIT_API_KEY}")
+    private String livekitApiKey;
 
-    @Value("${OPENVIDU_SECRET}")
-    private String openviduSecret;
+    @Value("${LIVEKIT_API_SECRET}")
+    private String livekitApiSecret;
 
-    private OpenVidu openvidu;
+    @Value("${LIVEKIT_URL}")
+    private String livekitUrl;
 
+    private RoomServiceClient roomService;
     private final ChatService chatService;
 
     @PostConstruct
     public void init() {
-        this.openvidu = new OpenVidu(openviduUrl, openviduSecret);
+        this.roomService = RoomServiceClient.create(livekitUrl, livekitApiKey, livekitApiSecret);
     }
 
-    // 세션(방) 생성 및 두 개의 토큰 발급 후 반환
     @PostMapping("/match")
-    public ResponseEntity<ApiResponseDto> createSessionWithTwoTokens(@RequestBody MatchResultRequest matchResultRequest)
-            throws OpenViduJavaClientException, OpenViduHttpException {
-        
-        // 세션 생성
-        SessionProperties properties = new SessionProperties.Builder().build();
-        Session session = openvidu.createSession(properties);
-        String sessionId = session.getSessionId();
+    public ResponseEntity<ApiResponseDto> createSessionWithTwoTokens(@RequestBody MatchResultRequest matchResultRequest) throws IOException {
+        // LiveKit room 생성
+        String roomName = UUID.randomUUID().toString();
 
-        // 채팅방을 생성하고 생성된 방의 ID를 가져옴
-        String chatRoomId = chatService.createChatRoom(matchResultRequest, sessionId);
+        // Room 생성 및 응답 처리
+        Call<Room> roomCall = roomService.createRoom(roomName);
+        Response<Room> response = roomCall.execute();
+        Room room = response.body();
+
+        if (room == null) {
+            throw new RuntimeException("Failed to create LiveKit room");
+        }
+
+        // 채팅방 생성
+        String chatRoomId = chatService.createChatRoom(matchResultRequest, roomName);
 
         // 첫 번째 사용자 토큰 생성
-        String tokenA = generateToken(session);
+        String tokenA = generateToken(roomName, matchResultRequest.getUserId1());
 
         // 두 번째 사용자 토큰 생성
-        String tokenB = generateToken(session);
+        String tokenB = generateToken(roomName, matchResultRequest.getUserId2());
 
-        // DTO 응답 반환
-        ChatResponse response = new ChatResponse(
-                sessionId,
+        ChatResponse chatResponse = new ChatResponse(
+                roomName,
                 tokenA,
                 tokenB,
                 chatRoomId
         );
 
-        // 응답 예시 (200, ok)
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "연결 성공",
-                response
+                chatResponse
         ));
     }
 
@@ -107,21 +122,19 @@ public class ChatController {
      * @return 채팅방 나가기 처리 결과
      */
     @DeleteMapping("/{chatRoomId}/leave")
-    public ResponseEntity<ApiResponseDto> leaveChat(
-            @PathVariable String chatRoomId) throws OpenViduJavaClientException, OpenViduHttpException {
-
+    public ResponseEntity<ApiResponseDto> leaveChat(@PathVariable String chatRoomId) {
         // 1. 채팅방의 세션 ID와 참여자 목록 조회
         ChatRoom chatRoom = chatService.getChatRoomWithParticipants(chatRoomId);
-        Session session = openvidu.getActiveSession(chatRoom.getSessionId());
 
-        if (session != null) {
-            // 2. 세션의 모든 활성 연결 종료
-            for (Connection connection : session.getActiveConnections()) {
-                session.forceDisconnect(connection);
-            }
+        // 2. 먼저 모든 참가자 강제 퇴장
+        for (Participant participant : chatRoom.getParticipants()) {
+            roomService.removeParticipant(chatRoom.getSessionId(), participant.getUserId());
         }
 
-        // 3. 채팅방 종료 처리 (종료 시간 기록, 유저 상태 업데이트)
+        // 3. LiveKit room 삭제
+        roomService.deleteRoom(chatRoom.getSessionId());
+
+        // 4. 채팅방 종료 처리
         chatService.endChatRoom(chatRoom);
 
         return ResponseEntity.ok(new ApiResponseDto(
@@ -131,23 +144,23 @@ public class ChatController {
         ));
     }
 
+
     /**
      * 채팅방 재연결
      * @param userId
      * @return sessionId, token
      */
     @PostMapping("/reconnect")
-    public ResponseEntity<ApiResponseDto> reconnect(@RequestHeader("X-User-Id") String userId) throws OpenViduJavaClientException, OpenViduHttpException {
-        // 1. user가 속한 active session 찾기
-        String sessionId = chatService.getSessionId(userId);
+    public ResponseEntity<ApiResponseDto> reconnect(@RequestHeader("X-User-Id") String userId) {
+        // 1. user가 속한 active room 찾기
+        String roomId = chatService.getSessionId(userId);
 
-        // 2. 기존 세션 가져오기
-        Session session = openvidu.getActiveSession(sessionId);
+        // 2. 새로운 토큰 생성
+        String token = generateToken(roomId, userId);
 
-        // 3. 재연결 응답 객체 생성
         ReconnectResponse reconnectResponse = new ReconnectResponse(
-                sessionId,
-                generateToken(session)
+                roomId,
+                token
         );
 
         return ResponseEntity.ok(new ApiResponseDto(
@@ -179,11 +192,12 @@ public class ChatController {
     /**
      * 세션과 property 정보를 받아 token을 생성합니다.
      */
-    private String generateToken(Session session) throws OpenViduJavaClientException, OpenViduHttpException {
-        ConnectionProperties properties = new ConnectionProperties.Builder()
-                .role(OpenViduRole.PUBLISHER)
-                .build();
+    private String generateToken(String roomName, String participantId) {
+        AccessToken token = new AccessToken(livekitApiKey, livekitApiSecret);
+        token.setName(participantId);
+        token.setIdentity(participantId);
+        token.addGrants(new RoomJoin(true), new RoomName(roomName));
 
-        return session.createConnection(properties).getToken();
+        return token.toJwt();
     }
 }

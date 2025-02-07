@@ -13,6 +13,8 @@ public class ExternalApiService {
 
     private final WebClient commentServiceClient;
 
+    private final WebClient gptClient;
+
     // Auth server에 유저 정보가 idle 또는 chatting으로 변경됨을 알림
     public void updateUserStatus(UserStatusRequest userStatusRequest) {
         authServiceClient.post()
@@ -38,6 +40,25 @@ public class ExternalApiService {
                 .uri("/review/" + userId)
                 .retrieve()
                 .bodyToMono(String.class)
+                .block();
+    }
+
+    // GPT 통해 10개의 질문 생성
+    public String createQuestions(String prompt) {
+        String requestBody = """
+        {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": "%s"}
+            ]
+        }
+        """.formatted(prompt);
+
+        return gptClient.post()
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(String.class)  // OpenAI 응답을 String으로 받음
                 .block();
     }
 }

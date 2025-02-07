@@ -13,10 +13,6 @@ public class CursorResponse<T> {
     private List<T> data;
     private String nextCursor;
 
-    public static <T> CursorResponse<T> of(List<T> data, String nextCursor) {
-        return new CursorResponse<>(data, nextCursor);
-    }
-
     public static <T> CursorResponse<T> from(Slice<T> slice, Function<T, String> cursorExtractor) {
         List<T> content = slice.getContent();
 

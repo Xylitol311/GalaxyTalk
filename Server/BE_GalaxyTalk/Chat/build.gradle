@@ -35,6 +35,7 @@ dependencies {
 
     // OpenVidu
     implementation 'io.openvidu:openvidu-java-client:2.31.0'
+    implementation 'io.livekit:livekit-server:0.8.2'
 
     // JSON 처리
     implementation 'com.fasterxml.jackson.core:jackson-databind'

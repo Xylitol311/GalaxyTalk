@@ -20,6 +20,9 @@ public class WebClientConfig {
     @Value("${COMMENT_SERVICE_URL}")
     private String commentServiceUrl;
 
+    @Value("${OPENAI_API_KEY}")
+    private String apiKey;
+
     @Bean
     public WebClient authServiceClient() {
         return WebClient.builder()
@@ -35,6 +38,17 @@ public class WebClientConfig {
         return WebClient.builder()
                 .baseUrl(commentServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .filter(logRequest())
+                .filter(logResponse())
+                .build();
+    }
+
+    @Bean
+    public WebClient gptClient() {
+        return WebClient.builder()
+                .baseUrl("https://api.openai.com/v1/chat/completions")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
                 .filter(logRequest())
                 .filter(logResponse())
                 .build();
