@@ -87,6 +87,32 @@ services:
       retries: 3
       start_period: 20s
 
+  galaxy-match:
+    build: ./BE_GalaxyTalk/Match
+    restart: always
+    ports:
+      - "30003:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AI_SERVICE_URL=${AI_SERVICE_URL}
+      - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+
+    # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
+    depends_on:
+      - redis
+    # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
 volumes:
   mysql_data:
   mongodb_data:
