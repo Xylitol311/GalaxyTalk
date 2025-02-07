@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: Gateway
+  cloud:
+    gateway:
+      routes:
+        - id: matching-service
+          uri: lb://match
+          predicates:
+            - Path=/matching-service/**
+          filters:
+            - RewritePath=/matching-service/(?<segment>.*), /$\{segment}
