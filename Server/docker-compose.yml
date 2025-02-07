@@ -20,6 +20,9 @@ services:
       timeout: 10s       # 10초 이내 응답 없으면 실패 처리
       retries: 3         # 3회 연속 실패시 unhealthy 상태로 간주
       start_period: 30s  # 초기 30초 동안은 체크 결과 무시 (초기 부팅 지연 고려)
+    networks:
+      - my-network
+
 
   redis:
     image: redis:latest
@@ -34,6 +37,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - my-network
+
 
   mongodb:
     image: mongo:6.0.9
@@ -60,6 +66,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    networks:
+      - my-network
+
 
   galaxy-auth:
     build: ./BE_GalaxyTalk/Auth
@@ -86,6 +95,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    networks:
+      - my-network
+
 
   galaxy-match:
     build: ./BE_GalaxyTalk/Match
@@ -116,3 +128,7 @@ services:
 volumes:
   mysql_data:
   mongodb_data:
+
+networks:
+  my-network:
+    external: true
