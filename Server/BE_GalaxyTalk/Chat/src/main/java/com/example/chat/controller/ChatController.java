@@ -190,6 +190,21 @@ public class ChatController {
     }
 
     /**
+     * 요청 시 해당 방에 저장된 질문 10개를 전달합니다.
+     * @param chatRoomId
+     * @return questions
+     */
+    @PostMapping("/{chatRoomId}/ai")
+    public ResponseEntity<ApiResponseDto> getQuestions(@PathVariable("chatRoomId") String chatRoomId) {
+
+
+        return ResponseEntity.ok(new ApiResponseDto(
+
+        ));
+    }
+
+
+    /**
      * 세션과 property 정보를 받아 token을 생성합니다.
      */
     private String generateToken(String roomName, String participantId) {

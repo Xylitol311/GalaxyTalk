@@ -66,8 +66,8 @@ public class ChatService {
         chatRoom.setCreatedAt(LocalDateTime.now());
         
         // 두 사용자 auth api에 채팅 상태로 변경 요청
-//        updateUserStatus(participant1.getUserId(), "chatting");
-//        updateUserStatus(participant2.getUserId(), "chatting");
+        updateUserStatus(participant1.getUserId(), "chatting");
+        updateUserStatus(participant2.getUserId(), "chatting");
 
         return chatRepository.save(chatRoom).getId();
     }
@@ -124,8 +124,8 @@ public class ChatService {
         String participant2 = chatRoom.getParticipants().get(1).getUserId();
 
         // 두 유저 상태 변경 auth api에 idle로 변경 요청
-//        updateUserStatus(participant1, "idle");
-//        updateUserStatus(participant2, "idle");
+        updateUserStatus(participant1, "idle");
+        updateUserStatus(participant2, "idle");
     }
 
     /**
@@ -189,6 +189,24 @@ public class ChatService {
         }
 
         return new SliceImpl<>(responseList, pageRequest, chatRooms.hasNext());
+    }
+
+    /**
+     * createQuestions() 메서드를 통해 생성된 질문을 mongodb에서 가져와 반환합니다.
+     * @param chatRoomId
+     * @return [questions]
+     */
+    public String[] getQuestions(String chatRoomId) {
+        return null;
+    }
+
+    /**
+     * 방에 입력된 고민 두 개를 가지고 공통 질문 10개를 생성하고 mongodb에 저장합니다.
+     * 이는 방 생성 시 호출됩니다.
+     * @param chatRoomId
+     */
+    private void createQuestions(String chatRoomId) {
+
     }
 
     private void updateUserStatus(String userId, String status) {
