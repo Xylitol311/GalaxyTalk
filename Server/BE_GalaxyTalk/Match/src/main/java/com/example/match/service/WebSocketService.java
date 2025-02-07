@@ -50,11 +50,11 @@ public class WebSocketService {
 
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user1.getUserId(),
-                new MessageResponseDto("CHAT_START", message, user1Data)
+                new MessageResponseDto("CHAT_CREATED", message, user1Data)
         );
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user2.getUserId(),
-                new MessageResponseDto("CHAT_START", message, user2Data)
+                new MessageResponseDto("CHAT_CREATED", message, user2Data)
         );
     }
 
