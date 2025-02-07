@@ -1,0 +1,10 @@
+spring:
+    data:
+        redis:
+            port: 6379
+            host: localhost
+            password: ${REDIS_PASSWORD}
+
+server:
+    address: localhost
+    port: 8080

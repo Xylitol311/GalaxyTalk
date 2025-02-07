@@ -1,24 +1,18 @@
 spring:
   application:
     name: Match
-  config:
-    import: optional:classpath:/application-secret.yml
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
 server:
   port: 8083
 
 ai:
   service:
-    url: localhost:8085
+    url: ${AI_SERVICE_URL}
 
 chat:
   service:
-    url: localhost:8084
+    url: ${CHAT_SERVICE_URL}
 
 auth:
   service:
-    url: localhost:8081
+    url: ${AUTH_SERVICE_URL}

@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-// 매칭 상태 관리를 위한 객체
+// 유저의 매칭 상태 관리를 위한 객체
 public class UserMatchStatus {
     private String userId;           // 사용자 ID
     private String concern;          // 사용자의 고민 내용
+    private int energy;
     private String mbti;            // 사용자의 MBTI
     private String preferredMbti;    // 선호하는 상대방 MBTI
     private MatchStatus status;      // 현재 매칭 상태

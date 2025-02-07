@@ -1,10 +1,11 @@
 package com.example.match.service;
 
 import com.example.match.constant.MBTI;
-import com.example.match.domain.MatchResponse;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
+import com.example.match.dto.MatchApproveRequestDto;
 import com.example.match.dto.UserResponseDto;
+import com.example.match.dto.UserStatusDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -45,14 +47,19 @@ public class MatchService {
         }
 
         user.setMbti(userMbti);
+        user.setEnergy(userResponse.getEnergy());
         user.setStatus(MatchStatus.WAITING);
-        user.setStartTime(System.currentTimeMillis());
+        user.setAccepted(false);
+        user.setStartTime(Instant.now().toEpochMilli());
 
         // Redis에 유저 상태 저장
         redisService.saveUserStatus(user);
 
         // 매칭 큐에 추가
         queueManager.addToQueue(user);
+
+        // ZSET에 유저 추가
+        redisService.addUserToWaitingQueue(user);
 
         // 대기 상태 알림
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
@@ -66,6 +73,9 @@ public class MatchService {
     public void cancelMatching(String userId) {
         // Redis에서 유저 정보 삭제
         redisService.deleteUserStatus(userId);
+
+        // ZSET에서 매칭 대기 유저 제거
+        redisService.removeUserFromWaitingQueue(userId);
 
         // 유저 퇴장 알림
         webSocketService.broadcastUserExit(userId);
@@ -106,7 +116,7 @@ public class MatchService {
             return CompletableFuture.completedFuture(null);
         }
 
-        processMatching(batch);
+        processMatching(batch, mbti);
         return CompletableFuture.completedFuture(null);
     }
 
@@ -115,7 +125,7 @@ public class MatchService {
      * 배치 단위로 매칭 처리
      * 가장 높은 유사도를 가진 페어를 찾아 매칭
      */
-    private void processMatching(List<UserMatchStatus> users) {
+    private void processMatching(List<UserMatchStatus> users, MBTI mbti) {
         // 매칭 가능한 유저만 필터링
         List<UserMatchStatus> availableUsers = filterAvailableUsers(users);
         if (availableUsers.size() < 2) return;
@@ -124,7 +134,7 @@ public class MatchService {
         List<MatchPair> sortedPairs = calculateAllPairsSimilarity(availableUsers);
 
         // 매칭 쌍 생성 및 처리
-        processMatchPairs(sortedPairs);
+        processMatchPairs(sortedPairs, mbti);
     }
 
     /**
@@ -163,7 +173,7 @@ public class MatchService {
     /**
      * 매칭 쌍 처리
      */
-    private void processMatchPairs(List<MatchPair> sortedPairs) {
+    private void processMatchPairs(List<MatchPair> sortedPairs, MBTI mbti) {
         Set<String> matchedUsers = new HashSet<>();
 
         for (MatchPair pair : sortedPairs) {
@@ -182,17 +192,18 @@ public class MatchService {
                     currentUser1.getStatus() == MatchStatus.WAITING &&
                     currentUser2.getStatus() == MatchStatus.WAITING) {
 
-                matchProcessor.createMatch(pair.user1, pair.user2);
+                matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUsers.add(pair.user1.getUserId());
                 matchedUsers.add(pair.user2.getUserId());
             } else {
+                // 취소, 완료된 사용자인 경우 현재 mbti 큐에서 삭제
                 if (currentUser1 == null) {
                     queueManager.removeFromQueueIfInvalid(
-                            MBTI.valueOf(pair.user1.getMbti()), pair.user1);
+                            mbti, pair.user1);
                 }
                 if (currentUser2 == null) {
                     queueManager.removeFromQueueIfInvalid(
-                            MBTI.valueOf(pair.user2.getMbti()), pair.user2);
+                            mbti, pair.user2);
                 }
             }
         }
@@ -202,24 +213,42 @@ public class MatchService {
      * 매칭 수락/거절 응답 처리
      * 유저의 응답에 따라 수락 또는 거절 프로세스 실행
      */
-    public void processMatchResponse(MatchResponse response) {
-        matchProcessor.processMatchResponse(response);
+    public void processMatchApproval(String userId, MatchApproveRequestDto response) {
+        UserMatchStatus user = redisService.getUserStatus(userId);
+
+        if (user == null) {
+            throw new IllegalArgumentException("해당 유저 정보를 찾을 수 없습니다.");
+        }
+
+        if (!response.getMatchId().equals(user.getMatchId())) {
+            throw new IllegalArgumentException("잘못된 매칭 ID입니다.");
+        }
+
+        // MatchProcessor를 통해 매칭 승인/거절 처리
+        matchProcessor.processMatchResponse(user, response);
     }
 
     /**
-     * 매칭 대기 중인 유저 정보 조회
+     * 매칭 대기 중인 유저 목록 조회
      *
      */
-    public void getWaitingUser(String userId) {
+    public List<UserStatusDto> getWaitingUsers() {
+        List<String> randomUserIds = redisService.getRandomWaitingUsers(20);
+        List<UserStatusDto> waitingUsers = new ArrayList<>();
 
-    }
-
-    /**
-     * 매칭 대기 중인 유저 정보 조회
-     *
-     */
-    public void getUsers(String userId) {
-
+        for (String userId : randomUserIds) {
+            UserMatchStatus userStatus = redisService.getUserStatus(userId);
+            if (userStatus != null) {
+                waitingUsers.add(new UserStatusDto(
+                        userStatus.getUserId(),
+                        userStatus.getConcern(),
+                        userStatus.getMbti(),
+                        userStatus.getStatus(),
+                        userStatus.getStartTime()
+                ));
+            }
+        }
+        return waitingUsers;
     }
 
     @Getter

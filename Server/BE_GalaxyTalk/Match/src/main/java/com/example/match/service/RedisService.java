@@ -1,11 +1,13 @@
 package com.example.match.service;
 
+import com.example.match.domain.MatchResultStatus;
 import com.example.match.domain.UserMatchStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,15 +41,15 @@ public class RedisService {
     /**
      * 매칭 정보 저장
      */
-    public void saveMatchInfo(String matchId, List<String> userIds) {
-        redisTemplate.opsForValue().set(MATCH_KEY_PREFIX + matchId, userIds);
+    public void saveMatchInfo(String matchId, MatchResultStatus matchResult) {
+        redisTemplate.opsForValue().set(MATCH_KEY_PREFIX + matchId, matchResult);
     }
 
     /**
      * 매칭 정보 조회
      */
-    public List<String> getMatchInfo(String matchId) {
-        return (List<String>) redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
+    public MatchResultStatus getMatchInfo(String matchId) {
+        return (MatchResultStatus) redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
     }
 
     /**
@@ -56,4 +58,33 @@ public class RedisService {
     public void deleteMatchInfo(String matchId) {
         redisTemplate.delete(MATCH_KEY_PREFIX + matchId);
     }
+
+    /**
+     * 매칭 대기 유저를 Sorted Set으로 관리.
+     * - 실시간 접속 유저 파악 시 사용
+     */
+    public void addUserToWaitingQueue(UserMatchStatus userMatchStatus) {
+        redisTemplate.opsForZSet().add("waiting_users", userMatchStatus.getUserId(), System.currentTimeMillis());
+    }
+
+    /**
+     * 매칭 대기 유저 삭제
+     * - 매칭 취소 혹은 완료된 경우 실행
+     */
+    public void removeUserFromWaitingQueue(String userId) {
+        redisTemplate.opsForZSet().remove("waiting_users", userId);
+    }
+
+    /**
+     * 실시간 매칭 대기 유저 중 랜덤으로 조회
+     */
+    public List<String> getRandomWaitingUsers(int count) {
+        List<Object> randomObjects = redisTemplate.opsForZSet().randomMembers("waiting_users", count);
+
+        // Object → String 변환
+        return randomObjects.stream()
+                .map(obj -> obj.toString())
+                .collect(Collectors.toList());
+    }
+
 }

@@ -13,4 +13,5 @@ public class UserStatusDto {
     private String concern;
     private String mbti;
     private MatchStatus status;
+    private long startTime;
 }

@@ -1,24 +1,21 @@
 package com.example.match.controller;
 
 import com.example.match.constant.MBTI;
-import com.example.match.domain.MatchResponse;
-import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.ApiResponseDto;
+import com.example.match.dto.MatchApproveRequestDto;
 import com.example.match.dto.MatchRequestDto;
+import com.example.match.dto.UserStatusDto;
 import com.example.match.service.MatchService;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.util.Set;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -94,44 +91,27 @@ public class MatchController {
         }
     }
 
-    @GetMapping("/user-status")
-    public ResponseEntity<ApiResponseDto> getWaitingUser(
-            @RequestHeader("X-User-Id") String userId
-    ) {
-        try {
-            matchService.getWaitingUser(userId);
-
-            return ResponseEntity.ok(new ApiResponseDto(
-                    true,
-                    "매칭 대기 중인 유저 조회 성공",
-                    null
-            ));
-        } catch (Exception e) {
-            log.error("Error getting user information waiting for matching {}", userId, e);
-            return ResponseEntity.internalServerError().body(new ApiResponseDto(
-                    false,
-                    "매칭 시작 시간 조회 중 오류가 발생했습니다.",
-                    null
-            ));
-        }
-    }
-
+    /**
+     * 매칭 대기 중인 유저 목록 조회
+     * - 실시간으로 매칭 대기 유저를 클라이언트 화면에 표시하기 위한 기능
+     */
     @GetMapping("/waiting-users")
     public ResponseEntity<ApiResponseDto> getWaitingUsers(
             @RequestHeader("X-User-Id") String userId
     ) {
         try {
+            List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
 
             return ResponseEntity.ok(new ApiResponseDto(
                     true,
                     "매칭 대기 중인 유저 조회 성공",
-                    null
+                    userStatusDtos
             ));
         } catch (Exception e) {
-            log.error("Error getting user information waiting for matching {}", userId, e);
+            log.error("Error getting users information waiting for matching {}", userId, e);
             return ResponseEntity.internalServerError().body(new ApiResponseDto(
                     false,
-                    "매칭 시작 시간 조회 중 오류가 발생했습니다.",
+                    "매칭 대기 유저 목록 조회 중 에러 발생.",
                     null
             ));
         }
@@ -146,10 +126,10 @@ public class MatchController {
         try {
             Long startTime = matchService.getMatchingStartTime(userId);
             if (startTime == null) {
-                return ResponseEntity.ok(new ApiResponseDto(
+                return ResponseEntity.badRequest().body(new ApiResponseDto(
                         false,
                         "매칭 중인 유저가 아닙니다.",
-                        startTime
+                        null
                 ));
             }
 
@@ -172,25 +152,23 @@ public class MatchController {
      * 매칭 수락/거절 응답 처리
      * WebSocket을 통한 실시간 응답 처리
      */
-    @MessageMapping("/match/response")
-    public void handleMatchResponse(MatchResponse response) {
+    @PostMapping("/approve")
+    public ResponseEntity<ApiResponseDto> handleMatchResponse(
+            @RequestHeader("X-User-Id") String userId,
+            MatchApproveRequestDto response) {
         try {
-            validateMatchResponse(response);
-            matchService.processMatchResponse(response);
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid match response: {}", e.getMessage());
-        } catch (Exception e) {
-            log.error("Error processing match response", e);
-        }
-    }
+            // 매칭 응답 처리 (userId는 요청에서 제거되었으므로 헤더에서 가져옴)
+            matchService.processMatchApproval(userId, response);
 
-    /**
-     * WebSocket 요청의 유효성 검증
-     */
-    private void validateMatchResponse(MatchResponse response) {
-        Set<ConstraintViolation<MatchResponse>> violations = validator.validate(response);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid match response data");
+            return ResponseEntity.ok(new ApiResponseDto(
+                    true, response.isAccepted() ? "매칭을 수락했습니다." : "매칭을 거절했습니다.", null));
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid match approval request: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponseDto(false, e.getMessage(), null));
+        } catch (Exception e) {
+            log.error("Error processing match approval for user {}", userId, e);
+            return ResponseEntity.internalServerError().body(new ApiResponseDto(
+                    false, "매칭 승인 처리 중 오류가 발생했습니다.", null));
         }
     }
 
@@ -215,9 +193,6 @@ public class MatchController {
         if (dto.getPreferredMbti() != null) {
             status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
         }
-        status.setStatus(MatchStatus.WAITING);
-        status.setAccepted(false);
-        status.setStartTime(Instant.now().toEpochMilli());
         return status;
     }
 }
