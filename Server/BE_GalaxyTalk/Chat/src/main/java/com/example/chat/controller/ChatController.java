@@ -138,7 +138,7 @@ public class ChatController {
      * @return sessionId, token
      */
     @PostMapping("/reconnect")
-    public ResponseEntity<ApiResponseDto> reconnect(@RequestParam String userId) throws OpenViduJavaClientException, OpenViduHttpException {
+    public ResponseEntity<ApiResponseDto> reconnect(@RequestHeader("X-User-Id") String userId) throws OpenViduJavaClientException, OpenViduHttpException {
         // 1. user가 속한 active session 찾기
         String sessionId = chatService.getSessionId(userId);
 

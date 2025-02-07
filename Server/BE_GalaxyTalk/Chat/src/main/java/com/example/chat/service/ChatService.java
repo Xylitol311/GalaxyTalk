@@ -17,9 +17,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,7 +129,9 @@ public class ChatService {
      * @return sessionId
      */
     public String getSessionId(String userId) {
-        return chatRepository.findActiveSessionIdByUserId(userId).orElse(null);
+        return chatRepository.findActiveSessionIdByUserId(userId)
+            .map(ChatRoom::getSessionId)  // ChatRoom 객체에서 sessionId만 추출
+            .orElse(null);
     }
 
     private void updateUserStatus(String userId, String status) {
