@@ -1,16 +1,18 @@
 package com.example.chat.service;
 
-import com.example.chat.dto.ChatRequest;
-import com.example.chat.dto.PreviousChatResponse;
-import com.example.chat.dto.UserStatusRequest;
+import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
-import com.example.chat.dto.MatchResultRequest;
 import com.example.chat.entity.Participant;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.repository.ChatRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ChatService {
+    @Value("${prompt}")
+    private String questionsPrompt;
 
     private final MongoTemplate mongoTemplate;
     private final ChatRepository chatRepository;
@@ -38,7 +42,7 @@ public class ChatService {
      * @return chatRoomId
      */
     @Transactional
-    public String createChatRoom(MatchResultRequest matchRequest, String sessionId) {
+    public String createChatRoom(MatchResultRequest matchRequest, String sessionId) throws JsonProcessingException {
         ChatRoom chatRoom = new ChatRoom();
 
         // participants 설정
@@ -66,10 +70,16 @@ public class ChatService {
         chatRoom.setCreatedAt(LocalDateTime.now());
         
         // 두 사용자 auth api에 채팅 상태로 변경 요청
-        updateUserStatus(participant1.getUserId(), "chatting");
-        updateUserStatus(participant2.getUserId(), "chatting");
+        // updateUserStatus(participant1.getUserId(), "chatting");
+        // updateUserStatus(participant2.getUserId(), "chatting");
 
-        return chatRepository.save(chatRoom).getId();
+        // 방을 생성하고 방의 Id를 가져옵니다.
+        String chatRoomId = chatRepository.save(chatRoom).getId();
+
+        // AI 질문을 방 생성 시점에 생성합니다.
+        createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2());
+
+        return chatRoomId;
     }
 
     /**
@@ -194,19 +204,46 @@ public class ChatService {
     /**
      * createQuestions() 메서드를 통해 생성된 질문을 mongodb에서 가져와 반환합니다.
      * @param chatRoomId
-     * @return [questions]
+     * @return questions
      */
-    public String[] getQuestions(String chatRoomId) {
-        return null;
+    public List<Question> getQuestions(String chatRoomId) {
+        return chatRepository.findQuestionsByRoomId(chatRoomId)
+                .map(ChatRoom::getQuestions)  // ChatRoom에서 questions 리스트를 가져옴
+                .orElse(null);
     }
 
     /**
      * 방에 입력된 고민 두 개를 가지고 공통 질문 10개를 생성하고 mongodb에 저장합니다.
      * 이는 방 생성 시 호출됩니다.
-     * @param chatRoomId
+     * @param concern1, concern2
      */
-    private void createQuestions(String chatRoomId) {
+    public void createQuestions(String chatRoomId, String concern1, String concern2) throws JsonProcessingException {
+        // 두 질문을 Prompt로 변환합니다.
+        String prompt = createPromptwithTwoConcerns(concern1, concern2);
 
+        // Prompt를 gpt api에 입력하고 질문 열 개를 Json 형태로 받아옵니다.
+        String jsonString = externalApiService.createQuestions(prompt);
+
+        // 1. OpenAI API 응답 전체를 JSON 노드로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(jsonString);
+
+        // 2. "choices" 배열에서 첫 번째 요소의 "message.content" 추출
+        String content = rootNode
+                .path("choices")
+                .get(0)
+                .path("message")
+                .path("content")
+                .asText();
+
+        List<Question> questions = objectMapper.readValue(content, new TypeReference<List<Question>>() {});
+
+        // 질문을 mongodb에 저장합니다.
+        chatRepository.updateQuestions(chatRoomId, questions);
+    }
+
+    private String createPromptwithTwoConcerns(String concern1, String concern2) {
+        return String.format(questionsPrompt, concern1, concern2);
     }
 
     private void updateUserStatus(String userId, String status) {

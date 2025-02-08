@@ -4,6 +4,13 @@ import com.example.chat.dto.UserStatusRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,20 +52,24 @@ public class ExternalApiService {
 
     // GPT 통해 10개의 질문 생성
     public String createQuestions(String prompt) {
-        String requestBody = """
-        {
-            "model": "gpt-4o",
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "%s"}
-            ]
-        }
-        """.formatted(prompt);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-4");
+        requestBody.put("messages", Arrays.asList(
+                Map.of("role", "system", "content", "You are a helpful assistant."),
+                Map.of("role", "user", "content", prompt)
+        ));
+        requestBody.put("temperature", 0.7);
+        requestBody.put("max_tokens", 2000);
 
         return gptClient.post()
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(String.class)  // OpenAI 응답을 String으로 받음
+                .bodyToMono(String.class)
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)) // 최대 3번 재시도, 1초 간격
+                        .filter(throwable -> throwable instanceof WebClientResponseException) // WebClient 예외만 재시도
+                        .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                            throw new RuntimeException("GPT API 호출 실패: 최대 재시도 횟수 초과", retrySignal.failure());
+                        }))
                 .block();
     }
 }

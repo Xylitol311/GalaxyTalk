@@ -5,6 +5,7 @@ import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.entity.Participant;
 import com.example.chat.service.ChatService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.livekit.server.RoomServiceClient;
 import livekit.LivekitModels;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import io.livekit.server.*;
 import io.livekit.server.AccessToken;
@@ -194,15 +196,16 @@ public class ChatController {
      * @param chatRoomId
      * @return questions
      */
-    @PostMapping("/{chatRoomId}/ai")
-    public ResponseEntity<ApiResponseDto> getQuestions(@PathVariable("chatRoomId") String chatRoomId) {
-
+    @GetMapping("/{chatRoomId}/ai")
+    public ResponseEntity<ApiResponseDto> getQuestions(@PathVariable("chatRoomId") String chatRoomId) throws JsonProcessingException {
+        List<Question> questions = chatService.getQuestions(chatRoomId);
 
         return ResponseEntity.ok(new ApiResponseDto(
-
+                true,
+                "AI 질문 생성 성공",
+                questions
         ));
     }
-
 
     /**
      * 세션과 property 정보를 받아 token을 생성합니다.

@@ -1,8 +1,8 @@
 package com.example.chat.repository;
 
+import com.example.chat.dto.Question;
 import com.example.chat.entity.ChatRoom;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.repository.Update;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,4 +33,11 @@ public interface ChatRepository extends MongoRepository<ChatRoom, String> {
             ObjectId cursor,
             Pageable pageable
     );
+
+    @Query("{ '_id': ?0 }")
+    @Update("{ '$set': { 'questions': ?1 }}")
+    void updateQuestions(String roomId, List<Question> questions);
+
+    @Query(value = "{ '_id': ?0 }", fields = "{ 'questions': 1 }")
+    Optional<ChatRoom> findQuestionsByRoomId(String roomId);
 }

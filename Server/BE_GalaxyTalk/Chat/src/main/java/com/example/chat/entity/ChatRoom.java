@@ -1,5 +1,6 @@
 package com.example.chat.entity;
 
+import com.example.chat.dto.Question;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,4 +20,5 @@ public class ChatRoom {
     private Double similarityScore;
     private LocalDateTime createdAt;
     private LocalDateTime endedAt;
+    private List<Question> questions;
 }
