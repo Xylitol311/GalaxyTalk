@@ -1,15 +1,74 @@
+
+#Server Setting
 server:
   port: 8080
 
+#FOR TOEKN
+jwt:
+  secret: ${JWT_SECRET}
+
+# Spring WebFlux - WebApplication environement setting
 spring:
+  main:
+    web-application-type: reactive
+
+#Application name
   application:
     name: Gateway
+
+#Setting profile
+  profiles:
+    include:
+
+
+#Gateway Setting
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 2000 #try connecting for 2sec
+        response-timeout: 10s #wating max 10sec until getting response from server
+      # route setting
       routes:
-        - id: matching-service
-          uri: lb://match
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/matching-service/**
-          filters:
-            - RewritePath=/matching-service/(?<segment>.*), /$\{segment}
+            - Path=/api/oauth/**
+        - id: auth-service-naver
+          uri: ${AUTH_SERVICE_URL}
+          predicates:
+            - Path=/oauth2/authorization/naver
+        - id: support-service
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/api/support/**
+
+# Eureka Setting
+eureka:
+  client:
+    register-with-eureka: false #REGISTER IN EUREKA T/F, Dont need to be regist
+    fetch-registry: true #GET OTHER SERVICE FROM EUREKA AND COMMUNICATE
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL}/eureka/ #EUREKA SERVER URL
+  instance:
+    prefer-ip-address: true # FALSE : REGIST SERVICE BY HOSTNAME EX) LOCALHOST(might cause error in docker) / TRUE : REGIST SERVICE BY IP
+    leaseRenewalIntervalInSeconds: 5 #GATEWAY CONNECT TO EUREKA SERVER PER 5SEC, REFRESH SERVICE INSTANCE
+    leaseExpirationDurationInSeconds: 10 #EUREKA DELETE SERVICE INSTANCE IF DOES NOT REFRESH UNTIL 10 SEC
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port} #MAKE Instance unique ID
+
+#Swagger setting
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth service
+        url: ${AUTH_SERVICE_URL}/v3/api-docs
+      - name: support service
+        url: ${SUPPORT_SERVICE_URL}/v3/api-docs
+
+# urls
+front:
+  url: ${FRONT_URL}
+
+gateway:
+  service:
+    url: ${GATEWAY_SERVICE_URL}

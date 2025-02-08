@@ -68,28 +68,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
         String refresh = cookies.get("RefreshToken");
         String access = cookies.get("AccessToken");
 
-        System.out.println("로그아웃시에는 리프레시를 받아오는거..");
-        System.out.println(refresh);
 
-        // 토큰 검증
-        if (refresh == null || access == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        try {
-            jwtUtil.isExpired(access);
-        } catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            sendResponse(response, ApiResponseDto.noAccessToken);
-        }
-
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            response.setStatus(499);
-            sendResponse(response, ApiResponseDto.noRefreshToken);
-        }
+        // 토큰 검증 (이미 GATEWAY에서 함)
 
 
         // 로그아웃 진행 - Refresh 토큰 DB에서 제거
@@ -100,7 +80,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
         deleteCookie(response, "RefreshToken");
         deleteCookie(response, "AccessToken");
 
-        sendResponse(response, new ApiResponseDto(null));
+        ApiResponseDto apiResponseDto = new ApiResponseDto("로그아웃에 성공했습니다.",null);
+
+        sendResponse(response, apiResponseDto);
     }
 
 

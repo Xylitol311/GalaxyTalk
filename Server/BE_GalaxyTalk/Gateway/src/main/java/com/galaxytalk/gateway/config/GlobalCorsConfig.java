@@ -1,5 +1,6 @@
 package com.galaxytalk.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -12,15 +13,21 @@ import java.util.Arrays;
 @Configuration
 public class GlobalCorsConfig {
 
+    @Value("${front.url}")
+    private String frontUrl;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 8080 포트에서 오는 요청을 허용
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        configuration.setExposedHeaders(Arrays.asList("AccessToken", "RefreshToken"));
+        // 3000 포트에서 오는 요청을 허용
+        configuration.setAllowedOrigins(Arrays.asList(frontUrl));
+        configuration.addAllowedHeader("Content-Type");
+        configuration.addAllowedMethod("GET");
+        configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
+        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedMethod("OPTIONS");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);  // preflight 응답 캐시 시간 설정 (초 단위)
 
@@ -34,6 +41,7 @@ public class GlobalCorsConfig {
         return source;
     }
 
+    //cors에 대해 실제 필터링 작업해줌 corsConfigurationSource은 설정임
     @Bean
     public CorsWebFilter corsWebFilter(CorsConfigurationSource corsConfigurationSource) {
         return new CorsWebFilter(corsConfigurationSource);

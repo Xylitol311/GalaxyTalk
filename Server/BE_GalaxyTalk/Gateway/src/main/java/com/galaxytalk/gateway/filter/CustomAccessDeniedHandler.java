@@ -15,10 +15,11 @@ public class CustomAccessDeniedHandler implements ServerAccessDeniedHandler {
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 직렬화를 위한 ObjectMapper
 
 
+    //mono는 리액티브 프로그래밍(비동기) 핵심 컴포넌트, 단일 응답처리 할때 많이 쓰임
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, AccessDeniedException denied) {
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN); //권한없음으로 설정
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON); //json으로 응답 하기 위해, API 응답의 표준적인 관행
 
         // ApiResponseDto를 사용한 응답 데이터 생성
         ApiResponseDto apiResponseDto = ApiResponseDto.forbidden;
@@ -45,12 +46,5 @@ public class CustomAccessDeniedHandler implements ServerAccessDeniedHandler {
             this.data = data;
         }
 
-        public int getStatusCode() {
-            return statusCode;
-        }
-
-        public ApiResponseDto getData() {
-            return data;
-        }
     }
 }

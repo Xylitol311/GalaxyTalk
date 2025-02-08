@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +22,10 @@ import java.util.Iterator;
 // 로그인 성공시 부가 작업
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    @Value("${front.url}")
+    private String frontUrl;
+
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
@@ -65,11 +70,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 권한에 따른 로그인 후 로직 분기
         if(role.equals("ROLE_GUEST")) {
-            response.sendRedirect("http://localhost:3000/signup");
+            response.sendRedirect(frontUrl+"/signup");
         }else if(role.equals("ROLE_USER")){
-            response.sendRedirect("http://localhost:3000/");
+            response.sendRedirect(frontUrl);
         }else{
-            response.sendRedirect("http://localhost:3000/signup");
+            response.sendRedirect(frontUrl+"/signup");
         }
     }
 

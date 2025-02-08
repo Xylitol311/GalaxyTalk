@@ -1,6 +1,5 @@
 package com.galaxytalk.auth.controller;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.galaxytalk.auth.dto.ApiResponseDto;
 import com.galaxytalk.auth.dto.UserSendDTO;
 import com.galaxytalk.auth.entity.Planets;
@@ -36,7 +35,6 @@ public class AuthController {
     private final PlanetService planetService;
     private final UserStatusService userStatusService;
 
-    ApiResponseDto okNoData = new ApiResponseDto(null);
 
     public AuthController(JWTUtil jwtUtil, UserService userService, RefreshTokenService refreshTokenService, PlanetService planetService, UserStatusService userStatusService) {
         this.jwtUtil = jwtUtil;
@@ -46,17 +44,16 @@ public class AuthController {
         this.userStatusService = userStatusService;
     }
 
-    //# 로그인 : localhost:8080/oauth2/authorization/naver 로 리다이렉트 시키면 됨
-
     @GetMapping("test")
-    public ResponseEntity<?> test(){
+    public ResponseEntity<?> test() {
+
+        System.out.println("테스트 들어옴");
+
         return ResponseEntity.ok("성공!");
     }
 
 
-
-
-
+    //# 로그인 : localhost:8080/oauth2/authorization/naver 로 리다이렉트 시키면 됨
     //# 회원가입
     @PostMapping("/signup")
     @Transactional
@@ -73,46 +70,42 @@ public class AuthController {
                 .map(Cookie::getValue)
                 .orElse(null);
         if (refreshToken.isEmpty()) {
-            return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
-            // 1-1) 기존 리프레시 토큰 검증 및 삭제
-            if (!refreshTokenService.findRefreshToken(refreshToken)) {
-                return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
-            }
-
-            refreshTokenService.removeRefreshToken(refreshToken);
+        // 1-1) 기존 리프레시 토큰 검증 및 삭제
+        refreshTokenService.removeRefreshToken(refreshToken);
 
         // 2. 받은 시리얼 번호로 유저 검색
         Users user = userService.getUserBySerialNumber(serialNumber);
         if (user == null) {
             return new ResponseEntity<>(ApiResponseDto.
-badRequestUser, HttpStatus.BAD_REQUEST);
+                    badRequestUser, HttpStatus.BAD_REQUEST);
         }
 
         // 3. 사용자 정보 수정(mbti & 행성 & ROLE_USER로 승격)
         user.setMbti(mbti);
         user.setRole(Role.ROLE_USER);
 
-            // 3-1. 행성 정보 조회 및 설정
-            Planets planet = planetService.getPlanetById(planetId);
-            if (planet == null) {
-                return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
-            }
-            user.setPlanets(planet);
+        // 3-1. 행성 정보 조회 및 설정
+        Planets planet = planetService.getPlanetById(planetId);
+        if (planet == null) {
+            return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
+        }
+        user.setPlanets(planet);
 
         // 4. 토큰 수정하기
-            //4-1) 다시 넣어줄 토큰 생성(ROLE이 변경되었기 때문에)
-            String newAccessToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 1); //1시간
-            String newRefreshToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 24 * 3); //3일
+        //4-1) 다시 넣어줄 토큰 생성(ROLE이 변경되었기 때문에)
+        String newAccessToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 1); //1시간
+        String newRefreshToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 24 * 3); //3일
 
-            //4-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
-            response.addCookie(createCookie("AccessToken", newAccessToken));
-            response.addCookie(createCookie("RefreshToken", newRefreshToken));
-            refreshTokenService.saveTokenInfo(newRefreshToken);
+        //4-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
+        response.addCookie(createCookie("AccessToken", newAccessToken));
+        response.addCookie(createCookie("RefreshToken", newRefreshToken));
+        refreshTokenService.saveTokenInfo(newRefreshToken);
 
-
-        return new ResponseEntity<>( okNoData , HttpStatus.OK);
+        ApiResponseDto goodResponse = new ApiResponseDto("회원가입이 완료 되었습니다.", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
     //# 회원정보 조회
@@ -120,7 +113,6 @@ badRequestUser, HttpStatus.BAD_REQUEST);
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용
     public ResponseEntity<?> getUserInfo(@RequestHeader("X-User-ID") String serialNumber) {
 
-        System.out.println("들어옴????");
         //1. serialNumber로 user 정보 가져오기 & 예외처리
         Users user = userService.getUserBySerialNumber(serialNumber);
         if (user == null) {
@@ -131,7 +123,7 @@ badRequestUser, HttpStatus.BAD_REQUEST);
         UserSendDTO getUser = new UserSendDTO(user.getSerialNumber(), user.getMbti(), user.getEnergy(), user.getRole(), user.getPlanets().getId());
 
         ApiResponseDto okData = new ApiResponseDto(getUser);
-        return new ResponseEntity<>( okData , HttpStatus.OK);
+        return new ResponseEntity<>(okData, HttpStatus.OK);
     }
 
     //# 회원정보 수정
@@ -157,16 +149,11 @@ badRequestUser, HttpStatus.BAD_REQUEST);
         }
         user.setPlanets(planet);
 
-        return new ResponseEntity<>( okNoData , HttpStatus.OK);
+        ApiResponseDto goodResponse = new ApiResponseDto("회원가입이 수정이 완료 되었습니다.", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
 
-    /*
-    회원탈퇴 관련 추가 로직 구현 필요
-    1. 로그인 할때 withdraw에 값이 있을 경우 재가입 창으로 옮겨줘야함
-    => 우선 signup 페이지로 넘겨버림(user로 자동 승격)
-    2. 회원탈퇴 시 언제까지 데이터 보존되는지 안내, 스케줄러로 자동 삭제 관리 필요
-     */
     //# 회원탈퇴 (SOFT DELETE)
     @PutMapping("/withdraw")
     @Transactional
@@ -189,35 +176,35 @@ badRequestUser, HttpStatus.BAD_REQUEST);
 
         // 4. 쿠키 조회 및 삭제
 
-            //4-1) 리프레시 토큰 조회 및 예외처리
-            Cookie[] cookies = request.getCookies();
+        //4-1) 리프레시 토큰 조회 및 예외처리
+        Cookie[] cookies = request.getCookies();
 
-            String refreshToken = Arrays.stream(cookies)
-                    .filter(cookie -> "RefreshToken".equals(cookie.getName()))
-                    .findFirst()
-                    .map(Cookie::getValue)
-                    .orElse(null);
+        String refreshToken = Arrays.stream(cookies)
+                .filter(cookie -> "RefreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
 
-            // 엑세스 토큰은 게이트 웨이에서 이미 확인하기 때문에, refreshtoken만 확인해도 됨
-            if (refreshToken.isEmpty())
-                return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
+        // 엑세스 토큰은 게이트 웨이에서 이미 확인하기 때문에, refreshtoken만 확인해도 됨
+        if (refreshToken.isEmpty())
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
-            //4-2) 토큰들 다 삭제해서 쿠키에 넣어주기
-            Cookie accessTokenCookie = new Cookie("AccessToken", null);
-            accessTokenCookie.setMaxAge(0);
-            accessTokenCookie.setPath("/");
-            response.addCookie(accessTokenCookie);
+        //4-2) 토큰들 다 삭제해서 쿠키에 넣어주기
+        Cookie accessTokenCookie = new Cookie("AccessToken", null);
+        accessTokenCookie.setMaxAge(0);
+        accessTokenCookie.setPath("/");
+        response.addCookie(accessTokenCookie);
 
-            Cookie refreshTokenCookie = new Cookie("RefreshToken", null);
-            refreshTokenCookie.setMaxAge(0);
-            refreshTokenCookie.setPath("/");
-            response.addCookie(refreshTokenCookie);
+        Cookie refreshTokenCookie = new Cookie("RefreshToken", null);
+        refreshTokenCookie.setMaxAge(0);
+        refreshTokenCookie.setPath("/");
+        response.addCookie(refreshTokenCookie);
 
         // 5. 레디스에서 rf 삭제
         refreshTokenService.removeRefreshToken(refreshToken);
 
-
-        return new ResponseEntity<>( okNoData , HttpStatus.OK);
+        ApiResponseDto goodResponse = new ApiResponseDto("회원탈퇴가 완료 되었습니다.", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
     //# 엑세스 토큰, 리프레스 토큰 갱신
@@ -230,8 +217,7 @@ badRequestUser, HttpStatus.BAD_REQUEST);
         Cookie[] cookies = request.getCookies();
 
 
-
-       if(cookies == null) return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.NOT_FOUND);
+        if (cookies == null) return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
         for (Cookie cookie : cookies) {
 
@@ -241,25 +227,25 @@ badRequestUser, HttpStatus.BAD_REQUEST);
             }
         }
 
-            //1-1) 토큰 비어있을 경우
-            if (refreshToken == null) {
-                //response status code
+        //1-1) 토큰 비어있을 경우
+        if (refreshToken == null) {
+            //response status code
 
 
-                return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
-            }
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
+        }
 
-            //1-2) 기간이 지났을 경우
-            try {
-                jwtUtil.isExpired(refreshToken);
+        //1-2) 기간이 지났을 경우
+        try {
+            jwtUtil.isExpired(refreshToken);
 
-            } catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException e) {
 
-                //response status code
-                return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
-            }
+            //response status code
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
+        }
 
-     //2. 유저 정보 가져오기
+        //2. 유저 정보 가져오기
         //레디스에 refreshtoken에 있는 serialNumber 가져오기
         String serialNumber = jwtUtil.getSerialNumber(refreshToken);
         Users user = userService.getUserBySerialNumber(serialNumber);
@@ -271,8 +257,8 @@ badRequestUser, HttpStatus.BAD_REQUEST);
 
 
         //3. 레디스 삭제(레디스에 이상 여부 함께 확인)
-        if(!refreshTokenService.findRefreshToken(refreshToken)){
-            return new ResponseEntity<>(ApiResponseDto.noRefreshToken, HttpStatus.valueOf(499));
+        if (!refreshTokenService.findRefreshToken(refreshToken)) {
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
 
@@ -280,43 +266,49 @@ badRequestUser, HttpStatus.BAD_REQUEST);
         String accessToken = jwtUtil.token(serialNumber, role.toString(), 1000 * 60 * 60 * 1); //1시간
         String newRefreshToken = jwtUtil.token(serialNumber, role.toString(), 1000 * 60 * 60 * 24 * 3); //3일
 
-            //4-1) 쿠키에 담기
-            response.addCookie(createCookie("AccessToken", accessToken));
-            response.addCookie(createCookie("RefreshToken", newRefreshToken));
+        //4-1) 쿠키에 담기
+        response.addCookie(createCookie("AccessToken", accessToken));
+        response.addCookie(createCookie("RefreshToken", newRefreshToken));
 
-            //4-2) 새로운 토큰은 레디스에 넣기
-            refreshTokenService.removeRefreshToken(refreshToken);
-            refreshTokenService.saveTokenInfo(newRefreshToken);
+        //4-2) 새로운 토큰은 레디스에 넣기
+        refreshTokenService.removeRefreshToken(refreshToken);
+        refreshTokenService.saveTokenInfo(newRefreshToken);
 
         ApiResponseDto goodResponse = new ApiResponseDto("리프레시 토큰 갱신이 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
 
-
     //# 회원 상태 조회
     @GetMapping("stauts")
-    public ResponseEntity<?> getUserStatus(@RequestHeader("X-User-ID") String serialNumber){
+    public ResponseEntity<?> getUserStatus(@RequestHeader("X-User-ID") String serialNumber) {
 
         //1. 유저 상태 조회
         Map<String, String> status = userStatusService.getUserStatus(serialNumber);
 
         //2. 유저 상태 조회 불가시 에러처리
         ApiResponseDto badResponse = new ApiResponseDto(false, "유저 접속 상태 조회 불가", null);
-        if(status.isEmpty()) return new ResponseEntity<>( badResponse, HttpStatus.BAD_REQUEST);
+        if (status.isEmpty()) return new ResponseEntity<>(badResponse, HttpStatus.BAD_REQUEST);
 
         ApiResponseDto goodResponse = new ApiResponseDto("유저 접속 상태 조회에 성공했습니다", status);
-        return new ResponseEntity<>( goodResponse , HttpStatus.OK);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
     //# 회원 상태 변경
+    // 'idle' : 채팅 종료시, 로그인시 자동으로 부여
+    // 'matching' : 매칭 큐 진입
+    // 'chatting' : 채팅 중
     @PostMapping("stauts")
-    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState){
+    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState) {
         //1. 회원 상태 저장
-        userStatusService.saveUserStatus(serialNumber,userInteractionState);
+        if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
+            ApiResponseDto badResponse = new ApiResponseDto(false, "유저 접속 상태 조회 불가", null);
+            return new ResponseEntity<>(badResponse, HttpStatus.BAD_REQUEST);
+        }
 
-        ApiResponseDto goodResponse = new ApiResponseDto("유저 접속 상태 변경에 성공했습니다", null);
-        return new ResponseEntity<>( goodResponse , HttpStatus.OK);
+
+        ApiResponseDto goodResponse = new ApiResponseDto("유저 상태 변경에 성공했습니다", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
 

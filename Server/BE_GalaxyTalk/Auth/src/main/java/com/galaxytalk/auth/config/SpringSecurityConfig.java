@@ -43,15 +43,18 @@ public class SpringSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable())
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenService, userStatusService), LogoutFilter.class)
-                .oauth2Login(oauth2 -> oauth2
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenService, userStatusService), LogoutFilter.class) //로그아웃 시 필터
+                .oauth2Login(oauth2 -> oauth2 //로그인시 필터
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler)
+                                .userService(customOAuth2UserService)) //로그인 필터
+                        .successHandler(customSuccessHandler) //로그인 성공한 후 필터
                 )
+                //모든 요청에 대해 permitAll(이미 게이트웨이에서 체크 해주기 때문에)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated())
+
+                //JWT 토큰으로 stateless 상태 유지
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

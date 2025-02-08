@@ -33,7 +33,6 @@ subprojects { // 모든 하위 모듈들에 이 설정을 적용합니다.
     dependencies { // 모든 하위 모듈에 추가 될 의존성 목록입니다.
         // Spring Boot Starter dependencies
         implementation 'org.springframework.boot:spring-boot-starter-web'       // Web + Servlet 컨테이너
-        implementation 'org.springframework.boot:spring-boot-starter-security'  // Spring Security
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // Spring Data JPA
 
         // Database drivers (필요한 DB 드라이버만 유지)

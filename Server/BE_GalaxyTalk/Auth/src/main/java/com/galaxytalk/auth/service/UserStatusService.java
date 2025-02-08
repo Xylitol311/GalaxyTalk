@@ -18,8 +18,10 @@ public class UserStatusService {
 
     //userStatus 저장
     @Transactional
-    public void saveUserStatus(String serialNumber, String status) {
-        userStatusRepository.save(new UserStatus(serialNumber,status));
+    public boolean saveUserStatus(String serialNumber, String status) {
+        UserStatus userStatus =userStatusRepository.save(new UserStatus(serialNumber,status));
+        if(userStatus==null) return false;
+        else return true;
     }
 
 
@@ -37,7 +39,7 @@ public class UserStatusService {
 
             UserStatus userStatus = userStatusOptional.get();
             statusMap.put("userInteractionState", userStatus.getUserInteractionState());
-            System.out.println(statusMap);
+
         return statusMap;
     }
 

@@ -40,13 +40,11 @@ public class JwtAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-        System.out.println("JwtAuthenticationFilter 실행됨");
-
         System.out.println("Request Method: " + request.getMethod());
         System.out.println("Request Headers: " + request.getHeaders());
         System.out.println("Request Cookies: " + request.getCookies());
 
-        // ✅ OPTIONS 요청은 바로 필터 체인을 실행하고 종료
+        // OPTIONS 요청은 바로 필터 체인을 실행하고 종료
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
