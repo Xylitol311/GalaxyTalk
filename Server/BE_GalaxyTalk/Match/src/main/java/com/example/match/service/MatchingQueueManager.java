@@ -3,6 +3,8 @@ package com.example.match.service;
 import com.example.match.constant.MBTI;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
+import com.example.match.exception.BusinessException;
+import com.example.match.exception.ErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +98,7 @@ public class MatchingQueueManager {
             // 변경된 user 상태를 Redis에 다시 저장하여 동기화
             redisService.saveUserStatus(user);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid MBTI value");
+            throw new BusinessException(ErrorCode.INVALID_MBTI, "Invalid MBTI value in addToQueue()");
         }
     }
 

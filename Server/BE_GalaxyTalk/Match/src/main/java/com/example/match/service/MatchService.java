@@ -6,6 +6,8 @@ import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchApproveRequestDto;
 import com.example.match.dto.UserResponseDto;
 import com.example.match.dto.UserStatusDto;
+import com.example.match.exception.BusinessException;
+import com.example.match.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,8 @@ public class MatchService {
 
         if (userMbti == null) {
             log.warn("유저 {}의 MBTI 정보를 가져올 수 없습니다.", user.getUserId());
-            return;
+            throw new BusinessException(ErrorCode.USER_INFO_NOT_FOUND,
+                    "유저 " + user.getUserId() + "의 MBTI 정보를 가져올 수 없습니다.");
         }
 
         user.setMbti(userMbti);
@@ -69,6 +72,7 @@ public class MatchService {
         // 새로운 유저 입장 알림
         webSocketService.broadcastNewUser(user);
     }
+
 
     /**
      * 매칭 취소 처리
@@ -220,16 +224,19 @@ public class MatchService {
         UserMatchStatus user = redisService.getUserStatus(userId);
 
         if (user == null) {
-            throw new IllegalArgumentException("해당 유저 정보를 찾을 수 없습니다.");
+            // 유저 정보를 찾을 수 없으면 예외
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND, "userId: " + userId);
         }
 
         if (!response.getMatchId().equals(user.getMatchId())) {
+            // 매칭 ID가 일치하지 않으면 잘못된 요청
             throw new IllegalArgumentException("잘못된 매칭 ID입니다.");
         }
 
         // MatchProcessor를 통해 매칭 승인/거절 처리
         matchProcessor.processMatchResponse(user, response);
     }
+
 
     /**
      * 매칭 대기 중인 유저 목록 조회
