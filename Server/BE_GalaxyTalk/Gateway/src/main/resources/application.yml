@@ -26,7 +26,7 @@ spring:
     gateway:
       httpclient:
         connect-timeout: 2000 #try connecting for 2sec
-        response-timeout: 10s #wating max 10sec until getting response from server
+        response-timeout: 60s #wating max 10sec until getting response from server
       # route setting
       routes:
         - id: auth-service

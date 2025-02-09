@@ -22,7 +22,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("http://localhost8086").description("Support Service"))
+                .addServersItem(new Server().url("http://localhost:8086").description("Support Service"))
                 .components(new Components());
     }
 
