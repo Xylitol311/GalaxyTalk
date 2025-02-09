@@ -45,6 +45,14 @@ public class JwtAuthenticationFilter implements WebFilter {
         System.out.println("Request Cookies: " + request.getCookies());
 
         // OPTIONS 요청은 바로 필터 체인을 실행하고 종료
+
+        String path = exchange.getRequest().getURI().getPath();
+        System.out.println(exchange.getRequest().getURI());
+        if (path.startsWith("/oauth2/authorization/")) {
+            return chain.filter(exchange);  // 필터 통과
+        }
+
+
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }

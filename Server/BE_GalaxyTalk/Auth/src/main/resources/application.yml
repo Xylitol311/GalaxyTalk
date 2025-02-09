@@ -1,7 +1,4 @@
-# SERVER SETTING
-server:
-  address: localhost
-  port: 8081
+# SERVER SETTING in local or prod file
 
 spring:
   application:
@@ -9,6 +6,8 @@ spring:
 
   profiles:
     include: redis
+    active: local  # 기본 환경을 local로 설정 (운영 환경에서는 prod로 변경)
+
 
 
 #LOGIN SETTING
@@ -37,17 +36,11 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
-#REDIS
+#REDIS setting in local or prod file
 ## SERIALIZATION ERROR CONTROLLER FOR REDIS
   jackson:
     serialization:
       fail-on-empty-beans: false
-
-  data:
-    redis:
-      port: 6379
-      host: 127.0.0.1
-      password: ${REDIS_PASSWORD}
 
 #JPA
   jpa:
@@ -58,12 +51,7 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
-#MYSQL
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_ROOT_PASSWORD}
+#MYSQL setting in local or prod file
 
 #GATEWAY : HELPING USING DISCOVERY LOCATOR LIKE EUREKA
   cloud:

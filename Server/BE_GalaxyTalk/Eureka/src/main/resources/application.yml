@@ -1,13 +1,13 @@
+#Server Setting in prod or local file
+
 spring:
   application:
     name: Eureka
-
-server:
-  port: 8761
+  profiles:
+    active: local
 
 eureka:
   instance:
-#    hostname: localhost
   client:
     register-with-eureka: false
     fetch-registry: false
