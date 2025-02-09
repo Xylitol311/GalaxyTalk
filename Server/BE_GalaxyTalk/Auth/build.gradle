@@ -41,6 +41,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // MacOS 환경에서 Netty의 DNS 해석 관련 네이티브 라이브러리
+    implementation 'io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64'
+
     // 개발 편의성 도구
     developmentOnly 'org.springframework.boot:spring-boot-devtools'         // DevTools for Hot Reload
 
