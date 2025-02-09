@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class UserStatusDto {
     private String userId;
     private String concern;
-    private String mbti;
+    private String prefferedMbti;
     private MatchStatus status;
     private long startTime;
 }

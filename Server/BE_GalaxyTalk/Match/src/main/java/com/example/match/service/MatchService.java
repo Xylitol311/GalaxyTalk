@@ -61,6 +61,9 @@ public class MatchService {
         // ZSET에 유저 추가
         redisService.addUserToWaitingQueue(user);
 
+        // 세션 서버에 매칭 상태 변경 요청
+        externalApiService.setUserStatus(user, "Matching");
+
         // 대기 상태 알림
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
         // 새로운 유저 입장 알림

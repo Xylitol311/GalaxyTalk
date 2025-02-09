@@ -5,8 +5,11 @@ import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -59,10 +62,27 @@ public class ExternalApiService {
         );
 
         return chatServiceClient.post()
-                .uri("/room")
+                .uri("/api/chat/match")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(ChatRoomResponseDto.class)
+                .block();
+    }
+
+    /**
+     * 세션 서버에 유저 상태 변경 요청 (JSON 형식)
+     */
+    public void setUserStatus(UserMatchStatus user, String matching) {
+        Map<String, Object> requestBody = Map.of(
+                "userId", user.getUserId(),
+                "status", matching
+        );
+
+        authServiceClient.post()
+                .uri("/api/oauth/status")
+                .bodyValue(requestBody)
+                .retrieve() // 2xx 응답이면 정상 처리, 4xx/5xx이면 예외 발생
+                .bodyToMono(Void.class) // 응답 본문을 무시
                 .block();
     }
 }
