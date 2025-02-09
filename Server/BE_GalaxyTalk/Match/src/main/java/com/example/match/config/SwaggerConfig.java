@@ -17,16 +17,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
         })
 public class SwaggerConfig {
-    @Value("${gateway.service.url}")
-    private String gatewayServerUrl;
-    @Value("${server.url}")
-    private String matchServerUrl;
+    @Value("${swagger.gateway.url}")
+    private String gatewayUrl;
 
-    //!!! 이부분만 url, description 자기 포트에 알맞게 변경
+    @Value("${swagger.match.url}")
+    private String matchUrl;
+
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url(matchServerUrl).description("Match Service"))
+                .addServersItem(new Server().url(matchUrl).description("Match Service"))
                 .components(new Components());
     }
 
@@ -37,14 +38,14 @@ public class SwaggerConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/v3/api-docs/**")
-                        .allowedOrigins(gatewayServerUrl)
+                        .allowedOrigins(gatewayUrl)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
                         .maxAge(3600);
 
                 registry.addMapping("/swagger-ui/**")
-                        .allowedOrigins(gatewayServerUrl)
+                        .allowedOrigins(gatewayUrl)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)

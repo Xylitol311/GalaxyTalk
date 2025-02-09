@@ -2,16 +2,15 @@ spring:
   application:
     name: Match
 
-server:
-  url: ${MATCH_SERVICE_URL}
-  port: 8083
-
-gateway:
-  service:
-    url: ${GATEWAY_SERVICE_URL}
-
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+# Swagger URL 설정(기본값 또는 환경 변수를 통해 주입 가능)
+swagger:
+  gateway:
+    url: ${GATEWAY_SERVICE_URL}
+  match:
+    url: ${MATCH_SERVICE_URL}
