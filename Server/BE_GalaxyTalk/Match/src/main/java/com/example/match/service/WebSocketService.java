@@ -35,18 +35,18 @@ public class WebSocketService {
         );
     }
 
-    public void notifyUsersWithChatRoom(UserMatchStatus user1, UserMatchStatus user2, ChatRoomResponseDto.ChatRoomData chatRoomData) {
+    public void notifyUsersWithChatRoom(UserMatchStatus user1, UserMatchStatus user2, ChatRoomResponseDto.ChatResponse chatResponse) {
         String message = "매칭이 완료되었습니다. 채팅방 정보입니다.";
 
         Map<String, Object> user1Data = new HashMap<>();
-        user1Data.put("chatRoomId", chatRoomData.getChatRoomId());
-        user1Data.put("sessionId", chatRoomData.getSessionId());
-        user1Data.put("token", chatRoomData.getTokenA());
+        user1Data.put("chatRoomId", chatResponse.getChatRoomId());
+        user1Data.put("sessionId", chatResponse.getSessionId());
+        user1Data.put("token", chatResponse.getTokenA());
 
         Map<String, Object> user2Data = new HashMap<>();
-        user2Data.put("chatRoomId", chatRoomData.getChatRoomId());
-        user2Data.put("sessionId", chatRoomData.getSessionId());
-        user2Data.put("token", chatRoomData.getTokenB());
+        user2Data.put("chatRoomId", chatResponse.getChatRoomId());
+        user2Data.put("sessionId", chatResponse.getSessionId());
+        user2Data.put("token", chatResponse.getTokenB());
 
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user1.getUserId(),

@@ -1,25 +1,21 @@
 package com.example.match.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 public class UserResponseDto {
-    private String userId;
-    private int energy;
-    private Role role;
-    private String mbti;
-    private int planetId;
+    private boolean success;
+    private String message;
+    private UserSendDTO data;
 
-    @Override
-    public String toString() {
-        return "UserResponseDto{" +
-                "userId='" + userId + '\'' +
-                ", energy=" + energy +
-                ", role=" + role +
-                ", mbti='" + mbti + '\'' +
-                ", planetId=" + planetId +
-                '}';
+
+    @Data
+    public static class UserSendDTO {
+        private String userId;
+        private String mbti;
+        private int energy;
+        private Role role;
+        private int planetId;
     }
+
 }
