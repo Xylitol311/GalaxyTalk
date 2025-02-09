@@ -1,0 +1,13 @@
+#Server Setting in prod or local file
+
+spring:
+  application:
+    name: Eureka
+  profiles:
+    active: local
+
+eureka:
+  instance:
+  client:
+    register-with-eureka: false
+    fetch-registry: false

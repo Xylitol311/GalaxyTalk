@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 /*
 로그인 성공 후 데이터를 전달 받기 위한 구현체 (작성하지 않을 경우 오류 발생)
 어떤 데이터를 받을 건지, 어떻게 받을건지는 직접 설정해줘야함
- */
+*/
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -32,7 +32,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        System.out.println("로그인 성공 후 정보 받기 ....");
 
         //Naver로 부터 전달 받은 값
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -49,19 +48,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             user = new Users();
             user.setSerialNumber(userSerialNumber);
-            user.setAgeInterval(oAuth2Response.getAgeInterval());
-            user.setBirthday(oAuth2Response.getBirthday());
-            user.setBirthyear(Integer.parseInt(oAuth2Response.getBirthyear()));
-            user.setEmail(oAuth2Response.getEmail());
 
             //!!권한 추후에 분기처리하기
             Role role = Role.ROLE_GUEST;
             user.setRole(role);
 
-            //JPA 데이터 저장
+            //데이터 저장
             userService.saveUser(user);
         }
-
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
         UserDTO userDTO = new UserDTO();

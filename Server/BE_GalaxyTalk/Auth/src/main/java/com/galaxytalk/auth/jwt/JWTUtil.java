@@ -22,9 +22,9 @@ public class JWTUtil {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getUserId(String token) {
+    public String getSerialNumber(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", String.class);
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("serialNumber", String.class);
     }
 
     public String getRole(String token) {
@@ -37,15 +37,17 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String token(String userId, String role, int expiredMs) {
+    public String token(String serialNumber, String role, int expiredMs) {
 
         return Jwts.builder()
-                .claim("userId", userId)
+                .claim("serialNumber", serialNumber)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
     }
+
+
 
 }
