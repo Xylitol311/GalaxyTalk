@@ -1,6 +1,9 @@
 package com.galaxytalk.gateway.filter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galaxytalk.gateway.dto.ApiResponseDto;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,33 +24,21 @@ public class CustomAccessDeniedHandler implements ServerAccessDeniedHandler {
         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN); //권한없음으로 설정
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON); //json으로 응답 하기 위해, API 응답의 표준적인 관행
 
-        System.out.println("여기에 옴..??");
+        System.out.println("여기에 옴..?? CustomAccessDeniedHandler 실행됨.");
 
 
-        // ApiResponseDto를 사용한 응답 데이터 생성
-        ApiResponseDto apiResponseDto = ApiResponseDto.forbidden;
-
-        CustomErrorResponse errorResponse = new CustomErrorResponse(403, apiResponseDto.forbidden);
+        // ✅ ApiResponseDto를 사용하여 JSON 응답 생성
+        ApiResponseDto response = ApiResponseDto.forbiddenResponse();
 
         try {
-            String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+            // JSON 변환 후 응답을 Buffer에 저장
+            String jsonResponse = objectMapper.writeValueAsString(response);
             DataBuffer buffer = exchange.getResponse().bufferFactory()
                     .wrap(jsonResponse.getBytes(StandardCharsets.UTF_8));
+
             return exchange.getResponse().writeWith(Mono.just(buffer));
         } catch (Exception e) {
             return Mono.error(e);
         }
-    }
-
-    // JSON 응답 구조를 맞추기 위한 내부 클래스
-    private static class CustomErrorResponse {
-        private final int statusCode;
-        private final ApiResponseDto data;
-
-        public CustomErrorResponse(int statusCode, ApiResponseDto data) {
-            this.statusCode = statusCode;
-            this.data = data;
-        }
-
     }
 }
