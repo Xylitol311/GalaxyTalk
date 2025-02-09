@@ -150,7 +150,7 @@ public class MatchController {
 
     /**
      * 매칭 수락/거절 응답 처리
-     * WebSocket을 통한 실시간 응답 처리
+     *
      */
     @PostMapping("/approve")
     public ResponseEntity<ApiResponseDto> handleMatchResponse(

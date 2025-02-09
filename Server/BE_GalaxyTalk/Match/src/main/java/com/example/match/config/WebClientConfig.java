@@ -1,7 +1,7 @@
 package com.example.match.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -13,42 +13,33 @@ import reactor.core.publisher.Mono;
 @Configuration
 @Slf4j
 public class WebClientConfig {
-
-    @Value("${ai.service.url}")
-    private String aiServiceUrl;
-
-    @Value("${chat.service.url}")
-    private String chatServiceUrl;
-    @Value("${auth.service.url}")
-    private String authServiceUrl;
-
     @Bean
-    public WebClient aiServiceClient() {
+    @LoadBalanced // Eureka 기반 로드밸런싱 적용
+    public WebClient.Builder loadBalancedWebClientBuilder() {
         return WebClient.builder()
-                .baseUrl(aiServiceUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .filter(logRequest())
-                .filter(logResponse())
+                .filter(logResponse());
+    }
+
+    @Bean
+    public WebClient aiServiceClient(WebClient.Builder webClientBuilder) {
+        return webClientBuilder
+                .baseUrl("http://ai-service") // Eureka 서비스명 사용
                 .build();
     }
 
     @Bean
-    public WebClient chatServiceClient() {
-        return WebClient.builder()
-                .baseUrl(chatServiceUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
+    public WebClient chatServiceClient(WebClient.Builder webClientBuilder) {
+        return webClientBuilder
+                .baseUrl("http://chat-service") // Eureka 서비스명 사용
                 .build();
     }
 
     @Bean
-    public WebClient authServiceClient() {
-        return WebClient.builder()
-                .baseUrl(authServiceUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
+    public WebClient authServiceClient(WebClient.Builder webClientBuilder) {
+        return webClientBuilder
+                .baseUrl("http://auth-service") // Eureka 서비스명 사용
                 .build();
     }
 

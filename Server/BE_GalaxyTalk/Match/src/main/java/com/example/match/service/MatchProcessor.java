@@ -110,14 +110,27 @@ public class MatchProcessor {
         }
     }
 
+    /**
+     * 채팅방 생성
+     * - 유저 정보와 매칭 정보, 유사도 점수 등을 담아 채팅 생성 요청
+     * - 응답 받은 openVidu SessionID, ChatRoomId 등을 사용자에게 전달
+     * - 유저 세션 서버에 유저 상태 Chatting으로 변경 요청
+     */
     private void createChat(UserMatchStatus user) {
+        // 정보 가져오기
         MatchResultStatus matchResultStatus = redisService.getMatchInfo(user.getMatchId());
         UserMatchStatus user1 = redisService.getUserStatus(matchResultStatus.getUserIds().get(0));
         UserMatchStatus user2 = redisService.getUserStatus(matchResultStatus.getUserIds().get(1));
 
+        // 채팅방 생성 요청
         ChatRoomResponseDto chatRoomResponseDto = externalApiService.createChatRoom(user1, user2, matchResultStatus.getSimilarity());
         ChatRoomResponseDto.ChatRoomData chatRoomData = chatRoomResponseDto.getData();
 
+        // 세션 서버의 유저 상태 변경
+        externalApiService.setUserStatus(user1, "Chatting");
+        externalApiService.setUserStatus(user2, "Chatting");
+
+        // 유저들에게 채팅방 정보 전송
         webSocketService.notifyUsersWithChatRoom(user1, user2, chatRoomData);
     }
 
