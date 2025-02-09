@@ -72,9 +72,7 @@ public class MatchController {
      * - 실시간으로 매칭 대기 유저를 클라이언트 화면에 표시하기 위한 기능
      */
     @GetMapping("/waiting-users")
-    public ResponseEntity<ApiResponseDto> getWaitingUsers(
-            @RequestHeader("X-User-ID") String userId
-    ) {
+    public ResponseEntity<ApiResponseDto> getWaitingUsers() {
         List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
