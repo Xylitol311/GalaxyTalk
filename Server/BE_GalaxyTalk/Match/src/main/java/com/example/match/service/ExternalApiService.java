@@ -5,13 +5,17 @@ import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExternalApiService {
     private final WebClient aiServiceClient;
     private final WebClient chatServiceClient;
@@ -21,8 +25,19 @@ public class ExternalApiService {
         return authServiceClient.get()
                 .uri("/api/oauth?userId=" + userId)
                 .header("X-User-ID", userId)
-                .retrieve()
-                .bodyToMono(UserResponseDto.class)
+                .exchangeToMono(response -> {
+                    if (response.statusCode().is2xxSuccessful()) {
+                        return response.bodyToMono(UserResponseDto.class);
+                    } else {
+                        return response.createException()
+                                .flatMap(error -> {
+                                    log.error("Failed to fetch user info: Status={} Message={}", response.statusCode(), error.getMessage());
+                                    return Mono.error(error);
+                                });
+                    }
+                })
+                .doOnError(WebClientResponseException.class, e -> log.error("WebClient error: Status={} Body={}", e.getStatusCode(), e.getResponseBodyAsString()))
+                .doOnError(Exception.class, e -> log.error("Unexpected error while fetching user info", e))
                 .block();
     }
 

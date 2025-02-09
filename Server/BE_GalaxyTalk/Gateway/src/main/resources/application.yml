@@ -41,6 +41,14 @@ spring:
           uri: lb://SUPPORT-SERVICE
           predicates:
             - Path=/api/support/**
+        - id: match-service
+          uri: lb://MATCH-SERVICE
+          predicates:
+            - Path=/api/match/**
+        - id: chat-service
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/api/chat/**
 
 # Eureka Setting
 eureka:
@@ -64,6 +72,10 @@ springdoc:
         url: ${AUTH_SERVICE_URL}/v3/api-docs
       - name: support service
         url: ${SUPPORT_SERVICE_URL}/v3/api-docs
+      - name: chat service
+        url: ${CHAT_SERVICE_URL}/v3/api-docs
+      - name: match service
+        url: ${MATCH_SERVICE_URL}/v3/api-docs
 
 # urls
 front:

@@ -1,12 +1,14 @@
 spring:
   application:
-    name: Match
+    name: match-service
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+
 
 # Swagger URL 설정(기본값 또는 환경 변수를 통해 주입 가능)
 swagger:

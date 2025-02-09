@@ -1,9 +1,14 @@
 spring:
   application:
-    name: Chat
+    name: chat-service
   config:
     import: classpath:prompt.yml  # 기존 spring.config.import=classpath:prompt.yml
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            url: http://localhost:8081 #auth
 server:
   port: 8084
 
@@ -50,3 +55,4 @@ comment:
 openai:
   api:
     key: ${OPENAI_API_KEY}
+

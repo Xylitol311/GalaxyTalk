@@ -34,6 +34,8 @@ public class MatchController {
     public ResponseEntity<ApiResponseDto> startMatching(
             @RequestHeader("X-User-ID") String userId,
             @Valid @RequestBody MatchRequestDto request) {
+
+
         try {
             // MBTI 유효성 검증
             if (request.getPreferredMbti() != null) {
@@ -97,6 +99,7 @@ public class MatchController {
     public ResponseEntity<ApiResponseDto> getWaitingUsers(
             @RequestHeader("X-User-ID") String userId
     ) {
+
         try {
             List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
 

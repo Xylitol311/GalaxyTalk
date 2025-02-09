@@ -115,6 +115,9 @@ public class AuthController {
 
         //1. serialNumber로 user 정보 가져오기 & 예외처리
         Users user = userService.getUserBySerialNumber(serialNumber);
+
+        System.out.println(user.getSerialNumber());
+
         if (user == null) {
             return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
         }
@@ -280,7 +283,7 @@ public class AuthController {
 
 
     //# 회원 상태 조회
-    @GetMapping("stauts")
+    @GetMapping("status")
     public ResponseEntity<?> getUserStatus(@RequestHeader("X-User-ID") String serialNumber) {
 
         //1. 유저 상태 조회
@@ -298,8 +301,11 @@ public class AuthController {
     // 'idle' : 채팅 종료시, 로그인시 자동으로 부여
     // 'matching' : 매칭 큐 진입
     // 'chatting' : 채팅 중
-    @PostMapping("stauts")
+    @PostMapping("status")
     public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState) {
+
+
+        System.out.println("상태요청 변경 옴" + " " + serialNumber + " " + userInteractionState);
         //1. 회원 상태 저장
         if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
             ApiResponseDto badResponse = new ApiResponseDto(false, "유저 접속 상태 조회 불가", null);

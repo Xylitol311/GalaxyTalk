@@ -36,11 +36,28 @@ public class SwaggerConfig {
                 .build();
     }
     @Bean
-    public GroupedOpenApi matchServiceApi() {
+    public GroupedOpenApi supportServiceApi() {
         return GroupedOpenApi.builder()
                 .group("Support Service")
                 .pathsToMatch("/api/support/**")
                 .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Support API")))
+                .build();
+    }
+    @Bean
+    public GroupedOpenApi chatServiceApi() {
+        return GroupedOpenApi.builder()
+                .group("Chat Service")
+                .pathsToMatch("/api/chat/**")
+                .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Chat API")))
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi matchServiceApi() {
+        return GroupedOpenApi.builder()
+                .group("Match Service")
+                .pathsToMatch("/api/match/**")
+                .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Match API")))
                 .build();
     }
 }

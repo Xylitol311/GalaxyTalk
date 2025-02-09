@@ -14,6 +14,6 @@ public interface AuthClient {
     @GetMapping("/api/oauth")
     ResponseEntity<?> getUser(@RequestHeader("X-User-ID") String serialNumber);
 
-    @PostMapping("/api/ouath/status")
-    ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("status") String status);
+    @PostMapping("/api/oauth/status")
+    ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState);
 }
