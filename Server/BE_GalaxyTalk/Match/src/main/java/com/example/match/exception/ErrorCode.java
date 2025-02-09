@@ -15,6 +15,7 @@ public enum ErrorCode {
     // 매칭 관련 에러 코드
     INVALID_MBTI("M001", "Invalid MBTI value"),
     MATCH_NOT_FOUND("M002", "매칭 중인 유저가 아닙니다."),
+    MATCH_ALREADY_IN_PROGRESS("M003", "이미 매칭 중인 유저입니다."),
 
     // 사용자 정보 관련 에러 코드
     USER_INFO_NOT_FOUND("U001", "유저 정보를 찾을 수 없습니다."),

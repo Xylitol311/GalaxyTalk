@@ -39,6 +39,12 @@ public class MatchService {
      * 3. WebSocket으로 대기 시작 알림
      */
     public void startMatching(UserMatchStatus user) {
+        // 이미 매칭 중인 유저인지 확인
+        UserMatchStatus userMatchStatus = redisService.getUserStatus(user.getUserId());
+        if (userMatchStatus != null) {
+            throw new BusinessException(ErrorCode.MATCH_ALREADY_IN_PROGRESS);
+        }
+
         // 회원 정보 요청 및 MBTI 추출
         UserResponseDto.UserSendDTO userResponse = externalApiService.getUserInfo(user.getUserId());
         String userMbti = (userResponse != null) ? userResponse.getMbti() : null;
