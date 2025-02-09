@@ -20,6 +20,7 @@ public class ExternalApiService {
     public UserResponseDto getUserInfo(String userId) {
         return authServiceClient.get()
                 .uri("/api/oauth?userId=" + userId)
+                .header("X-User-ID", userId)
                 .retrieve()
                 .bodyToMono(UserResponseDto.class)
                 .block();
@@ -77,6 +78,7 @@ public class ExternalApiService {
 
         authServiceClient.post()
                 .uri("/api/oauth/status")
+                .header("X-User-ID", user.getUserId())
                 .bodyValue(requestBody)
                 .retrieve() // 2xx 응답이면 정상 처리, 4xx/5xx이면 예외 발생
                 .bodyToMono(Void.class) // 응답 본문을 무시
