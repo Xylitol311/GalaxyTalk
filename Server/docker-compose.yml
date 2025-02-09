@@ -1,4 +1,4 @@
-version: '3.8'  # 도커 컴포즈 버전 (최신 버전 권장)
+version: '3.8'  # 도커 컴포즈 버전
 
 services:
   mysql:
@@ -13,6 +13,16 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
+    # MySQL이 정상적으로 동작하는지 확인하기 위한 헬스체크 추가
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 30s      # 30초마다 체크
+      timeout: 10s       # 10초 이내 응답 없으면 실패 처리
+      retries: 3         # 3회 연속 실패시 unhealthy 상태로 간주
+      start_period: 30s  # 초기 30초 동안은 체크 결과 무시 (초기 부팅 지연 고려)
+    networks:
+      - my-network
+
 
   redis:
     image: redis:latest
@@ -20,9 +30,19 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD}
+    # Redis 서버의 정상 동작 여부를 확인하기 위한 헬스체크 추가
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - my-network
+
 
   mongodb:
-    image: mongo:latest
+    image: mongo:6.0.9
     container_name: my-mongodb
     ports:
       - "27017:27017"
@@ -32,6 +52,80 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - mongodb_data:/data/db
+    # MongoDB가 제대로 기동했는지 확인하기 위한 헬스체크 추가
+    healthcheck:
+      # mongo 클라이언트를 통해 db.adminCommand('ping') 명령어 실행
+      test: [
+        "CMD", "mongosh",
+        "--username", "${MONGO_INITDB_ROOT_USERNAME}",
+        "--password", "${MONGO_INITDB_ROOT_PASSWORD}",
+        "--authenticationDatabase", "admin",
+        "--eval", "db.adminCommand('ping').ok === 1 ? quit(0) : quit(1)"
+      ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - my-network
+
+
+  galaxy-auth:
+    build: ./BE_GalaxyTalk/Auth
+    restart: always
+    ports:
+      - "30001:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+    # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
+
+
+  galaxy-match:
+    build: ./BE_GalaxyTalk/Match
+    restart: always
+    ports:
+      - "30003:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AI_SERVICE_URL=${AI_SERVICE_URL}
+      - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+
+    # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
+    depends_on:
+      - redis
+    # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
 
   galaxy-auth:
     build: ./BE_GalaxyTalk/Auth
@@ -44,3 +138,7 @@ services:
 volumes:
   mysql_data:
   mongodb_data:
+
+networks:
+  my-network:
+    external: true

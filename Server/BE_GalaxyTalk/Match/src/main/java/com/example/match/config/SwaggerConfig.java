@@ -4,11 +4,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 
 @Configuration
 @OpenAPIDefinition(
@@ -17,12 +17,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
         })
 public class SwaggerConfig {
+    @Value("${swagger.gateway.url}")
+    private String gatewayUrl;
+
+    @Value("${swagger.match.url}")
+    private String matchUrl;
 
 
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("http://localhost:8082").description("Match Service"))
+                .addServersItem(new Server().url(matchUrl).description("Match Service"))
                 .components(new Components());
     }
 
@@ -33,14 +38,14 @@ public class SwaggerConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/v3/api-docs/**")
-                        .allowedOrigins("http://localhost:8080")
+                        .allowedOrigins(gatewayUrl)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
                         .maxAge(3600);
 
                 registry.addMapping("/swagger-ui/**")
-                        .allowedOrigins("http://localhost:8080")
+                        .allowedOrigins(gatewayUrl)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
