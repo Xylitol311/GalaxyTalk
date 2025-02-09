@@ -72,14 +72,14 @@ public class ExternalApiService {
     /**
      * 세션 서버에 유저 상태 변경 요청 (JSON 형식)
      */
-    public void setUserStatus(UserMatchStatus user, String matching) {
+    public void setUserStatus(String userId, String matching) {
         authServiceClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/oauth/status")
                         .queryParam("userInteractionState", matching)
                         .build()
                 )
-                .header("X-User-ID", user.getUserId())
+                .header("X-User-ID", userId)
                 .retrieve() // 2xx 응답이면 정상 처리, 4xx/5xx이면 예외 발생
                 .bodyToMono(Void.class) // 응답 본문을 무시
                 .block();

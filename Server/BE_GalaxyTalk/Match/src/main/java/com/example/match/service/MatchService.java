@@ -65,7 +65,7 @@ public class MatchService {
         redisService.addUserToWaitingQueue(user);
 
         // 세션 서버에 매칭 상태 변경 요청
-        externalApiService.setUserStatus(user, "Matching");
+        externalApiService.setUserStatus(user.getUserId(), "matching");
 
         // 대기 상태 알림
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
@@ -83,6 +83,9 @@ public class MatchService {
 
         // ZSET에서 매칭 대기 유저 제거
         redisService.removeUserFromWaitingQueue(userId);
+
+        // 세션 서버 상태 변경
+        externalApiService.setUserStatus(userId, "idle");
 
         // 유저 퇴장 알림
         webSocketService.broadcastUserExit(userId);
