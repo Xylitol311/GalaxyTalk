@@ -14,13 +14,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class WebClientConfig {
 
-    @Value("${AUTH_SERVICE_URL}")
+    @Value("${auth.service.url}")
     private String authServiceUrl;
 
-    @Value("${COMMENT_SERVICE_URL}")
+    @Value("${comment.service.url}")
     private String commentServiceUrl;
 
-    @Value("${OPENAI_API_KEY}")
+    @Value("${openai.api.key}")
     private String apiKey;
 
     @Bean

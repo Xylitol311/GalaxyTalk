@@ -6,20 +6,18 @@ import com.example.chat.entity.ChatRoom;
 import com.example.chat.entity.Participant;
 import com.example.chat.service.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.livekit.server.AccessToken;
+import io.livekit.server.RoomJoin;
+import io.livekit.server.RoomName;
 import io.livekit.server.RoomServiceClient;
-import livekit.LivekitModels;
+import jakarta.annotation.PostConstruct;
+import livekit.LivekitModels.Room;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import io.livekit.server.*;
-import io.livekit.server.AccessToken;
-import livekit.LivekitModels.Room;
-
-import jakarta.annotation.PostConstruct;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -33,13 +31,13 @@ import java.util.UUID;
 @Slf4j
 public class ChatController {
 
-    @Value("${LIVEKIT_API_KEY}")
+    @Value("${livekit.api.key}")
     private String livekitApiKey;
 
-    @Value("${LIVEKIT_API_SECRET}")
+    @Value("${livekit.api.secret}")
     private String livekitApiSecret;
 
-    @Value("${LIVEKIT_URL}")
+    @Value("${livekit.url}")
     private String livekitUrl;
 
     private RoomServiceClient roomService;
