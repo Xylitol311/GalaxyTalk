@@ -8,7 +8,6 @@ import com.example.match.dto.MatchRequestDto;
 import com.example.match.dto.UserStatusDto;
 import com.example.match.service.MatchService;
 import jakarta.validation.Valid;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
