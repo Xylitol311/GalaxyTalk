@@ -24,7 +24,6 @@ import java.util.List;
 @RequestMapping("/api/match")
 public class MatchController {
     private final MatchService matchService;
-    private final Validator validator;
 
     /**
      * 매칭 시작 요청 처리
@@ -34,7 +33,7 @@ public class MatchController {
      */
     @PostMapping
     public ResponseEntity<ApiResponseDto> startMatching(
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-ID") String userId,
             @Valid @RequestBody MatchRequestDto request) {
         try {
             // MBTI 유효성 검증
@@ -73,7 +72,7 @@ public class MatchController {
      */
     @DeleteMapping
     public ResponseEntity<ApiResponseDto> cancelMatching(
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-ID") String userId) {
         try {
             matchService.cancelMatching(userId);
             return ResponseEntity.ok(new ApiResponseDto(
@@ -97,7 +96,7 @@ public class MatchController {
      */
     @GetMapping("/waiting-users")
     public ResponseEntity<ApiResponseDto> getWaitingUsers(
-            @RequestHeader("X-User-Id") String userId
+            @RequestHeader("X-User-ID") String userId
     ) {
         try {
             List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
@@ -122,7 +121,7 @@ public class MatchController {
      */
     @GetMapping("/start-time")
     public ResponseEntity<ApiResponseDto> getMatchingStartTime(
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-ID") String userId) {
         try {
             Long startTime = matchService.getMatchingStartTime(userId);
             if (startTime == null) {
@@ -154,7 +153,7 @@ public class MatchController {
      */
     @PostMapping("/approve")
     public ResponseEntity<ApiResponseDto> handleMatchResponse(
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-ID") String userId,
             MatchApproveRequestDto response) {
         try {
             // 매칭 응답 처리 (userId는 요청에서 제거되었으므로 헤더에서 가져옴)
