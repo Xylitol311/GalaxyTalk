@@ -1,6 +1,7 @@
 package com.example.chat.service;
 
 import com.example.chat.dto.UserStatusRequest;
+import com.example.chat.feign.AuthClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,7 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ExternalApiService {
 
-    private final WebClient authServiceClient;
+    private final AuthClient authServiceClient;
 
     private final WebClient commentServiceClient;
 
@@ -24,21 +25,17 @@ public class ExternalApiService {
 
     // Auth server에 유저 정보가 idle 또는 chatting으로 변경됨을 알림
     public void updateUserStatus(UserStatusRequest userStatusRequest) {
-        authServiceClient.post()
-            .uri("/status")
-            .bodyValue(userStatusRequest)
-            .retrieve()
-            .bodyToMono(UserStatusRequest.class)
-            .block();
+        authServiceClient.changeUserStatus(
+                userStatusRequest.getUserId(),
+                userStatusRequest.getStatus()
+        );
     }
 
     // Auth server에서 상대방 id를 가지고 상대방 행성 이름 가져오기
-    public String getUserPlanet(String userId) {
-        return authServiceClient.get()
-                .uri("/planets/" + userId)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+    public int getUserPlanet(String userId) {
+        Map<String, Object> response = (Map<String, Object>) authServiceClient.getUser(userId).getBody();
+        Map<String, Object> data = (Map<String, Object>) response.get("data");
+        return (Integer) data.get("planetId");
     }
 
     // Comment server에서 내가 남긴 상대에 대한 리뷰 받아오기

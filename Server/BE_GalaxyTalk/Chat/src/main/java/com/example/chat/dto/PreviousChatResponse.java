@@ -7,7 +7,7 @@ public class PreviousChatResponse {
     String chatRoomId;
     String myConcern;
     String participantConcern;
-    String participantPlanet;
+    Integer participantPlanet;
     String chatRoomCreatedAt;
     String participantReview;
 }

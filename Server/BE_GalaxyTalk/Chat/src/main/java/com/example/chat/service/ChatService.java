@@ -70,8 +70,8 @@ public class ChatService {
         chatRoom.setCreatedAt(LocalDateTime.now());
         
         // 두 사용자 auth api에 채팅 상태로 변경 요청
-        // updateUserStatus(participant1.getUserId(), "chatting");
-        // updateUserStatus(participant2.getUserId(), "chatting");
+        updateUserStatus(participant1.getUserId(), "chatting");
+        updateUserStatus(participant2.getUserId(), "chatting");
 
         // 방을 생성하고 방의 Id를 가져옵니다.
         String chatRoomId = chatRepository.save(chatRoom).getId();
@@ -193,7 +193,9 @@ public class ChatService {
             previousChatResponse.setParticipantConcern(other.getConcern());
 
             previousChatResponse.setParticipantPlanet(externalApiService.getUserPlanet(otherUserId));
-            previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
+
+            // TODO: Comment Server 구현 후 연동
+            // previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
 
             responseList.add(previousChatResponse);
         }

@@ -43,6 +43,24 @@ dependencies {
 
     // MongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // Eureka
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // feignCLient
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+}
+
+ext {
+    set('springCloudVersion', "2024.0.0")  // 최신 버전 예시
+}
+
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {
