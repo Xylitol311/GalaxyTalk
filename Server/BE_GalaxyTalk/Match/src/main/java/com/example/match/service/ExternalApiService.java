@@ -1,9 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.ChatRoomResponseDto;
-import com.example.match.dto.SimilarityResponseDto;
-import com.example.match.dto.UserResponseDto;
+import com.example.match.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,12 +15,13 @@ public class ExternalApiService {
     private final WebClient chatServiceClient;
     private final WebClient authServiceClient;
 
-    public UserResponseDto getUserInfo(String userId) {
+    public UserResponseDto.UserSendDTO getUserInfo(String userId) {
         return authServiceClient.get()
                 .uri("/api/oauth?userId=" + userId)
                 .header("X-User-ID", userId)
                 .retrieve()
-                .bodyToMono(UserResponseDto.class)
+                .bodyToMono(UserResponseDto.class) // 1차적으로 ApiResponseDto로 변환
+                .map(UserResponseDto::getData)
                 .block();
     }
 
@@ -50,8 +49,8 @@ public class ExternalApiService {
      * - Match 서버에서 유저 아이디, 고민 내용, 유사도 점수를 Chat 서버로 전달
      * - Chat 서버에서 sessionId, token 및 chatRoomId 반환
      */
-    public ChatRoomResponseDto createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
-        Map<String, Object> request = Map.of(
+    public ChatRoomResponseDto.ChatResponse createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
+        Map<String, Object> requestBody = Map.of(
                 "userId1", user1.getUserId(),
                 "userId2", user2.getUserId(),
                 "concern1", user1.getConcern(),
@@ -61,9 +60,10 @@ public class ExternalApiService {
 
         return chatServiceClient.post()
                 .uri("/api/chat/match")
-                .bodyValue(request)
+                .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(ChatRoomResponseDto.class)
+                .bodyToMono(ChatRoomResponseDto.class) // Chat 서버 응답을 ChatRoomResponseDto로 변환
+                .map(ChatRoomResponseDto::getData) // data 필드(ChatResponse)만 추출
                 .block();
     }
 

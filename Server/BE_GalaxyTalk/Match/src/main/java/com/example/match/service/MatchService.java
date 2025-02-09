@@ -38,7 +38,7 @@ public class MatchService {
      */
     public void startMatching(UserMatchStatus user) {
         // 회원 정보 요청 및 MBTI 추출
-        UserResponseDto userResponse = externalApiService.getUserInfo(user.getUserId());
+        UserResponseDto.UserSendDTO userResponse = externalApiService.getUserInfo(user.getUserId());
         String userMbti = (userResponse != null) ? userResponse.getMbti() : null;
 
         if (userMbti == null) {
