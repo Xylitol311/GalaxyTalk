@@ -1,12 +1,18 @@
 spring:
   application:
     name: Match
-  config:
-    import: optional:classpath:/application-secret.yml
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
-server:
-  port: 8083
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Swagger URL 설정(기본값 또는 환경 변수를 통해 주입 가능)
+swagger:
+  gateway:
+    # .env나 Jenkins에서 GATEWAY_SERVICE_URL을 주입받을 수 있음
+    url: ${GATEWAY_SERVICE_URL}
+  match:
+    # .env나 Jenkins에서 MATCH_SERVICE_URL을 주입받을 수 있음
+    url: ${MATCH_SERVICE_URL}

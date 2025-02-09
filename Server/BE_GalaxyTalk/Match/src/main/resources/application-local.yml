@@ -12,6 +12,12 @@ server:
 eureka:
     client:
         service-url:
-            defaultZone: http://localhost:8761/eureka/  # Eureka Server ??
+            defaultZone: http://localhost:8761/eureka/
     instance:
-        prefer-ip-address: true  # ??? ?? ? IP ??
+        prefer-ip-address: true
+
+swagger:
+    gateway:
+        url: http://localhost:8080
+    match:
+        url: http://localhost:8083

@@ -8,3 +8,10 @@ spring:
 server:
     address: 0.0.0.0
     port: 8080
+
+# 원격(클라우드/서버) 환경에서의 Swagger 주소
+swagger:
+    gateway:
+        url: https://my-remote-domain.com
+    match:
+        url: https://my-remote-domain.com/match
