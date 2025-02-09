@@ -1,0 +1,8 @@
+# 운영(예: Docker/K8S 등)에서 포트나 IP가 달라진다면 여기서 오버라이딩
+server:
+  address: 0.0.0.0
+  port: 8080
+
+eureka:
+  instance:
+    ip-address: ${SERVER_IP:0.0.0.0}  # 운영 환경에서 별도 IP 주입 가능 (환경 변수 SERVER_IP가 없으면 0.0.0.0)
