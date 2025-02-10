@@ -20,7 +20,7 @@ wait_for_service() {
 
 # --- 의존 서비스들이 준비될 때까지 대기 ---
 # 아래의 서비스 이름과 포트 번호는 docker-compose.yml에서 정의한 서비스 이름과 내부 포트와 일치해야 합니다.
-wait_for_service "eureka" "8761"
+wait_for_service "eureka" "8080"
 wait_for_service "galaxy-auth" "8080"
 wait_for_service "galaxy-match" "8080"
 wait_for_service "galaxy-support" "8080"
