@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Jua';
+    src: url('./shared/assets/fonts/Jua-Regular.ttf') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;
@@ -29,6 +36,7 @@
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
+        --font-primary: 'Jua', sans-serif;
     }
     .dark {
         --background: 222.2 84% 4.9%;
@@ -64,4 +72,10 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Memo: 임시 구현 */
+body {
+    background-color: black;
+    font-family: var(--font-primary);
 }

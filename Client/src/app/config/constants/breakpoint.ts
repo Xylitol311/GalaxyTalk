@@ -3,7 +3,3 @@ export const BREAKPOINT = {
     TABLET: 1024,
     DESKTOP: 1280,
 };
-
-export const DELAY = {
-    DEBOUNCE: 300,
-};
