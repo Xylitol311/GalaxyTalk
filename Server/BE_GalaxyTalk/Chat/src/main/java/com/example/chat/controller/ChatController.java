@@ -91,8 +91,10 @@ public class ChatController {
      * @return 저장된 메시지 객체
      */
     @PostMapping("/{chatRoomId}/message")
-    public ResponseEntity<ApiResponseDto> saveMessage(@RequestBody ChatRequest chatRequest, @PathVariable String chatRoomId) {
+    public ResponseEntity<ApiResponseDto> saveMessage(@RequestBody ChatRequest chatRequest, @PathVariable String chatRoomId, @RequestHeader("X-User-Id") String userId) {
         chatRequest.setChatRoomId(chatRoomId);
+        chatRequest.setSenderId(userId);
+
         ChatMessage savedMessage = chatService.saveMessage(chatRequest);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
