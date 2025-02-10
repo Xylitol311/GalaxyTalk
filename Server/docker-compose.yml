@@ -198,6 +198,7 @@ services:
       - SUPPORT_SERVICE_URL=http://galaxy-support:8080
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
+      - JWT_SECRET=${JWT_SECRET}
 
     depends_on:
       - eureka
