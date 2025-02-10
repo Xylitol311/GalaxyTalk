@@ -199,6 +199,7 @@ services:
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
       - JWT_SECRET=${JWT_SECRET}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
 
     depends_on:
       - eureka
