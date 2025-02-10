@@ -4,7 +4,9 @@ from pydantic import BaseModel
 import time
 from model import SentenceSimilarity
 import uvicorn
+from config import get_config
 
+Config = get_config()
 app = FastAPI()
 
 # 모델 초기화 (글로벌하게 한 번만 로드)
@@ -26,4 +28,7 @@ async def compute_similarity(sentences: SentencePair):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("server:app", 
+                host=Config.HOST, 
+                port=Config.PORT, 
+                reload=True)

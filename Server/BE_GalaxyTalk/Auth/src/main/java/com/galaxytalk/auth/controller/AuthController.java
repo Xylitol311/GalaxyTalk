@@ -44,15 +44,6 @@ public class AuthController {
         this.userStatusService = userStatusService;
     }
 
-    @GetMapping("test")
-    public ResponseEntity<?> test() {
-
-        System.out.println("테스트 들어옴");
-
-        return ResponseEntity.ok("성공!");
-    }
-
-
     //# 로그인 : localhost:8080/oauth2/authorization/naver 로 리다이렉트 시키면 됨
     //# 회원가입
     @PostMapping("/signup")
@@ -318,6 +309,7 @@ public class AuthController {
 
         //브라우저에서(javascript를 통해) 쿠키에 접근할 수 없도록 제한
         cookie.setHttpOnly(true);
+
 
         return cookie;
     }

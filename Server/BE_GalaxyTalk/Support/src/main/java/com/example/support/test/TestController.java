@@ -36,11 +36,4 @@ public class TestController {
     }
 
 
-
-    @GetMapping({"", "/"})
-    public ResponseEntity<String> test2() {
-        System.out.println("실행됨?");
-        return serviceClient.test();
-    }
-
 }
