@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # 애플리케이션 코드만 복사
-COPY config.py server.py model.py run.py ./
+COPY config.py server.py model.py ./
 
-# run.py를 통해 실행
-CMD ["python", "run.py"]
+# server.py를 직접 실행
+CMD ["python", "server.py"]
