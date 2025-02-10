@@ -97,6 +97,8 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
+        System.out.println("여기까지는 왔을까요..");
+
         // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
         return chain.filter(exchange.mutate().request(modifiedRequest).build())
                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));

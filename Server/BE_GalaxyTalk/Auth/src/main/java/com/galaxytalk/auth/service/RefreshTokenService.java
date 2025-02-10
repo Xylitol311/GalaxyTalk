@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -13,27 +15,29 @@ public class RefreshTokenService {
 
     //사용자 식별 아이디, 리프레시 토큰, 엑세스 토큰 저장
     @Transactional
-    public void saveTokenInfo(String refreshToken) {
-        refreshTokenRepository.save(new RefreshToken(refreshToken));
+    public void saveTokenInfo(String accessToken, String refreshToken) {
+        refreshTokenRepository.save(new RefreshToken(accessToken,refreshToken));
     }
 
 
     //리프레시 토큰 삭제
     @Transactional
-    public void removeRefreshToken(String refreshToken) {
-
-        refreshTokenRepository.findByRefreshToken(refreshToken)
-                .ifPresent(x -> refreshTokenRepository.deleteById(x.getId()));
-
-    }
-
-    public Boolean findRefreshToken(String refreshToken) {
-        if(!refreshTokenRepository.findByRefreshToken(refreshToken).isPresent())
+    public Boolean removeRefreshToken(String accessToken) {
+        if(!refreshTokenRepository.findById(accessToken).isPresent())
             return false;
 
-        return true;
 
+      refreshTokenRepository.deleteById(accessToken);
+        return true;
     }
+
+    public String getRefreshToken(String accessToken){
+
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findById(accessToken);
+
+        return refreshToken.get().getRefreshToken();
+    }
+
 
 
 }

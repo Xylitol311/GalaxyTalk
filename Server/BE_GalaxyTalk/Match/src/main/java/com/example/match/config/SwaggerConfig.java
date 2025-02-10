@@ -10,12 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-@OpenAPIDefinition(
-        servers = {
-                @io.swagger.v3.oas.annotations.servers.Server(url = "http://localhost:8080", description = "Gateway Server")
+import java.util.List;
 
-        })
+@Configuration
+
 public class SwaggerConfig {
     @Value("${swagger.gateway.url}")
     private String gatewayUrl;
@@ -28,7 +26,8 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .addServersItem(new Server().url(matchUrl).description("Match Service"))
-                .components(new Components());
+                .components(new Components())
+                .servers(List.of(new Server().url(gatewayUrl).description("Gateway Server")));
     }
 
     // CORS 설정을 위한 WebMvcConfigurer 추가

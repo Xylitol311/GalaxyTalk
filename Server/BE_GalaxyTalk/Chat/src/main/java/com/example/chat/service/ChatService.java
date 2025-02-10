@@ -143,9 +143,8 @@ public class ChatService {
      * @param userId
      * @return sessionId
      */
-    public String getSessionId(String userId) {
-        return chatRepository.findActiveSessionIdByUserId(userId)
-            .map(ChatRoom::getSessionId)  // ChatRoom 객체에서 sessionId만 추출
+    public ChatRoom getSessionId(String userId) {
+        return chatRepository.findActiveSessionIdByUserId(userId) // ChatRoom 객체에서 sessionId만 추출
             .orElse(null);
     }
 

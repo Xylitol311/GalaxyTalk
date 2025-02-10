@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ReconnectResponse {
+    String chatRoomId;
     String sessionId;
     String token;
 }
