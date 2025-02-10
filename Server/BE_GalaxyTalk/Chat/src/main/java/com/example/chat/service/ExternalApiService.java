@@ -33,11 +33,11 @@ public class ExternalApiService {
         );
     }
 
-    // Auth server에서 상대방 id를 가지고 상대방 행성 이름 가져오기
-    public int getUserPlanet(String userId) {
+    // Auth server에서 상대방 id를 가지고 상대방 정보를 가져옴
+    // 행성 ID, MBTI, 매너온도 데이터 추출
+    public Map<String, Object> getUserInfo(String userId) {
         Map<String, Object> response = (Map<String, Object>) authServiceClient.getUser(userId).getBody();
-        Map<String, Object> data = (Map<String, Object>) response.get("data");
-        return (Integer) data.get("planetId");
+        return (Map<String, Object>) response.get("data");
     }
 
     // Comment server에서 내가 남긴 상대에 대한 리뷰 받아오기
