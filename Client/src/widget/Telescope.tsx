@@ -1,0 +1,43 @@
+import { useGLTF } from '@react-three/drei';
+import { useState } from 'react';
+import RecursiveGLTF from './RecursiveGLTF';
+
+interface TelescopeProps {
+    onClick: () => void;
+}
+
+function Telescope({ onClick }: TelescopeProps) {
+    const telescope = useGLTF('./satellite_dish_1k.glb');
+    const [hover, setHover] = useState(false);
+
+    const handlePointerOver = (e: any) => {
+        e.stopPropagation();
+        setHover(true);
+        document.body.style.cursor = 'pointer';
+    };
+
+    const handlePointerOut = (e: any) => {
+        e.stopPropagation();
+        setHover(false);
+        document.body.style.cursor = 'default';
+    };
+
+    return (
+        <group
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}>
+            <RecursiveGLTF
+                object={telescope.scene}
+                castShadow={true}
+                receiveShadow={true}
+                scale={0.3}
+                position={[1, -2.8, 6]}
+                rotation={[0, (65 * Math.PI) / 180, 0]}
+                hover={hover}
+                onClick={onClick}
+            />
+        </group>
+    );
+}
+
+export default Telescope;
