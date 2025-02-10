@@ -106,9 +106,6 @@ services:
       - "30003:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - AI_SERVICE_URL=${AI_SERVICE_URL}
       - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
@@ -127,13 +124,6 @@ services:
     networks:
       - my-network
 
-  galaxy-auth:
-    build: ./BE_GalaxyTalk/Auth
-    restart: always
-    ports:
-      - "30001:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
 
 volumes:
   mysql_data:
