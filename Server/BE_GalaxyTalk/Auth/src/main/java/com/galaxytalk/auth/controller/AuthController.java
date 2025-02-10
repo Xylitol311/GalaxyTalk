@@ -64,17 +64,18 @@ public class AuthController {
         // 1. 쿠키 받아오기 & 없을 경우 에러처리( 리프레시 토큰 가져오기 용 )
         Cookie[] cookies = request.getCookies();
 
-        String refreshToken = Arrays.stream(cookies)
-                .filter(cookie -> "RefreshToken".equals(cookie.getName()))
+        String accessToken = Arrays.stream(cookies)
+                .filter(cookie -> "AccessToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
-        if (refreshToken.isEmpty()) {
-            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
+        if (accessToken.isEmpty()) {
+            return new ResponseEntity<>(ApiResponseDto.noAccessToken, HttpStatus.UNAUTHORIZED);
         }
 
         // 1-1) 기존 리프레시 토큰 검증 및 삭제
-        refreshTokenService.removeRefreshToken(refreshToken);
+        if(!refreshTokenService.removeRefreshToken(accessToken))
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
         // 2. 받은 시리얼 번호로 유저 검색
         Users user = userService.getUserBySerialNumber(serialNumber);
@@ -101,8 +102,7 @@ public class AuthController {
 
         //4-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
         response.addCookie(createCookie("AccessToken", newAccessToken));
-        response.addCookie(createCookie("RefreshToken", newRefreshToken));
-        refreshTokenService.saveTokenInfo(newRefreshToken);
+        refreshTokenService.saveTokenInfo(newAccessToken,newRefreshToken);
 
         ApiResponseDto goodResponse = new ApiResponseDto("회원가입이 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
@@ -170,41 +170,37 @@ public class AuthController {
             return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
         }
 
-        // 2. 사용자 withdrawn 정보 수정
-        user.setWithdrawnAt(LocalDateTime.now());
 
-        // 3. 사용자 role 수정
-        user.setRole(Role.ROLE_WITHDRAW);
+        // 2. 쿠키 조회 및 삭제
 
-
-        // 4. 쿠키 조회 및 삭제
-
-        //4-1) 리프레시 토큰 조회 및 예외처리
+        //2-1) 토큰 조회 및 예외처리
         Cookie[] cookies = request.getCookies();
 
-        String refreshToken = Arrays.stream(cookies)
-                .filter(cookie -> "RefreshToken".equals(cookie.getName()))
+        String accessToken = Arrays.stream(cookies)
+                .filter(cookie -> "AccessToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
 
-        // 엑세스 토큰은 게이트 웨이에서 이미 확인하기 때문에, refreshtoken만 확인해도 됨
-        if (refreshToken.isEmpty())
+        //accessToken이 비어있는거는 재로그인 필요
+        if (accessToken.isEmpty())
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
-        //4-2) 토큰들 다 삭제해서 쿠키에 넣어주기
+        //3) 토큰들 다 삭제처리
+        if(!refreshTokenService.removeRefreshToken(accessToken))
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
+
         Cookie accessTokenCookie = new Cookie("AccessToken", null);
         accessTokenCookie.setMaxAge(0);
         accessTokenCookie.setPath("/");
         response.addCookie(accessTokenCookie);
 
-        Cookie refreshTokenCookie = new Cookie("RefreshToken", null);
-        refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
+        // 4) 사용자 withdrawn 정보 수정
+        user.setWithdrawnAt(LocalDateTime.now());
 
-        // 5. 레디스에서 rf 삭제
-        refreshTokenService.removeRefreshToken(refreshToken);
+        // 5) 사용자 role 수정
+        user.setRole(Role.ROLE_WITHDRAW);
+
 
         ApiResponseDto goodResponse = new ApiResponseDto("회원탈퇴가 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
@@ -215,67 +211,55 @@ public class AuthController {
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용, HTTP req -> 쿠키까기용, HTTP res -> 새로운 쿠키 담아주기 용
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        //1. 쿠키에서 리프레시 토큰 까기
-        String refreshToken = null;
+        //1. 쿠키에서 엑세스 토큰 까기
+        String accessToken = null;
         Cookie[] cookies = request.getCookies();
-
-
-        if (cookies == null) return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
         for (Cookie cookie : cookies) {
 
-            if (cookie.getName().equals("RefreshToken")) {
-                refreshToken = cookie.getValue();
+            if (cookie.getName().equals("AccessToken")) {
+                accessToken = cookie.getValue();
                 break;
             }
         }
 
-        //1-1) 토큰 비어있을 경우
-        if (refreshToken == null) {
+        //1-1) 토큰 비어있을 경우 재로그인 필요 ( 이부분은 permitall & 토큰 검증 없어서 따로 해줘야함 )
+        if (accessToken == null) {
             //response status code
 
-
+            System.out.println("1번");
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
-        //1-2) 기간이 지났을 경우
-        try {
-            jwtUtil.isExpired(refreshToken);
+        //2. refreshToken 가져오기
+        String refreshToken = refreshTokenService.getRefreshToken(accessToken);
 
-        } catch (ExpiredJwtException e) {
-
-            //response status code
+        //3. refreshToken 검증
+        if(refreshToken==null){
+            System.out.println("2번" + " " + refreshToken);
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
-        //2. 유저 정보 가져오기
-        //레디스에 refreshtoken에 있는 serialNumber 가져오기
-        String serialNumber = jwtUtil.getSerialNumber(refreshToken);
-        Users user = userService.getUserBySerialNumber(serialNumber);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
-        }
-
-        Role role = user.getRole();
-
-
-        //3. 레디스 삭제(레디스에 이상 여부 함께 확인)
-        if (!refreshTokenService.findRefreshToken(refreshToken)) {
+        if(jwtUtil.isExpired(refreshToken)){
+            System.out.println("3번" + " " + refreshToken);
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
-
 
         //4. 새로운 토큰 생성
-        String accessToken = jwtUtil.token(serialNumber, role.toString(), 1000 * 60 * 60 * 1); //1시간
-        String newRefreshToken = jwtUtil.token(serialNumber, role.toString(), 1000 * 60 * 60 * 24 * 3); //3일
+        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 1); //1시간
+        String newRefreshToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24*3); //3일
 
-        //4-1) 쿠키에 담기
-        response.addCookie(createCookie("AccessToken", accessToken));
-        response.addCookie(createCookie("RefreshToken", newRefreshToken));
 
-        //4-2) 새로운 토큰은 레디스에 넣기
-        refreshTokenService.removeRefreshToken(refreshToken);
-        refreshTokenService.saveTokenInfo(newRefreshToken);
+
+        //5. 레디스 삭제(레디스에 이상 여부 함께 확인) 하고 새로운 값은 넣기
+        if (!refreshTokenService.removeRefreshToken(accessToken)) {
+            return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
+        }
+        refreshTokenService.saveTokenInfo(newAccessToken, newRefreshToken);
+
+
+        //6. 엑세스토큰 쿠키에 담기
+        response.addCookie(createCookie("AccessToken", newAccessToken));
 
         ApiResponseDto goodResponse = new ApiResponseDto("리프레시 토큰 갱신이 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
@@ -327,7 +311,7 @@ public class AuthController {
         cookie.setMaxAge(60 * 60); //1시간간
 
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
-        //cookie.setSecure(true);
+        cookie.setSecure(true);
 
         //브라우저가 쿠키값을 전송할 URL 지정
         cookie.setPath("/");
