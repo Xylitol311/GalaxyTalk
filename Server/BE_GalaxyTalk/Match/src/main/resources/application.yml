@@ -8,13 +8,9 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-
-
-# Swagger URL 설정(기본값 또는 환경 변수를 통해 주입 가능)
+# Swagger URL은 환경변수(GATEWAY_SERVICE_URL, MATCH_SERVICE_URL)를 통해 주입받습니다.
 swagger:
   gateway:
-    # .env나 Jenkins에서 GATEWAY_SERVICE_URL을 주입받을 수 있음
     url: ${GATEWAY_SERVICE_URL}
   match:
-    # .env나 Jenkins에서 MATCH_SERVICE_URL을 주입받을 수 있음
     url: ${MATCH_SERVICE_URL}
