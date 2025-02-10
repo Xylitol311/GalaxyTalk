@@ -14,3 +14,12 @@ swagger:
     url: ${GATEWAY_SERVICE_URL}
   match:
     url: ${MATCH_SERVICE_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-components: always
