@@ -74,6 +74,8 @@ services:
     container_name: eureka
     ports:
       - "30000:8761"  # EC2의 30000 포트 → 컨테이너 내부의 8761 포트 (Eureka 기본 포트)
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     restart: always
     networks:
       - my-network
@@ -92,6 +94,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - CLIENT_SECRET=${CLIENT_SECRET}
+      - FRONT_URL=${FRONT_URL}
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
