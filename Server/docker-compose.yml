@@ -196,11 +196,20 @@ services:
       - eureka
       - galaxy-auth
       - galaxy-match
-      - galaxy-support
     networks:
       - my-network
 
-
+  galaxy-ai:
+    build: ./AI
+    container_name: galaxy-ai
+    ports:
+      - "30005:8080"
+    environment:
+      - PYTHON_ENV=prod
+    volumes:
+      - /home/ubuntu/sentence_similarity_model_klue:/home/ubuntu/sentence_similarity_model_klue
+    networks:
+      - my-network
 
 volumes:
   mysql_data:
