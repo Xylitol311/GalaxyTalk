@@ -125,6 +125,18 @@ services:
       - my-network
 
 
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+    environment:
+      - LIVEKIT_KEYS=${LIVEKIT_API_KEY}:${LIVEKIT_API_SECRET}
+    restart: always
+    networks:
+      - my-network
+
 volumes:
   mysql_data:
   mongodb_data:
