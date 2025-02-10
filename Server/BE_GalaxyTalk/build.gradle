@@ -31,8 +31,25 @@ subprojects { // 모든 하위 모듈들에 이 설정을 적용합니다.
     }
 
     dependencies { // 모든 하위 모듈에 추가 될 의존성 목록입니다.
-        implementation 'org.springframework.boot:spring-boot-starter'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        // Spring Boot Starter dependencies
+        implementation 'org.springframework.boot:spring-boot-starter-web'       // Web + Servlet 컨테이너
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // Spring Data JPA
+
+        // Database drivers (필요한 DB 드라이버만 유지)
+        runtimeOnly 'com.mysql:mysql-connector-j'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        // 개발 편의성 도구
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'         // DevTools for Hot Reload
+
+        // Test dependencies
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'  // Spring Boot Test
+        testImplementation 'org.springframework.security:spring-security-test' // Spring Security Test
+
+
     }
 
     test {

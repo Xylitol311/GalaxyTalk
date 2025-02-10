@@ -1,0 +1,16 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+
+spring:
+  data:
+    redis:
+      port: 6379
+      host: redis
+      password: ${REDIS_PASSWORD}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://my-mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}

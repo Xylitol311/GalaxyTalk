@@ -1,7 +1,9 @@
 package com.galaxytalk.auth.jwt;
 
-import com.galaxytalk.auth.repository.RefreshTokenRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.galaxytalk.auth.dto.ApiResponseDto;
 import com.galaxytalk.auth.service.RefreshTokenService;
+import com.galaxytalk.auth.service.UserStatusService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,11 +24,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final UserStatusService userStatusService;
 
-    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshTokenService refreshTokenService) {
+    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshTokenService refreshTokenService, UserStatusService userStatusService) {
 
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
+        this.userStatusService = userStatusService;
     }
 
     @Override
@@ -44,12 +48,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
             filterChain.doFilter(request, response);
             return;
         }
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("POST")) {
 
-            filterChain.doFilter(request, response);
-            return;
-        }
+
 
         // 쿠키 가져오기
         Map<String, String> cookies = new HashMap<>();
@@ -59,38 +59,24 @@ public class CustomLogoutFilter extends GenericFilterBean {
             }
         }
 
-        String refresh = cookies.get("RefreshToken");
         String access = cookies.get("AccessToken");
+        // 토큰 검증 (이미 GATEWAY에서 함)
 
-        // 토큰 검증
-        if (refresh == null || access == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        if (!validateToken(refresh, response, HttpServletResponse.SC_BAD_REQUEST)) return;
-        if (!validateToken(access, response, HttpServletResponse.SC_UNAUTHORIZED)) return;
 
         // 로그아웃 진행 - Refresh 토큰 DB에서 제거
-        refreshTokenService.removeRefreshToken(refresh);
+
+        refreshTokenService.removeRefreshToken(access);
+        userStatusService.removeUserStatus(jwtUtil.getSerialNumber(access));
 
         // 토큰 쿠키 삭제
-        deleteCookie(response, "RefreshToken");
         deleteCookie(response, "AccessToken");
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        ApiResponseDto apiResponseDto = new ApiResponseDto("로그아웃에 성공했습니다.", null);
+
+        sendResponse(response, apiResponseDto);
+
     }
 
-    private boolean validateToken(String token, HttpServletResponse response, int errorCode) throws IOException {
-        try {
-            jwtUtil.isExpired(token);
-            return true;
-        } catch (ExpiredJwtException e) {
-
-            response.setStatus(errorCode);
-            return false;
-        }
-    }
 
     private void deleteCookie(HttpServletResponse response, String name) {
         Cookie cookie = new Cookie(name, null);
@@ -99,6 +85,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         cookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
         cookie.setSecure(true);
         response.addCookie(cookie);
+    }
+
+    private void sendResponse(HttpServletResponse response, ApiResponseDto apiResponseDto) throws IOException {
+        // 응답 상태 설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponseDto));
     }
 
 }

@@ -25,27 +25,4 @@ public class PlanetService {
         return planetRepository.findById(id);
     }
 
-    // 행성 저장
-    @Transactional
-    public Planets savePlanet(Planets planet) {
-        return planetRepository.save(planet);
-    }
-
-    // 행성 정보 업데이트
-//    @Transactional
-//    public Planets updatePlanet(Long id, Planets updatedPlanet) {
-//        return planetRepository.findById(id)
-//                .map(planet -> {
-//                    planet.setName(updatedPlanet.getName());
-//                    planet.setDescription(updatedPlanet.getDescription());
-//                    // 추가 필드 업데이트 가능
-//                    return planetRepository.save(planet);
-//                }).orElseThrow(() -> new RuntimeException("Planet not found"));
-//    }
-
-    // 행성 삭제
-    @Transactional
-    public void deletePlanet(Long id) {
-        planetRepository.deleteById(id);
-    }
 }

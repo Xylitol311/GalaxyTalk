@@ -1,0 +1,4 @@
+server:
+  address: localhost
+  port: 8761
+
