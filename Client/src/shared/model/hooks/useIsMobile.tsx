@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { BREAKPOINT, DELAY } from '@/shared/config/constants';
+import { BREAKPOINT, TIME } from '@/app/config/constants';
 import { debounce } from '@/shared/lib/utils';
 
 export default function useIsMobile(
     breakpoint: number = BREAKPOINT.MOBILE,
-    debounceDelay: number = DELAY.DEBOUNCE
+    debounceDelay: number = TIME.DELAY.DEBOUNCE
 ): boolean {
     const [isMobile, setIsMobile] = useState<boolean>(
         window.innerWidth < breakpoint

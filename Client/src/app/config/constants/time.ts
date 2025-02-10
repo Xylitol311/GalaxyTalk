@@ -1,0 +1,5 @@
+export const DELAY = {
+    DEBOUNCE: 300,
+    MESSAGE_FADE: 1000,
+    MESSAGE_INTERVAL: 5000,
+};

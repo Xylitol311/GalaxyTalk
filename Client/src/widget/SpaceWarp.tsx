@@ -1,5 +1,5 @@
 // https://github.com/o2bomb/space-warp
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import {
     Bloom,
     ChromaticAberration,
@@ -91,7 +91,8 @@ function SpaceWarp() {
     });
 
     return (
-        <Canvas camera={{ fov: 100, near: 0.2, far: 200}}>
+        // <Canvas camera={{ fov: 100, near: 0.2, far: 200 }}>
+        <>
             <instancedMesh
                 ref={ref}
                 args={[undefined, undefined, COUNT]}
@@ -112,7 +113,8 @@ function SpaceWarp() {
                     }
                 />
             </EffectComposer>
-        </Canvas>
+        </>
+        // </Canvas>
     );
 }
 

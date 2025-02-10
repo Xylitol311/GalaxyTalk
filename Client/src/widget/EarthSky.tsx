@@ -1,5 +1,5 @@
 import { OrbitControls } from '@react-three/drei';
-import { Canvas, useThree } from '@react-three/fiber';
+import { useThree } from '@react-three/fiber';
 import {
     Bloom,
     EffectComposer,
@@ -23,7 +23,15 @@ function EarthSky() {
         intensity = 0.4;
 
     return (
-        <Canvas shadows camera={{ fov: 60, near: 0.01, far: 10000, position: [0, 0, -0.2]}}>
+        // <Canvas
+        //     shadows
+        //     camera={{
+        //         fov: 60,
+        //         near: 0.01,
+        //         far: 10000,
+        //         position: [0, 0, -0.2],
+        //     }}>
+        <>
             <RotatingStars />
             <axesHelper />
             <OrbitControls enableDamping />
@@ -49,7 +57,8 @@ function EarthSky() {
                 />
                 <ToneMapping />
             </EffectComposer>
-        </Canvas>
+        </>
+        // </Canvas>
     );
 }
 
