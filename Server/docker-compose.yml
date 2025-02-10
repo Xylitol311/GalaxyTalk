@@ -102,6 +102,8 @@ services:
       - FRONT_URL=${FRONT_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
@@ -128,6 +130,8 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
     depends_on:
       - mysql
     healthcheck:
@@ -193,6 +197,7 @@ services:
       - SUPPORT_SERVICE_URL=http://galaxy-support:8080
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
+
     depends_on:
       - eureka
       - galaxy-auth
@@ -227,6 +232,7 @@ services:
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
       - LIVEKIT_URL=http://livekit:7880
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
     depends_on:
       - mongodb
       - galaxy-auth
