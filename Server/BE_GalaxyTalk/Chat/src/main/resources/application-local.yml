@@ -1,0 +1,15 @@
+server:
+  address: localhost
+  port: 8084
+
+eureka:
+  instance:
+    ip-address: 127.0.0.1  # 로컬 테스트 시 명시적 127.0.0.1
+
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            url: http://localhost:8081 #auth

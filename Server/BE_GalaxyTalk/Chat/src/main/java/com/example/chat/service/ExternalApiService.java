@@ -25,6 +25,8 @@ public class ExternalApiService {
 
     // Auth server에 유저 정보가 idle 또는 chatting으로 변경됨을 알림
     public void updateUserStatus(UserStatusRequest userStatusRequest) {
+
+        System.out.println(userStatusRequest.getUserId() + " " + userStatusRequest.getStatus());
         authServiceClient.changeUserStatus(
                 userStatusRequest.getUserId(),
                 userStatusRequest.getStatus()

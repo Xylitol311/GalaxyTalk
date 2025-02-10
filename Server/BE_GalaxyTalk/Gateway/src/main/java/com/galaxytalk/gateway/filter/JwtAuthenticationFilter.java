@@ -110,7 +110,7 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         // ApiResponseDto를 JSON 문자열로 변환
         try {
-            String errorResponse = new ObjectMapper().writeValueAsString(ApiResponseDto.noAccessToken);
+            String errorResponse = new ObjectMapper().writeValueAsString(ApiResponseDto.noAccessTokenResponse());
 
             // 에러 응답을 작성
             DataBuffer buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));

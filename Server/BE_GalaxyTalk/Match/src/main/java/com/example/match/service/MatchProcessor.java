@@ -123,15 +123,14 @@ public class MatchProcessor {
         UserMatchStatus user2 = redisService.getUserStatus(matchResultStatus.getUserIds().get(1));
 
         // 채팅방 생성 요청
-        ChatRoomResponseDto chatRoomResponseDto = externalApiService.createChatRoom(user1, user2, matchResultStatus.getSimilarity());
-        ChatRoomResponseDto.ChatRoomData chatRoomData = chatRoomResponseDto.getData();
+        ChatRoomResponseDto.ChatResponse chatResponse = externalApiService.createChatRoom(user1, user2, matchResultStatus.getSimilarity());
 
         // 세션 서버의 유저 상태 변경
-        externalApiService.setUserStatus(user1, "Chatting");
-        externalApiService.setUserStatus(user2, "Chatting");
+        externalApiService.setUserStatus(user1.getUserId(), "Chatting");
+        externalApiService.setUserStatus(user2.getUserId(), "Chatting");
 
         // 유저들에게 채팅방 정보 전송
-        webSocketService.notifyUsersWithChatRoom(user1, user2, chatRoomData);
+        webSocketService.notifyUsersWithChatRoom(user1, user2, chatResponse);
     }
 
     /**

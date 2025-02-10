@@ -6,10 +6,10 @@ import lombok.Data;
 public class ChatRoomResponseDto {
     private boolean success;
     private String message;
-    private ChatRoomData data;
+    private ChatResponse data;
 
     @Data
-    public static class ChatRoomData {
+    public static class ChatResponse {
         private String sessionId;
         private String tokenA;
         private String tokenB;

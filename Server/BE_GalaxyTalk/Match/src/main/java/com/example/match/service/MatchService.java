@@ -6,6 +6,8 @@ import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchApproveRequestDto;
 import com.example.match.dto.UserResponseDto;
 import com.example.match.dto.UserStatusDto;
+import com.example.match.exception.BusinessException;
+import com.example.match.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +39,20 @@ public class MatchService {
      * 3. WebSocket으로 대기 시작 알림
      */
     public void startMatching(UserMatchStatus user) {
+        // 이미 매칭 중인 유저인지 확인
+        UserMatchStatus userMatchStatus = redisService.getUserStatus(user.getUserId());
+        if (userMatchStatus != null) {
+            throw new BusinessException(ErrorCode.MATCH_ALREADY_IN_PROGRESS);
+        }
+
         // 회원 정보 요청 및 MBTI 추출
-        UserResponseDto userResponse = externalApiService.getUserInfo(user.getUserId());
+        UserResponseDto.UserSendDTO userResponse = externalApiService.getUserInfo(user.getUserId());
         String userMbti = (userResponse != null) ? userResponse.getMbti() : null;
 
         if (userMbti == null) {
             log.warn("유저 {}의 MBTI 정보를 가져올 수 없습니다.", user.getUserId());
-            return;
+            throw new BusinessException(ErrorCode.USER_INFO_NOT_FOUND,
+                    "유저 " + user.getUserId() + "의 MBTI 정보를 가져올 수 없습니다.");
         }
 
         user.setMbti(userMbti);
@@ -62,13 +71,14 @@ public class MatchService {
         redisService.addUserToWaitingQueue(user);
 
         // 세션 서버에 매칭 상태 변경 요청
-        externalApiService.setUserStatus(user, "Matching");
+        externalApiService.setUserStatus(user.getUserId(), "matching");
 
         // 대기 상태 알림
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
         // 새로운 유저 입장 알림
         webSocketService.broadcastNewUser(user);
     }
+
 
     /**
      * 매칭 취소 처리
@@ -79,6 +89,9 @@ public class MatchService {
 
         // ZSET에서 매칭 대기 유저 제거
         redisService.removeUserFromWaitingQueue(userId);
+
+        // 세션 서버 상태 변경
+        externalApiService.setUserStatus(userId, "idle");
 
         // 유저 퇴장 알림
         webSocketService.broadcastUserExit(userId);
@@ -220,16 +233,19 @@ public class MatchService {
         UserMatchStatus user = redisService.getUserStatus(userId);
 
         if (user == null) {
-            throw new IllegalArgumentException("해당 유저 정보를 찾을 수 없습니다.");
+            // 유저 정보를 찾을 수 없으면 예외
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND, "userId: " + userId);
         }
 
         if (!response.getMatchId().equals(user.getMatchId())) {
+            // 매칭 ID가 일치하지 않으면 잘못된 요청
             throw new IllegalArgumentException("잘못된 매칭 ID입니다.");
         }
 
         // MatchProcessor를 통해 매칭 승인/거절 처리
         matchProcessor.processMatchResponse(user, response);
     }
+
 
     /**
      * 매칭 대기 중인 유저 목록 조회

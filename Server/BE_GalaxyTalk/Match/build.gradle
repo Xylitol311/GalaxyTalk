@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.webjars:sockjs-client:1.5.1'
     implementation 'org.webjars:stomp-websocket:2.3.4'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
 
     // Eureka & LoadBalancer
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
