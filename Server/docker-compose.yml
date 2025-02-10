@@ -151,6 +151,7 @@ services:
       - AI_SERVICE_URL=${AI_SERVICE_URL}
       - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
 
     # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:

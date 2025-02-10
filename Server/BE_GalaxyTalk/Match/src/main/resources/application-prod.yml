@@ -15,7 +15,7 @@ eureka:
         fetch-registry: true
         service-url:
             # Jenkins에서 EUREKA_SERVICE_URL을 주입받습니다.
-            defaultZone: ${EUREKA_SERVICE_URL}/eureka
+            defaultZone: ${EUREKA_SERVICE_URL}/eureka/
     instance:
         prefer-ip-address: true
         leaseRenewalIntervalInSeconds: 5
