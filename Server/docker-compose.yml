@@ -229,6 +229,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
       - COMMENT_SERVICE_URL=http://galaxy-support:8080
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
