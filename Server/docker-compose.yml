@@ -73,10 +73,15 @@ services:
     build: ./BE_GalaxyTalk/Eureka  # Eureka 서버 Dockerfile 경로
     container_name: eureka
     ports:
-      - "8761:8761"  # EC2의 30000 포트 → 컨테이너 내부의 8761 포트 (Eureka 기본 포트)
+      - "8761:8761"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - my-network
 
