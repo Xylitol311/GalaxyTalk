@@ -1,6 +1,5 @@
 package com.galaxytalk.auth.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
@@ -10,16 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
-@OpenAPIDefinition(
-        // API가 실행되는 기본 서버의 URL 설정
-
-        servers = {
-                @io.swagger.v3.oas.annotations.servers.Server(url = "http://localhost:8080", description = "Gateway Server")
-
-}
-)
-
 public class SwaggerConfig {
 
     @Value("${auth.service.url}")
@@ -35,7 +27,9 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .addServersItem(new Server().url(authServiceUrl).description("Auth Service"))
-                .components(new Components());
+                .components(new Components())
+                .servers(List.of(new Server().url(gatewayServiceUrl).description("Gateway Server")));
+
     }
 
     // CORS 설정을 위한 WebMvcConfigurer 추가

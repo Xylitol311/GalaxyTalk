@@ -50,12 +50,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
 
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("POST")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         // 쿠키 가져오기
         Map<String, String> cookies = new HashMap<>();
@@ -65,24 +59,22 @@ public class CustomLogoutFilter extends GenericFilterBean {
             }
         }
 
-        String refresh = cookies.get("RefreshToken");
         String access = cookies.get("AccessToken");
-
-
         // 토큰 검증 (이미 GATEWAY에서 함)
 
 
         // 로그아웃 진행 - Refresh 토큰 DB에서 제거
-        refreshTokenService.removeRefreshToken(refresh);
+
+        refreshTokenService.removeRefreshToken(access);
         userStatusService.removeUserStatus(jwtUtil.getSerialNumber(access));
 
         // 토큰 쿠키 삭제
-        deleteCookie(response, "RefreshToken");
         deleteCookie(response, "AccessToken");
 
-        ApiResponseDto apiResponseDto = new ApiResponseDto("로그아웃에 성공했습니다.",null);
+        ApiResponseDto apiResponseDto = new ApiResponseDto("로그아웃에 성공했습니다.", null);
 
         sendResponse(response, apiResponseDto);
+
     }
 
 

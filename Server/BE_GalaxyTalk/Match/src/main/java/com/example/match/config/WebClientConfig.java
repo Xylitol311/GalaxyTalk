@@ -23,9 +23,12 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient aiServiceClient(WebClient.Builder webClientBuilder) {
-        return webClientBuilder
-                .baseUrl("http://ai-service") // Eureka 서비스명 사용
+    public WebClient aiServiceClientWithoutLoadBalancing() {
+        return WebClient.builder()
+                .baseUrl("http://127.0.0.1:8085")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .filter(logRequest())
+                .filter(logResponse())
                 .build();
     }
 

@@ -23,7 +23,7 @@ public interface ChatRepository extends MongoRepository<ChatRoom, String> {
     @Update("{ '$set': { 'endedAt': ?1 }}")
     void updateEndedAt(String id, LocalDateTime now);
 
-    @Query(value = "{ 'participants.userId': ?0, 'endedAt': null }", fields = "{ 'sessionId': 1, '_id': 0 }")
+    @Query(value = "{ 'participants.userId': ?0, 'endedAt': null }", fields = "{ 'sessionId': 1}")
     Optional<ChatRoom> findActiveSessionIdByUserId(String userId);
 
     @Query(value = "{ 'participants.userId': ?0, 'endedAt': { $ne: null }, '_id': { $gt: ?1 } }",
