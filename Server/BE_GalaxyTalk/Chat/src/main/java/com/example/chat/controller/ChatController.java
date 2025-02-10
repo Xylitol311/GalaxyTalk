@@ -155,13 +155,16 @@ public class ChatController {
     @PostMapping("/reconnect")
     public ResponseEntity<ApiResponseDto> reconnect(@RequestHeader("X-User-Id") String userId) {
         // 1. user가 속한 active room 찾기
-        String roomId = chatService.getSessionId(userId);
+        ChatRoom chatRoom = chatService.getSessionId(userId);
+        String chatRoomId = chatRoom.getId();
+        String sessionId = chatRoom.getSessionId();
 
         // 2. 새로운 토큰 생성
-        String token = generateToken(roomId, userId);
+        String token = generateToken(sessionId, userId);
 
         ReconnectResponse reconnectResponse = new ReconnectResponse(
-                roomId,
+                chatRoomId,
+                sessionId,
                 token
         );
 
