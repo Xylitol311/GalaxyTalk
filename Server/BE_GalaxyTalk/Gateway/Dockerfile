@@ -4,9 +4,6 @@ FROM amazoncorretto:17
 # 2. 작업실 마련: 작업 디렉토리 설정
 WORKDIR /app
 
-# curl 설치: apt-get update 후 curl 설치
-RUN apt-get update && apt-get install -y curl
-
 # 3. 빌드된 JAR 파일 지정 (빌드 결과물이 있는 경로에 맞게 수정)
 ARG JAR_FILE=build/libs/*SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
