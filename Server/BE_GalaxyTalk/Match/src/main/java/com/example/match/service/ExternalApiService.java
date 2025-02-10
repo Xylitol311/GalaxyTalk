@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ExternalApiService {
-    private final WebClient aiServiceClient;
+    private final WebClient aiServiceClientWithoutLoadBalancing;
     private final WebClient chatServiceClient;
     private final WebClient authServiceClient;
 
@@ -36,7 +36,7 @@ public class ExternalApiService {
                 "sentence2", user2.getConcern()
         );
 
-        return aiServiceClient.post()
+        return aiServiceClientWithoutLoadBalancing.post()
                 .uri("/calculate-similarity")
                 .bodyValue(request)
                 .retrieve()
@@ -72,11 +72,11 @@ public class ExternalApiService {
     /**
      * 세션 서버에 유저 상태 변경 요청 (JSON 형식)
      */
-    public void setUserStatus(String userId, String matching) {
+    public void setUserStatus(String userId, String status) {
         authServiceClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/oauth/status")
-                        .queryParam("userInteractionState", matching)
+                        .queryParam("userInteractionState", status)
                         .build()
                 )
                 .header("X-User-ID", userId)
