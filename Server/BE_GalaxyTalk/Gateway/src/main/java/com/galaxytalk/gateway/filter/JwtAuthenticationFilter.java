@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         // OPTIONS 요청은 바로 필터 체인을 실행하고 종료
 
         String path = exchange.getRequest().getURI().getPath();
-        System.out.println(exchange.getRequest().getURI());
+
         if (path.startsWith("/oauth2/authorization/")) {
             return chain.filter(exchange);  // 필터 통과
         }
@@ -97,7 +97,6 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
-        System.out.println("여기까지는 왔을까요..");
 
         // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
         return chain.filter(exchange.mutate().request(modifiedRequest).build())

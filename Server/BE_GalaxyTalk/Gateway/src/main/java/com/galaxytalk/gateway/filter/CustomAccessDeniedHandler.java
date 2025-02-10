@@ -24,10 +24,9 @@ public class CustomAccessDeniedHandler implements ServerAccessDeniedHandler {
         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN); //권한없음으로 설정
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON); //json으로 응답 하기 위해, API 응답의 표준적인 관행
 
-        System.out.println("여기에 옴..?? CustomAccessDeniedHandler 실행됨.");
 
 
-        // ✅ ApiResponseDto를 사용하여 JSON 응답 생성
+        // ApiResponseDto를 사용하여 JSON 응답 생성
         ApiResponseDto response = ApiResponseDto.forbiddenResponse();
 
         try {
