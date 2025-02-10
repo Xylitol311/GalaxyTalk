@@ -44,15 +44,6 @@ public class AuthController {
         this.userStatusService = userStatusService;
     }
 
-    @GetMapping("test")
-    public ResponseEntity<?> test() {
-
-        System.out.println("테스트 들어옴");
-
-        return ResponseEntity.ok("성공!");
-    }
-
-
     //# 로그인 : localhost:8080/oauth2/authorization/naver 로 리다이렉트 시키면 됨
     //# 회원가입
     @PostMapping("/signup")

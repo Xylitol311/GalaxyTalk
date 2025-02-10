@@ -10,6 +10,4 @@ public interface ServiceClient {
     @GetMapping("/api/oauth")
     ResponseEntity<?> getUser(@RequestHeader("X-User-ID") String serialNumber);
 
-    @GetMapping("/api/oauth/test")
-    ResponseEntity<String> test();
 }
