@@ -132,7 +132,7 @@ services:
       - "7880:7880"
       - "7881:7881"
     environment:
-      - LIVEKIT_KEYS=${LIVEKIT_API_KEY}:${LIVEKIT_API_SECRET}
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
     restart: always
     networks:
       - my-network
