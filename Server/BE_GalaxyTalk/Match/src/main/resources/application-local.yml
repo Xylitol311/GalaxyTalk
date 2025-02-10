@@ -14,7 +14,7 @@ eureka:
         register-with-eureka: true
         fetch-registry: true
         service-url:
-            # 로컬에서는 환경변수(EUREKA_SERVICE_URL)가 없을 경우 기본값 http://localhost:30000 사용
+            # 로컬에서는 환경변수(EUREKA_SERVICE_URL)가 없을 경우 기본값 http://localhost:8671 사용
             defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8671}/eureka/
     instance:
         prefer-ip-address: true
