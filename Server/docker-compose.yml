@@ -95,6 +95,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - CLIENT_SECRET=${CLIENT_SECRET}
       - FRONT_URL=${FRONT_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
