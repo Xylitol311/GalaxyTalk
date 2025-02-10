@@ -1,4 +1,4 @@
-FROM node:22.13.1-alpine
+FROM node:22-alpine3.19
 RUN npm install -g serve
 RUN mkdir /dist
 ADD ./dist /dist
