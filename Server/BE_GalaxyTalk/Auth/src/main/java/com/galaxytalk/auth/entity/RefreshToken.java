@@ -1,28 +1,24 @@
 package com.galaxytalk.auth.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
+
+import java.sql.Ref;
+
 
 @AllArgsConstructor
 @Getter
+@Setter
 @NoArgsConstructor
 @RedisHash(value = "jwtToken", timeToLive = 60*60*24*3) //3일 후 자동 삭제
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String accessToken;
 
-    @Indexed
     private String refreshToken;
-
-    public RefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
 }

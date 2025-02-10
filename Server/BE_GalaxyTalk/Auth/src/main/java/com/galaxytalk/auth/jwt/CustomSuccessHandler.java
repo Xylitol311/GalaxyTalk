@@ -2,6 +2,7 @@ package com.galaxytalk.auth.jwt;
 
 import com.galaxytalk.auth.dto.CustomOAuth2User;
 
+import com.galaxytalk.auth.entity.RefreshToken;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import com.galaxytalk.auth.service.UserStatusService;
 import jakarta.servlet.ServletException;
@@ -57,14 +58,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtUtil.token(serialNumber, role, 1000*60*60*1); //1시간
         String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); //3일
 
+
         //만들어진 토큰은 클라이언트데 쿠키에 담아서 주기
         response.addCookie(createCookie("AccessToken", accessToken));
-        response.addCookie(createCookie("RefreshToken",refreshToken));
 
         response.setStatus(HttpStatus.OK.value());
 
         //리프레시 토큰 레디스에 넣기, 유저 상태 관리 시작
-        refreshTokenService.saveTokenInfo(refreshToken);
+        refreshTokenService.saveTokenInfo(accessToken,refreshToken);
         userStatusService.saveUserStatus(serialNumber, "idle");
 
 
@@ -86,7 +87,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //쿠키의 유효기간 설정
         cookie.setMaxAge(60*60); //1시간간
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
-        //cookie.setSecure(true);
+        cookie.setSecure(true);
 
         //브라우저가 쿠키값을 전송할 URL 지정
         cookie.setPath("/");
