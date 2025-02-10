@@ -102,6 +102,8 @@ services:
       - FRONT_URL=${FRONT_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
@@ -128,6 +130,8 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
     depends_on:
       - mysql
     healthcheck:
@@ -151,6 +155,7 @@ services:
       - AI_SERVICE_URL=${AI_SERVICE_URL}
       - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
 
     # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
@@ -192,15 +197,55 @@ services:
       - SUPPORT_SERVICE_URL=http://galaxy-support:8080
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
+
     depends_on:
       - eureka
       - galaxy-auth
       - galaxy-match
-      - galaxy-support
     networks:
       - my-network
 
+  galaxy-ai:
+    build: ./AI
+    container_name: galaxy-ai
+    ports:
+      - "30005:8080"
+    environment:
+      - PYTHON_ENV=prod
+    volumes:
+      - /home/ubuntu/sentence_similarity_model_klue:/home/ubuntu/sentence_similarity_model_klue
+    networks:
+      - my-network
 
+  galaxy-chat:
+    build: ./BE_GalaxyTalk/Chat
+    restart: always
+    ports:
+      - "30004:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MONGO_INITDB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - COMMENT_SERVICE_URL=http://galaxy-support:8080
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - LIVEKIT_URL=http://livekit:7880
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+    depends_on:
+      - mongodb
+      - galaxy-auth
+      - galaxy-support
+      - livekit
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
 
 volumes:
   mysql_data:
