@@ -23,6 +23,7 @@ wait_for_service() {
 wait_for_service "eureka" "8080"
 wait_for_service "galaxy-auth" "8080"
 wait_for_service "galaxy-match" "8080"
+wait_for_service "galaxy-chat" "8080"
 # wait_for_service "galaxy-support" "8080"
 
 echo "All dependent services are healthy. Starting Gateway..."

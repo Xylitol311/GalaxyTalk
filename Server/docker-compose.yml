@@ -194,6 +194,7 @@ services:
       # Docker 네트워크 내부에서는 컨테이너 이름으로 접근
       - AUTH_SERVICE_URL=http://galaxy-auth:8080
       - MATCH_SERVICE_URL=http://galaxy-match:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
       - SUPPORT_SERVICE_URL=http://galaxy-support:8080
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
@@ -233,6 +234,7 @@ services:
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
       - LIVEKIT_URL=http://livekit:7880
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
     depends_on:
       - mongodb
       - galaxy-auth
