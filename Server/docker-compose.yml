@@ -73,12 +73,12 @@ services:
     build: ./BE_GalaxyTalk/Eureka  # Eureka 서버 Dockerfile 경로
     container_name: eureka
     ports:
-      - "8761:8761"
+      - "30000:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     restart: always
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -101,6 +101,7 @@ services:
       - CLIENT_SECRET=${CLIENT_SECRET}
       - FRONT_URL=${FRONT_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
