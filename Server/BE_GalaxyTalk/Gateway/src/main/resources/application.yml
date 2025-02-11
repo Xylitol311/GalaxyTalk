@@ -67,6 +67,7 @@ eureka:
 #Swagger setting
 springdoc:
   swagger-ui:
+    disable-swagger-default-url: true
     urls:
       - name: auth service
         url: ${AUTH_SERVICE_URL}/v3/api-docs

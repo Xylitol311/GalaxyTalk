@@ -48,6 +48,8 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
+        System.out.println("들어오고 있는 경로 : " + path);
+
         if (path.startsWith("/oauth2/authorization/")) {
             return chain.filter(exchange);  // 필터 통과
         }
