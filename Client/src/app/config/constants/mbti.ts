@@ -15,4 +15,4 @@ export const MBTI_TYPES = [
     'ISFP',
     'ISTJ',
     'ISTP',
-];
+] as const;

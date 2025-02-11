@@ -13,7 +13,9 @@ export async function postMatchStart(formData: MatchStartFormValues) {
 }
 
 export async function deleteMatchCancel() {
-    const { data } = await fetcher.delete(PATH.API_PATH.MATCH.CANCEL);
+    const { data } = await fetcher.delete<BaseResponseType>(
+        PATH.API_PATH.MATCH.CANCEL
+    );
 
     return data;
 }

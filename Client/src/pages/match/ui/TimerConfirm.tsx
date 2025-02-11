@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -47,7 +46,10 @@ export default function TimerConfirm() {
             {open && (
                 <DialogPortal>
                     <DialogOverlay />
-                    <DialogContent>
+                    <DialogContent
+                        showCloseButton={false}
+                        onInteractOutside={(e) => e.preventDefault()}
+                        onEscapeKeyDown={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle>Confirm Action</DialogTitle>
                             <DialogDescription>
@@ -68,14 +70,12 @@ export default function TimerConfirm() {
                                 onClick={() => setOpen(false)}>
                                 Pass
                             </Button>
-                            <DialogClose asChild>
-                                <Button
-                                    ref={cancelRef}
-                                    variant="outline"
-                                    onClick={() => setOpen(false)}>
-                                    Cancel
-                                </Button>
-                            </DialogClose>
+                            <Button
+                                ref={cancelRef}
+                                variant="outline"
+                                onClick={() => setOpen(false)}>
+                                Cancel
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </DialogPortal>

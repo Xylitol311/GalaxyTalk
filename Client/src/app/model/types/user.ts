@@ -3,7 +3,7 @@ export type UserBaseType = {
     mbti: string;
     planetId: number;
     energy: number;
-    role: 'ADMIN' | 'USER' | 'GUEST' | 'WITHDRAW' | 'RESTRICTED';
+    role: 'ADMIN' | 'USER' | 'GUEST' | 'WITHDRAW' | 'RESTRICTED' | null;
 };
 
 export type UserStatusType = {
