@@ -85,7 +85,7 @@ export default function SignupForm() {
                         ${isSelected ? 'bg-gray-800' : 'bg-gray-300'}
                         hover:bg-gray-700 hover:scale-105`}>
                                                     <img
-                                                        src={`/src/shared/assets/images/${planet.imageUrl}`}
+                                                        src={`../../../../src/shared/assets/images/${planet.imageUrl}`}
                                                         alt={planet.name}
                                                         className="w-32 h-32 object-cover"
                                                     />
@@ -104,17 +104,30 @@ export default function SignupForm() {
                                 </Carousel>
 
                                 {watch('planetId') && (
-                                    <p className="mt-2 text-sm text-gray-600 text-center">
+                                    <p className="flex gap-2 mt-2 text-sm text-gray-600 text-center justify-center">
                                         나의 행성:{' '}
-                                        <span className="font-medium text-gray-800">
-                                            {
-                                                PLANETS.find(
-                                                    (planet) =>
-                                                        planet.id ===
-                                                        watch('planetId')
-                                                )?.name
-                                            }
-                                        </span>
+                                        <div className="flex gap-1">
+                                            <span className="font-medium text-gray-800">
+                                                {
+                                                    PLANETS.find(
+                                                        (planet) =>
+                                                            planet.id ===
+                                                            watch('planetId')
+                                                    )?.name
+                                                }
+                                            </span>
+                                            <img
+                                                src={`../../../../src/shared/assets/images/${watch('planetId')}.PNG`}
+                                                alt={
+                                                    PLANETS.find(
+                                                        (planet) =>
+                                                            planet.id ===
+                                                            watch('planetId')
+                                                    )?.name
+                                                }
+                                                className="w-4 h-4 object-cover"
+                                            />
+                                        </div>
                                     </p>
                                 )}
 
