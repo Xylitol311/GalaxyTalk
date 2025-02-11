@@ -183,21 +183,14 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     container_name: livekit
-    network_mode: host  # 호스트 네트워크 모드 사용
     ports:
-      - "7881:7880"
+      - "7880:7880"
+      - "7881:7881"
       - "7882:7882/udp"
       - "50000-50020:50000-50020/udp"
     environment:
-      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
-      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
-    volumes:
-      # 로컬 파일(./livekit.yml)을 컨테이너 내부(/app/livekit.yml)에 연결
-      - /home/ubuntu/livekit.yml:/app/livekit.yml
-    command:
-      # LiveKit 서버 시작시 --config 옵션으로 YAML 파일을 사용하도록 지정
-      - --config
-      - /app/livekit.yml
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+      LIVEKIT_PORT: 7880
     restart: always
     networks:
       - my-network
