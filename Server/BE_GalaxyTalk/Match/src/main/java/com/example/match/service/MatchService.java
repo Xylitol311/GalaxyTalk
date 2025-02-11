@@ -39,6 +39,8 @@ public class MatchService {
      * 3. WebSocket으로 대기 시작 알림
      */
     public void startMatching(UserMatchStatus user) {
+        log.info("Starting Matching...");
+
         // 이미 매칭 중인 유저인지 확인
         UserMatchStatus userMatchStatus = redisService.getUserStatus(user.getUserId());
         if (userMatchStatus != null) {
@@ -84,6 +86,12 @@ public class MatchService {
      * 매칭 취소 처리
      */
     public void cancelMatching(String userId) {
+        // 매칭 중인 유저인지 확인
+        UserMatchStatus userMatchStatus = redisService.getUserStatus(userId);
+        if (userMatchStatus.getStatus() != MatchStatus.MATCHED ) {
+            throw new BusinessException(ErrorCode.MATCH_ALREADY_IN_PROGRESS);
+        }
+
         // Redis에서 유저 정보 삭제
         redisService.deleteUserStatus(userId);
 
