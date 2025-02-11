@@ -69,16 +69,17 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         // 3. 새로운 요청 객체 생성 (헤더에 userId 추가)
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                .header("X-User-ID", userId)
                 .headers(httpHeaders -> {
-                    httpHeaders.remove("X-Real-IP"); // 필요 없는 헤더 제거
+                    httpHeaders.remove("X-Real-IP");
                     httpHeaders.remove("X-Forwarded-For");
                     httpHeaders.remove("X-Forwarded-Proto");
                     httpHeaders.remove("X-Forwarded-Port");
                     httpHeaders.remove("X-Forwarded-Host");
                     httpHeaders.remove("Forwarded");
                 })
+                .header("X-User-ID", userId)  // 헤더 추가는 마지막에
                 .build();
+
 
         System.out.println("User ID: " + userId);
         System.out.println("Role: " + role);
@@ -93,10 +94,10 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
-
-        // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
         return chain.filter(exchange.mutate().request(modifiedRequest).build())
                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+        // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
+\
 
     }
     private boolean isTokenExpired(String token) {
