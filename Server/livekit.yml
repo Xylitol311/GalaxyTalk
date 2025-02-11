@@ -1,0 +1,22 @@
+# livekit.yaml 예시
+
+api_key: "<LIVEKIT_API_KEY>"
+api_secret: "<LIVEKIT_API_SECRET>"
+
+bind_address: 0.0.0.0
+# LiveKit이 WebSocket을 수신할 주소 & 포트
+# 별도로 지정하지 않으면 default가 7880
+
+# 서버 로깅 관련
+logging:
+  level: debug
+
+rtc:
+  # STUN/TURN 같은 설정
+  # 필요하다면 추가
+  tcp_port: 7880
+  udp_port: 7882
+
+# 외부 클라이언트가 접속할 때 인식할 IP/도메인
+# EC2 외부 IP가 13.124.213.63일 경우:
+node_ip: 13.124.213.63
