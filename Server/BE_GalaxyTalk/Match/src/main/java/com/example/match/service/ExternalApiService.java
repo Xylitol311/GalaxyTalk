@@ -21,7 +21,7 @@ public class ExternalApiService {
 
     public UserResponseDto.UserSendDTO getUserInfo(String userId) {
         return authServiceClient.get()
-                .uri("/api/oauth?userId=" + userId)
+                .uri("/api/oauth")
                 .header("X-User-ID", userId)
                 .retrieve()
                 .bodyToMono(UserResponseDto.class) // 1차적으로 ApiResponseDto로 변환
