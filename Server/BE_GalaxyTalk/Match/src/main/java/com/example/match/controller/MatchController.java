@@ -26,7 +26,6 @@ import java.util.List;
 @RequestMapping("/api/match")
 public class MatchController {
     private final MatchService matchService;
-    private final ExternalApiService externalApiService;
 
     /**
      * 매칭 시작 요청 처리
@@ -141,27 +140,5 @@ public class MatchController {
             status.setPreferredMbti(dto.getPreferredMbti().toUpperCase());
         }
         return status;
-    }
-
-    /**
-     * 매칭 ai 점수 테스트
-     */
-    @GetMapping("/test")
-    public ResponseEntity<ApiResponseDto> test(
-            @RequestParam String concern1, @RequestParam String concern2) {
-        log.info("Test 요청 전송됨: " + concern1);
-        UserMatchStatus user1 = new UserMatchStatus();
-        UserMatchStatus user2 = new UserMatchStatus();
-
-        user1.setConcern(concern1);
-        user2.setConcern(concern2);
-
-        double similarity = externalApiService.calculateSimilarity(user1, user2);
-
-        return ResponseEntity.ok(new ApiResponseDto(
-                true,
-                "매칭 시작 시간 조회 성공",
-                similarity
-        ));
     }
 }
