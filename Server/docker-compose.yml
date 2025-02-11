@@ -183,6 +183,7 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     container_name: livekit
+    network_mode: host
     ports:
       - "7880:7880"
       - "7881:7881"
@@ -199,8 +200,6 @@ services:
       LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
 
     restart: always
-    networks:
-      - my-network
 
 
   gateway:
