@@ -46,7 +46,7 @@ public class WebSocketService {
         );
     }
 
-    public void notifyUsersWithChatRoom(UserMatchStatus user1, UserMatchStatus user2, ChatRoomResponseDto.ChatResponse chatResponse) {
+    public void notifyUsersWithChatRoom(UserMatchStatus user1, UserMatchStatus user2, Map<String, Object> chatResponse) {
         if (user1 == null || user2 == null || chatResponse == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "notifyUsersWithChatRoom: 인자가 null입니다.");
         }
@@ -54,15 +54,25 @@ public class WebSocketService {
         String message = "매칭이 완료되었습니다. 채팅방 정보입니다.";
         log.info("Matching Success! notify users with chat room {}", chatResponse);
 
+//        Map<String, Object> user1Data = new HashMap<>();
+//        user1Data.put("chatRoomId",  chatResponse.getChatRoomId());
+//        user1Data.put("sessionId", chatResponse.getSessionId());
+//        user1Data.put("token", chatResponse.getTokenA());
+//
+//        Map<String, Object> user2Data = new HashMap<>();
+//        user2Data.put("chatRoomId", chatResponse.getChatRoomId());
+//        user2Data.put("sessionId", chatResponse.getSessionId());
+//        user2Data.put("token", chatResponse.getTokenB());
+
         Map<String, Object> user1Data = new HashMap<>();
-        user1Data.put("chatRoomId", chatResponse.getChatRoomId());
-        user1Data.put("sessionId", chatResponse.getSessionId());
-        user1Data.put("token", chatResponse.getTokenA());
+        user1Data.put("chatRoomId",  chatResponse.get("chatRoomId"));
+        user1Data.put("sessionId", chatResponse.get("sessionId"));
+        user1Data.put("token", chatResponse.get("tokenA"));
 
         Map<String, Object> user2Data = new HashMap<>();
-        user2Data.put("chatRoomId", chatResponse.getChatRoomId());
-        user2Data.put("sessionId", chatResponse.getSessionId());
-        user2Data.put("token", chatResponse.getTokenB());
+        user2Data.put("chatRoomId",  chatResponse.get("chatRoomId"));
+        user2Data.put("sessionId", chatResponse.get("sessionId"));
+        user2Data.put("token", chatResponse.get("tokenB"));
 
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + user1.getUserId(),

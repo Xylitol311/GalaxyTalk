@@ -1,6 +1,14 @@
 spring:
   application:
     name: match-service
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            url: ${AUTH_SERVICE_URL}
+          chat-service:
+            url: ${CHAT_SERVICE_URL}
 
 springdoc:
   api-docs:

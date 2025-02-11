@@ -48,8 +48,10 @@ public class MatchService {
         }
 
         // 회원 정보 요청 및 MBTI 추출
-        UserResponseDto.UserSendDTO userResponse = externalApiService.getUserInfo(user.getUserId());
-        String userMbti = (userResponse != null) ? userResponse.getMbti() : null;
+//        UserResponseDto.UserSendDTO userResponse = externalApiService.getUserInfo(user.getUserId());
+        Map<String, Object> userResponse = externalApiService.getUserInfo(user.getUserId());
+//        String userMbti = (userResponse != null) ? userResponse.getMbti() : null;
+        String userMbti = (userResponse != null) ? (String) userResponse.get("mbti") : null;
 
         if (userMbti == null) {
             log.warn("유저 {}의 MBTI 정보를 가져올 수 없습니다.", user.getUserId());
@@ -58,7 +60,7 @@ public class MatchService {
         }
 
         user.setMbti(userMbti);
-        user.setEnergy(userResponse.getEnergy());
+        user.setEnergy((Integer) userResponse.get("energy"));
         user.setStatus(MatchStatus.WAITING);
         user.setAccepted(false);
         user.setStartTime(Instant.now().toEpochMilli());
