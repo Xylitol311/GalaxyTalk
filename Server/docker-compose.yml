@@ -181,15 +181,14 @@ services:
     image: livekit/livekit-server:latest
     container_name: livekit
     ports:
-      - "7880:7880"
-      - "7881:7881"
+      - "7880:7881"
       - "7882:7882/udp"
       - "50000-50020:50000-50020/udp"
     environment:
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
     volumes:
-      # 로컬 파일(./livekit.yaml)을 컨테이너 내부(/app/livekit.yaml)에 연결
+      # 로컬 파일(./livekit.yml)을 컨테이너 내부(/app/livekit.yml)에 연결
       - /home/ubuntu/livekit.yml:/app/livekit.yml
     command:
       # LiveKit 서버 시작시 --config 옵션으로 YAML 파일을 사용하도록 지정
