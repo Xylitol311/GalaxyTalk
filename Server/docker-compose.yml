@@ -187,11 +187,11 @@ services:
       - "50000-50020:50000-50020/udp"
     volumes:
       # 로컬 파일(./livekit.yaml)을 컨테이너 내부(/app/livekit.yaml)에 연결
-      - ./livekit.yaml:/app/livekit.yaml
+      - ./livekit.yml:/app/livekit.yml
     command:
       # LiveKit 서버 시작시 --config 옵션으로 YAML 파일을 사용하도록 지정
       - --config
-      - /app/livekit.yaml
+      - /app/livekit.yml
     restart: always
     networks:
       - my-network
