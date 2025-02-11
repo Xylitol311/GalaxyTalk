@@ -19,8 +19,8 @@ export default function UserProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        setUserBase(userBaseInfo);
-        setUserStatus(userStatus);
+        setUserBase(userBaseInfo.data);
+        setUserStatus(userStatus.data);
     }, [isQuerySuccess, setUserBase, setUserStatus, userBaseInfo, userStatus]);
 
     useEffect(() => {

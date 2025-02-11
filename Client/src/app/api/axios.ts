@@ -21,10 +21,10 @@ fetcher.interceptors.request.use(
 
 // Memo: axios 응답 인터셉터 설정
 fetcher.interceptors.response.use(
-    (response) => response.data,
+    (response) => response,
     (error) => {
         // Todo: 에러 처리
         console.error('API 요청 실패:', error);
-        return Promise.reject(error.response?.data || 'Unknown error');
+        return Promise.reject(error);
     }
 );

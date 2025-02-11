@@ -1,4 +1,4 @@
-import { OrbitControls } from '@react-three/drei';
+import { Html, OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import {
     Bloom,
@@ -6,12 +6,16 @@ import {
     ToneMapping,
 } from '@react-three/postprocessing';
 import { useEffect } from 'react';
+import { useUserStore } from '@/app/model/stores/user';
+import MatchingForm from '@/features/match/ui/MatchingForm';
+import NaverButton from '@/features/user/ui/NaverButton';
+import Introduce from '@/pages/home/ui/Introduce';
 import Ground from './Ground';
 import RotatingStars from './RotatingStars';
-import Telescope from './Telescope';
 
 function EarthSky() {
     const { camera } = useThree();
+    const { userId } = useUserStore();
 
     useEffect(() => {
         // camera.position는 Canvas의 camera prop에서 설정한 값(여기서는 [0,0,-0.01])을 그대로 사용합니다.
@@ -21,6 +25,7 @@ function EarthSky() {
 
     const levels = 8,
         intensity = 0.4;
+    const isLogin = !!userId;
 
     return (
         // <Canvas
@@ -33,7 +38,6 @@ function EarthSky() {
         //     }}>
         <>
             <RotatingStars />
-            <axesHelper />
             <OrbitControls enableDamping />
             <ambientLight intensity={2} />
             <directionalLight
@@ -43,11 +47,29 @@ function EarthSky() {
                 scale={10}
             />
             <Ground />
-            <Telescope
-                onClick={() => {
-                    'telescope is clicked';
-                }}
-            />
+            {isLogin ? (
+                <MatchingForm />
+            ) : (
+                <Html
+                    position={[0, 0, 0]}
+                    center
+                    transform
+                    zIndexRange={[100, 0]}
+                    style={{ pointerEvents: 'none' }}>
+                    <div
+                        className="flex flex-col gap-4 items-center"
+                        style={{
+                            pointerEvents: 'auto',
+                            userSelect: 'none',
+                        }}>
+                        <Introduce />
+                        <span>
+                            <NaverButton />
+                        </span>
+                    </div>
+                </Html>
+            )}
+
             <EffectComposer enableNormalPass={false}>
                 <Bloom
                     mipmapBlur

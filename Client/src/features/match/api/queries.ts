@@ -16,8 +16,10 @@ export const usePostMatchStart = () => {
     return useMutation({
         mutationFn: (formData: MatchStartFormValues) =>
             postMatchStart(formData),
-        onSuccess: () => {
-            navigate(PATH.ROUTE.MATCH);
+        onSuccess: (response) => {
+            if (response.success) {
+                navigate(PATH.ROUTE.WARP);
+            }
         },
         onError: (error) => {
             console.error('매치 시작 실패:', error);

@@ -1,10 +1,21 @@
-import { useUserStore } from '@/app/model/stores/user';
-import AfterLogin from './ui/AfterLogin';
-import BeforeLogin from './ui/BeforeLogin';
+import { Canvas } from '@react-three/fiber';
+import EarthSky from '@/widget/EarthSky';
+import Header from '@/widget/home/ui/header';
 
 export default function Home() {
-    const { userId } = useUserStore();
-    const isLogin = !!userId;
-
-    return <>{isLogin ? <AfterLogin /> : <BeforeLogin />}</>;
+    return (
+        <>
+            <Header />
+            <Canvas
+                shadows
+                camera={{
+                    fov: 60,
+                    near: 0.01,
+                    far: 10000,
+                    position: [0, 0, 12],
+                }}>
+                <EarthSky />
+            </Canvas>
+        </>
+    );
 }

@@ -73,6 +73,9 @@ function RecursiveGLTF({
                     castShadow={castShadow} // 상위에서 전달받은 shadow 설정을 자식에 전달
                     receiveShadow={receiveShadow}
                     hover={hover}
+                    onClick={() => {
+                        onClick?.();
+                    }}
                 />
             ))}
         </group>
