@@ -3,8 +3,6 @@
 spring:
   application:
     name: Eureka
-  profiles:
-    active: local
 
 eureka:
   instance:

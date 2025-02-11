@@ -9,9 +9,23 @@ server:
     address: 0.0.0.0
     port: 8080
 
-# 원격(클라우드/서버) 환경에서의 Swagger 주소
+eureka:
+    client:
+        register-with-eureka: true
+        fetch-registry: true
+        service-url:
+            # Jenkins에서 EUREKA_SERVICE_URL을 주입받습니다.
+            defaultZone: ${EUREKA_SERVICE_URL}/eureka/
+    instance:
+        prefer-ip-address: true
+        leaseRenewalIntervalInSeconds: 5
+        leaseExpirationDurationInSeconds: 10
+        instance-id: ${spring.application.name}:${server.port}
+
 swagger:
     gateway:
-        url: https://my-remote-domain.com
+        # Jenkins에서 GATEWAY_SERVICE_URL을 주입받으며, 기본값은 https://my-remote-domain.com
+        url: ${GATEWAY_SERVICE_URL:https://my-remote-domain.com}
     match:
-        url: https://my-remote-domain.com/match
+        # Jenkins에서 MATCH_SERVICE_URL을 주입받으며, 기본값은 https://my-remote-domain.com/match
+        url: ${MATCH_SERVICE_URL:https://my-remote-domain.com/match}

@@ -69,6 +69,22 @@ services:
     networks:
       - my-network
 
+  eureka:
+    build: ./BE_GalaxyTalk/Eureka  # Eureka 서버 Dockerfile 경로
+    container_name: eureka
+    ports:
+      - "30000:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - my-network
+
 
   galaxy-auth:
     build: ./BE_GalaxyTalk/Auth
@@ -83,12 +99,42 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - CLIENT_SECRET=${CLIENT_SECRET}
+      - FRONT_URL=${FRONT_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - NAVER_LOGIN_URL=${NAVER_LOGIN_URL}
+
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
       - mysql
       - redis
       - mongodb
     # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
+
+
+  galaxy-support:
+    build: ./BE_GalaxyTalk/Support
+    restart: always
+    ports:
+      - "30002:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
+    depends_on:
+      - mysql
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -106,13 +152,11 @@ services:
       - "30003:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - AI_SERVICE_URL=${AI_SERVICE_URL}
       - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
 
     # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
@@ -127,13 +171,87 @@ services:
     networks:
       - my-network
 
-  galaxy-auth:
-    build: ./BE_GalaxyTalk/Auth
-    restart: always
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
     ports:
-      - "30001:8080"
+      - "7880:7880"
+      - "7881:7881"
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    restart: always
+    networks:
+      - my-network
+
+
+  gateway:
+    build: ./BE_GalaxyTalk/Gateway
+    container_name: gateway
+    ports:
+      - "30006:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      # Docker 네트워크 내부에서는 컨테이너 이름으로 접근
+      - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - MATCH_SERVICE_URL=http://galaxy-match:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
+      - SUPPORT_SERVICE_URL=http://galaxy-support:8080
+      - EUREKA_SERVICE_URL=http://eureka:8080
+      - FRONT_URL=${FRONT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+
+    depends_on:
+      - eureka
+      - galaxy-auth
+      - galaxy-match
+    networks:
+      - my-network
+
+  galaxy-ai:
+    build: ./AI
+    container_name: galaxy-ai
+    ports:
+      - "30005:8080"
+    environment:
+      - PYTHON_ENV=prod
+    volumes:
+      - /home/ubuntu/sentence_similarity_model_klue:/home/ubuntu/sentence_similarity_model_klue
+    networks:
+      - my-network
+
+  galaxy-chat:
+    build: ./BE_GalaxyTalk/Chat
+    restart: always
+    ports:
+      - "30004:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MONGO_INITDB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
+      - COMMENT_SERVICE_URL=http://galaxy-support:8080
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - LIVEKIT_URL=http://livekit:7880
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+    depends_on:
+      - mongodb
+      - galaxy-auth
+      - galaxy-support
+      - livekit
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
 
 volumes:
   mysql_data:
