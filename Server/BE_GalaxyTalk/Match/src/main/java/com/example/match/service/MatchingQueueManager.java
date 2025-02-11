@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 @Slf4j
@@ -20,85 +21,111 @@ import java.util.concurrent.PriorityBlockingQueue;
 @Component
 @RequiredArgsConstructor
 public class MatchingQueueManager {
-    // Lazy Deletion과 GC 처리
     private final RedisService redisService;
-
-    // MBTI별 매칭 큐
-    private final Map<MBTI, Queue<UserMatchStatus>> mbtiQueues = new EnumMap<>(MBTI.class);
-
-    // 큐 크기 상수
+    // in-memory에서 각 userId의 매칭 시작 시간(startTime)을 저장하여 우선순위 큐의 정렬 기준으로 사용.
+    private final Map<String, Long> userStartTimeMap = new ConcurrentHashMap<>();
+    // [신규 코드] 매칭 큐를 단 하나만 사용.
+    private final Queue<String> universalQueue = new PriorityBlockingQueue<>(
+            11,
+            Comparator.comparingLong(
+                    userId -> userStartTimeMap.getOrDefault(userId, Long.MAX_VALUE)
+            )
+    );
+//    private final Map<MBTI, Queue<String>> mbtiQueues = new EnumMap<>(MBTI.class);
+//    private static final Map<MBTI, List<String>> RELATED_MBTI_PATTERNS = new EnumMap<>(MBTI.class);
     private static final int BATCH_SIZE = 50;
 
-    // MBTI 연관 관계 매핑
-    private static final Map<MBTI, List<String>> RELATED_MBTI_PATTERNS = new EnumMap<>(MBTI.class);
-
-    @PostConstruct
-    public void init() {
-        // MBTI별 큐 초기화 - PriorityBlockingQueue 사용하여 대기 시간 기준 정렬
-        for (MBTI mbti : MBTI.values()) {
-            mbtiQueues.put(mbti, new PriorityBlockingQueue<>(
-                    11,
-                    Comparator.comparingLong(UserMatchStatus::getStartTime)
-            ));
-        }
-
-        // MBTI 연관 관계 초기화
-        initializeRelatedMbtiPatterns();
-    }
-
-    private void initializeRelatedMbtiPatterns() {
-        for (MBTI mbti : MBTI.values()) {
-            String mbtiStr = mbti.name();
-            List<String> patterns = new ArrayList<>();
-
-            // INFx 패턴
-            patterns.add(mbtiStr.substring(0, 3) + ".");
-            // INxP 패턴
-            patterns.add(mbtiStr.substring(0, 2) + "." + mbtiStr.charAt(3));
-            // IxFP 패턴
-            patterns.add(mbtiStr.charAt(0) + "." + mbtiStr.substring(2));
-            // xNFP 패턴
-            patterns.add("." + mbtiStr.substring(1));
-
-            RELATED_MBTI_PATTERNS.put(mbti, patterns);
-        }
-    }
+    /**
+     * 초기화: 각 MBTI별 매칭 큐를 초기화하고, 우선순위 큐의 정렬 기준(매칭 시작 시간)을 위해 userStartTimeMap을 참조.
+     * + 연관 MBTI 패턴을 초기화.
+     */
+//    @PostConstruct
+//    public void init() {
+//        for (MBTI mbti : MBTI.values()) {
+//            // PriorityBlockingQueue를 사용, userStartTimeMap에 저장된 시작 시간을 기준으로 정렬.
+//            mbtiQueues.put(mbti, new PriorityBlockingQueue<>(
+//                    11,
+//                    Comparator.comparingLong(userId -> userStartTimeMap.getOrDefault(userId, Long.MAX_VALUE))
+//            ));
+//        }
+//        initializeRelatedMbtiPatterns();
+//    }
 
     /**
-     * 유저를 해당하는 MBTI 큐에 추가
-     * - 중복 삽입을 막기 위해 user.machingQueues 확인 후 추가
-     * - user.machingQueues에 큐 이름(MBTI.name())을 저장
-     * - Redis에 변경 사항을 다시 저장하여 상태 동기화
+     * 각 MBTI에 대해 연관된 MBTI 패턴(예: INFx, INxP, IxFP, xNFP)을 초기화.
+     */
+//    private void initializeRelatedMbtiPatterns() {
+//        for (MBTI mbti : MBTI.values()) {
+//            String mbtiStr = mbti.name();
+//            List<String> patterns = new ArrayList<>();
+//            // 예시: "INFx" 패턴
+//            patterns.add(mbtiStr.substring(0, 3) + ".");
+//            // 예시: "INxP" 패턴
+//            patterns.add(mbtiStr.substring(0, 2) + "." + mbtiStr.charAt(3));
+//            // 예시: "IxFP" 패턴
+//            patterns.add(mbtiStr.charAt(0) + "." + mbtiStr.substring(2));
+//            // 예시: "xNFP" 패턴
+//            patterns.add("." + mbtiStr.substring(1));
+//            RELATED_MBTI_PATTERNS.put(mbti, patterns);
+//        }
+//    }
+
+    /**
+     * 유저를 해당 MBTI 큐에 추가.
+     * - 큐에 추가할 때 Redis의 유저 매칭 큐 목록(셋)도 업데이트.
+     * - Redis에 저장된 유저 객체의 matchingQueues 필드를 최신 상태로 동기화
+     *
+     * @param user 매칭 큐에 추가할 유저 정보
      */
     public void addToQueue(UserMatchStatus user) {
         log.info("add to Matching queue");
         try {
-            // machingQueues가 null일 수 있으므로 초기화
-            if (user.getMachingQueues() == null) {
-                user.setMachingQueues(new ArrayList<>());
+            String userId = user.getUserId();
+//            // 자신의 MBTI 큐에 추가
+//            MBTI userMbti = MBTI.valueOf(user.getMbti());
+//            String userMbtiName = userMbti.name();
+//            // Redis의 유저 큐 목록에서 해당 MBTI 큐에 속해있는지 확인
+//            if (!redisService.isUserInQueue(userId, userMbtiName)) {
+//                // in-memory 큐에 userId 추가
+//                mbtiQueues.get(userMbti).offer(userId);
+//                // 매칭 시작 시간을 함께 저장 (우선순위 큐 정렬 기준)
+//                userStartTimeMap.put(userId, user.getStartTime());
+//                // Redis의 유저 매칭 큐 목록(셋)에 해당 MBTI 큐 추가
+//                redisService.addUserToQueue(userId, userMbtiName);
+//            }
+//
+//            // 선호하는 MBTI가 있는 경우 해당 큐에도 추가
+//            if (user.getPreferredMbti() != null) {
+//                MBTI preferredMbti = MBTI.valueOf(user.getPreferredMbti());
+//                String preferredMbtiName = preferredMbti.name();
+//                if (!redisService.isUserInQueue(userId, preferredMbtiName)) {
+//                    mbtiQueues.get(preferredMbti).offer(userId);
+//                    userStartTimeMap.put(userId, user.getStartTime());
+//                    redisService.addUserToQueue(userId, preferredMbtiName);
+//                }
+//            }
+//
+//            // 최신 매칭 큐 목록을 Redis에서 조회하여 유저 객체의 matchingQueues 필드를 업데이트.
+//            Set<String> queues = redisService.getUserMatchingQueues(userId);
+//            user.setMachingQueues(new ArrayList<>(queues));
+//            redisService.saveUserStatus(user);
+
+            // [신규] universalQueue에만 추가
+            // 중복 확인(이미 universalQueue에 들어있으면 추가 X) 로직은 간단히 "contains"로 처리
+            if (!universalQueue.contains(userId)) {
+                universalQueue.offer(userId);
+                userStartTimeMap.put(userId, user.getStartTime());
             }
 
-            // 자신의 MBTI 큐에 추가
-            MBTI userMbti = MBTI.valueOf(user.getMbti());
-            String userMbtiName = userMbti.name();
-            // 이미 들어가있는 큐인지 확인
-            if (!user.getMachingQueues().contains(userMbtiName)) {
-                mbtiQueues.get(userMbti).offer(user);
-                user.getMachingQueues().add(userMbtiName);
+            // Redis에 저장된 user_matching_queues 는 사용하지 않거나,
+            // "SINGLE_QUEUE" 라는 가상의 키로 단일 관리
+            if (!redisService.isUserInQueue(userId, "SINGLE_QUEUE")) {
+                redisService.addUserToQueue(userId, "SINGLE_QUEUE");
             }
 
-            // 선호하는 MBTI 큐에 추가
-            if (user.getPreferredMbti() != null) {
-                MBTI preferredMbti = MBTI.valueOf(user.getPreferredMbti());
-                String preferredMbtiName = preferredMbti.name();
-                // 이미 들어가있는 큐인지 확인
-                if (!user.getMachingQueues().contains(preferredMbtiName)) {
-                    mbtiQueues.get(preferredMbti).offer(user);
-                    user.getMachingQueues().add(preferredMbtiName);
-                }
-            }
-
-            // 변경된 user 상태를 Redis에 다시 저장하여 동기화
+            // user 객체 업데이트 후 Redis에 저장
+            // matchingQueues에는 "SINGLE_QUEUE"만 들어있게 할 수 있음
+            user.setMachingQueues(new ArrayList<>(Collections.singletonList("SINGLE_QUEUE")));
             redisService.saveUserStatus(user);
         } catch (IllegalArgumentException e) {
             throw new BusinessException(ErrorCode.INVALID_MBTI, "Invalid MBTI value in addToQueue()");
@@ -106,23 +133,54 @@ public class MatchingQueueManager {
     }
 
     /**
-     * 특정 MBTI 큐에서 배치 사이즈만큼의 유저를 가져옴
-     * - Lazy Deletion 정책 때문에, poll된 유저가 Redis에서 삭제되었거나
-     *   매칭 상태가 WAITING이 아닐 경우는 후속 로직(필터링)에서 제외될 수 있음
-     *   (=매칭되면 안되는 유저이므로 매칭 과정에서 제외)
+     * 특정 MBTI 큐에서 배치 사이즈(BATCH_SIZE)만큼의 유저를 꺼내어 반환.
+     * - 큐에는 poll 후 Redis에서 유저 상태를 조회하여 UserMatchStatus 객체를 반환 받음
+     * - 동시에 Redis의 유저 매칭 큐 목록에서 해당 MBTI 큐 정보를 제거.
+     * </p>
+     *
+     * @return 매칭 처리할 유저 목록
      */
-    public List<UserMatchStatus> getBatchFromQueue(MBTI mbti) {
+//    public List<UserMatchStatus> getBatchFromQueue(MBTI mbti) {
+    public List<UserMatchStatus> getBatchFromQueue() {
         log.info("get batch from Matching queue");
-
-        Queue<UserMatchStatus> queue = mbtiQueues.get(mbti);
+//        Queue<String> queue = mbtiQueues.get(mbti);
         List<UserMatchStatus> batch = new ArrayList<>();
 
-        for (int i = 0; i < BATCH_SIZE && !queue.isEmpty(); i++) {
-            UserMatchStatus user = queue.poll();
-            if (user != null) {
-                // 여기서 바로 Redis 조회를 하여 "유효한" 유저만 batch에 추가할 수도 있지만,
-                // processMatching() 단계에서 filterAvailableUsers()로 중복 확인하므로 일단 add.
+//        if (queue.size() == 1) {
+//            String userId = queue.peek();
+//            UserMatchStatus user = redisService.getUserStatus(userId);
+//            moveToRelatedQueue(user, mbti);
+//            return batch;
+//        }
+
+//        for (int i = 0; i < BATCH_SIZE && !queue.isEmpty(); i++) {
+//            String userId = queue.poll();
+//            if (userId != null) {
+//                // in-memory startTimeMap에서 해당 userId 제거
+//                userStartTimeMap.remove(userId);
+//                // Redis의 유저 매칭 큐 목록에서도 해당 MBTI 큐 정보 제거
+//                redisService.removeUserFromQueue(userId, mbti.name());
+//                // Redis에서 최신 유저 상태 조회
+//                UserMatchStatus user = redisService.getUserStatus(userId);
+//                if (user != null) {
+//                    batch.add(user);
+//                }
+//            }
+//        }
+        if (universalQueue.size() < 2) {
+            return batch;
+        }
+
+        for (int i = 0; i < BATCH_SIZE && !universalQueue.isEmpty(); i++) {
+            String userId = universalQueue.poll();
+            if (userId == null) continue;
+
+            // Redis에서 최신 상태 조회
+            UserMatchStatus user = redisService.getUserStatus(userId);
+            if (user != null && user.getStatus() == MatchStatus.WAITING) {
                 batch.add(user);
+            } else {
+                // 유효하지 않으면 무시
             }
         }
 
@@ -131,74 +189,100 @@ public class MatchingQueueManager {
 
     /**
      * 매칭이 어려운 유저를 연관된 MBTI 큐로 이동
-     * - 기존 큐에서 제거하지 않음 (Lazy Deletion 및 중복 삽입 관리 고려)
-     * - 연관 큐에만 추가하여 매칭 기회를 확대
+     * - 이동 시 매칭 큐 정보 업데이트.
+     *
+     * @param user 이동할 유저 정보
+     * @param mbti 현재 속한 MBTI
      */
-    public void moveToRelatedQueue(UserMatchStatus user) {
-        log.info("move to another Matching queue");
-
-        MBTI userMbti = MBTI.valueOf(user.getMbti());
-        Queue<UserMatchStatus> largestQueue = findLargestRelatedQueue(userMbti);
-
-        if (largestQueue != null) {
-            largestQueue.offer(user);
-        }
-    }
+//    public void moveToRelatedQueue(UserMatchStatus user, MBTI mbti) {
+//        log.info("move to another Matching queue");
+//        // 연관 MBTI 큐 중에서 큐 사이즈가 가장 큰 MBTI를 선택.
+//        MBTI targetMbti = findLargestRelatedQueue(mbti);
+//        if (targetMbti != null) {
+//            // 선택된 대상 MBTI 큐 획득
+//            Queue<String> targetQueue = mbtiQueues.get(targetMbti);
+//            // in-memory 큐에 userId 추가 및 시작 시간 업데이트
+//            targetQueue.offer(user.getUserId());
+//            userStartTimeMap.put(user.getUserId(), user.getStartTime());
+//            // Redis의 유저 매칭 큐 목록에도 대상 MBTI 큐 추가
+//            redisService.addUserToQueue(user.getUserId(), targetMbti.name());
+//            // 최신 큐 목록을 반영하여 유저 객체 업데이트 후 Redis 저장
+//            Set<String> queues = redisService.getUserMatchingQueues(user.getUserId());
+//            user.setMachingQueues(new ArrayList<>(queues));
+//            redisService.saveUserStatus(user);
+//        }
+//    }
 
     /**
-     * 연관된 MBTI 큐 중 사이즈가 가장 큰 큐를 찾음(매칭 확률을 증가시키기 위해)
+     * 연관된 MBTI 큐 중에서 큐 사이즈가 가장 큰 MBTI를 탐색
+     * - 대상 MBTI 값을 반환하여 이후 Redis 업데이트에 활용
+     *
+     * @param mbti 기준 MBTI
+     * @return 큐 사이즈가 가장 큰 연관 MBTI (없으면 null)
      */
-    private Queue<UserMatchStatus> findLargestRelatedQueue(MBTI mbti) {
-        log.info("find largest size Matching queue");
-
-        List<String> patterns = RELATED_MBTI_PATTERNS.get(mbti);
-
-        return patterns.stream()
-                .flatMap(pattern -> mbtiQueues.entrySet().stream()
-                        .filter(entry -> entry.getKey().name().matches(pattern))
-                        .map(Map.Entry::getValue))
-                .max(Comparator.comparingInt(Queue::size))
-                .orElse(null);
-    }
+//    private MBTI findLargestRelatedQueue(MBTI mbti) {
+//        log.info("find largest size Matching queue");
+//        List<String> patterns = RELATED_MBTI_PATTERNS.get(mbti);
+//        return mbtiQueues.entrySet().stream()
+//                .filter(entry ->
+//                        patterns.stream().anyMatch(pattern -> entry.getKey().name().matches(pattern))
+//                )
+//                .max(Comparator.comparingInt(entry -> entry.getValue().size()))
+//                .map(Map.Entry::getKey)
+//                .orElse(null);
+//    }
 
     /**
-     * 특정 큐에서 유저 제거 (필요한 경우에만)
-     * - 사용되는 곳: 매칭 시 유저가 null이거나 유효하지 않을 때 제거
+     * 특정 MBTI 큐의 크기를 반환.
+     *
+     * @param mbti 대상 MBTI
+     * @return 큐의 크기
      */
-    public void removeFromQueueIfInvalid(MBTI mbti, UserMatchStatus user) {
-        log.info("remove from Matching queue");
-        Queue<UserMatchStatus> queue = mbtiQueues.get(mbti);
-        if (queue != null) {
-            queue.removeIf(queuedUser ->
-                    queuedUser.getUserId().equals(user.getUserId()));
-        }
-    }
+//    public int getQueueSize(MBTI mbti) {
+//        log.info("get Matching queue size");
+//        return mbtiQueues.get(mbti).size();
+//    }
 
     /**
-     * 특정 MBTI 큐의 크기 반환
-     */
-    public int getQueueSize(MBTI mbti) {
-        log.info("get Matching queue size");
-        return mbtiQueues.get(mbti).size();
-    }
-
-    /**
-     * 주기적으로 큐에서 "유령 유저(Ghost Users)"를 제거하는 Garbage Collection
-     * - fixedDelay = 60000 -> 1분마다 실행 (예시)
-     * - Redis에서 이미 삭제된(유효하지 않은) 유저는 큐에서 제거
-     * - Lazy Deletion으로 인해 큐에 남아 있을 수 있는 데이터를 주기적으로 정리
+     * 주기적으로 매칭 큐에서 유령 유저(더 이상 유효하지 않은 유저)를 제거.
+     * - in-memory 큐에 저장된 userId 기준으로 Redis에서 유저 상태를 재확인.
+     *   유효하지 않은 경우 해당 userId를 큐와 userStartTimeMap, 그리고 Redis의 매칭 큐 목록에서 제거.
      */
     @Scheduled(fixedDelay = 60000)
     public void garbageCollectQueues() {
-        log.info("garbage collect matching queues");
-        for (Map.Entry<MBTI, Queue<UserMatchStatus>> entry : mbtiQueues.entrySet()) {
-            Queue<UserMatchStatus> queue = entry.getValue();
+//        log.info("garbage collect matching queues");
+//        for (Map.Entry<MBTI, Queue<String>> entry : mbtiQueues.entrySet()) {
+//            Queue<String> queue = entry.getValue();
+//            queue.removeIf(userId -> {
+//                UserMatchStatus statusInRedis = redisService.getUserStatus(userId);
+//                if (statusInRedis == null || statusInRedis.getStatus() != MatchStatus.WAITING) {
+//                    // in-memory startTimeMap에서 제거
+//                    userStartTimeMap.remove(userId);
+//                    // Redis의 해당 MBTI 큐 정보에서도 제거
+//                    redisService.removeUserFromQueue(userId, entry.getKey().name());
+//                    return true;
+//                }
+//                return false;
+//            });
+//        }
 
-            queue.removeIf(user -> {
-                UserMatchStatus statusInRedis = redisService.getUserStatus(user.getUserId());
-                // Redis에 정보가 없으면 삭제된 유저로 간주
-                return (statusInRedis == null || statusInRedis.getStatus() != MatchStatus.WAITING);
-            });
+        log.info("garbage collect single matching queue");
+        List<String> retained = new ArrayList<>();
+        while (!universalQueue.isEmpty()) {
+            String userId = universalQueue.poll();
+            UserMatchStatus statusInRedis = redisService.getUserStatus(userId);
+            if (statusInRedis != null && statusInRedis.getStatus() == MatchStatus.WAITING) {
+                // 여전히 WAITING이면 유지
+                retained.add(userId);
+            } else {
+                // 매칭 완료 or 취소된 유저 제거
+                userStartTimeMap.remove(userId);
+                redisService.removeUserFromQueue(userId, "SINGLE_QUEUE");
+            }
+        }
+        // 다시 큐에 삽입
+        for (String userId : retained) {
+            universalQueue.offer(userId);
         }
     }
 }

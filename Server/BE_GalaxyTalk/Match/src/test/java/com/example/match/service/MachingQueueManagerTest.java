@@ -59,7 +59,7 @@ class MatchingQueueManagerTest {
         matchingQueueManager.addToQueue(user1);
         matchingQueueManager.addToQueue(user2);
 
-        List<UserMatchStatus> batch = matchingQueueManager.getBatchFromQueue(MBTI.INFP);
+//        List<UserMatchStatus> batch = matchingQueueManager.getBatchFromQueue(MBTI.INFP);
 
         // Check if batch contains 2 users
         assertEquals(2, batch.size());
@@ -74,7 +74,7 @@ class MatchingQueueManagerTest {
         user.setStatus(MatchStatus.WAITING);
 
         matchingQueueManager.addToQueue(user);
-        matchingQueueManager.moveToRelatedQueue(user);
+        matchingQueueManager.moveToRelatedQueue(user, MBTI.INFP);
 
         // Check if the user was moved to the related queue
         assertEquals(1, matchingQueueManager.getQueueSize(MBTI.ENTP));
