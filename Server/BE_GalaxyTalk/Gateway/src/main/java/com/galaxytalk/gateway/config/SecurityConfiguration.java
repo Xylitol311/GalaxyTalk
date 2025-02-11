@@ -4,8 +4,11 @@ import com.galaxytalk.gateway.dto.ApiResponseDto;
 import com.galaxytalk.gateway.filter.CustomAccessDeniedHandler;
 import com.galaxytalk.gateway.filter.JwtAuthenticationFilter;
 
+import org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter;
+import org.springframework.cloud.gateway.filter.headers.XForwardedHeadersFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 
@@ -40,5 +43,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)  // JWT 필터 통과
                 .build();
     }
+
+
 
 }

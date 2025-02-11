@@ -24,6 +24,10 @@ spring:
 #Gateway Setting
   cloud:
     gateway:
+      x-forwarded:
+        enabled: true
+        # 기존 헤더를 유지하지 않고 덮어쓰기
+        append: false
       httpclient:
         connect-timeout: 2000 #try connecting for 2sec
         response-timeout: 60s #wating max 10sec until getting response from server
@@ -67,7 +71,6 @@ eureka:
 #Swagger setting
 springdoc:
   swagger-ui:
-    disable-swagger-default-url: true
     urls:
       - name: auth service
         url: ${AUTH_SERVICE_URL}/v3/api-docs
