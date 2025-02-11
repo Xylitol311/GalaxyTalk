@@ -22,8 +22,8 @@ auth:
   service:
     url: ${AUTH_SERVICE_URL}
 ai:
-  service:
-    url: ${AI_SERVICE_URL}
+  ip:
+    url: ${AI_IP_URL}
 
 management:
   endpoints:

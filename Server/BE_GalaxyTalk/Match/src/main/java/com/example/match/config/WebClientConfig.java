@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Configuration
 @Slf4j
 public class WebClientConfig {
-    @Value("${ai.service.url}")
+    @Value("${ai.ip.url}")
     private static String aiServiceBaseUrl;
     @Value("${chat.service.url}")
     private static String chatServiceBaseUrl;

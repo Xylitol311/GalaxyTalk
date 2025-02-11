@@ -148,7 +148,7 @@ public class MatchController {
      */
     @GetMapping("/test")
     public ResponseEntity<ApiResponseDto> test(
-            @RequestBody String concern1, @RequestBody String concern2) {
+            String concern1, String concern2) {
         log.info("Test 요청 전송됨: " + concern1);
         UserMatchStatus user1 = new UserMatchStatus();
         UserMatchStatus user2 = new UserMatchStatus();
