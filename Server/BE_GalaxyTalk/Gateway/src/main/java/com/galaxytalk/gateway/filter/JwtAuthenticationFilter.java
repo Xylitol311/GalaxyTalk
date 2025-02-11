@@ -73,8 +73,6 @@ public class JwtAuthenticationFilter implements WebFilter {
                 .build();
 
 
-
-
         System.out.println("User ID: " + userId);
         System.out.println("Role: " + role);
 
