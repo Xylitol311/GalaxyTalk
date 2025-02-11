@@ -10,17 +10,18 @@ import org.springframework.web.server.ServerWebExchange;
 @Configuration
 public class GatewayConfig {
     @Bean
-    public HttpHeadersFilter customXForwardedHeadersFilter() {  // 이름 변경
+    public HttpHeadersFilter customXForwardedHeadersFilter() {
         return new XForwardedHeadersFilter() {
             @Override
             public HttpHeaders filter(HttpHeaders headers, ServerWebExchange exchange) {
+                // 기존 헤더 제거
                 headers.remove("X-Forwarded-For");
                 headers.remove("X-Forwarded-Proto");
                 headers.remove("X-Forwarded-Host");
                 headers.remove("X-Forwarded-Port");
+                // 부모 클래스의 filter 메서드 호출하고 결과 반환
                 return super.filter(headers, exchange);
             }
         };
     }
-
 }

@@ -199,6 +199,7 @@ services:
       # 외부 프록시(Nginx)를 통한 WSS 연결을 위해 LIVEKIT_WS_URL 수정
       LIVEKIT_WS_URL: "wss://i12a503.p.ssafy.io/livekitws/"
       LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
+      LIVEKIT_LOG_LEVEL: "debug"
     restart: always
     networks:
       - my-network
