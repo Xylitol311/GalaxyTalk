@@ -1,4 +1,5 @@
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const OAUTH_URL = import.meta.env.VITE_OAUTH_URL;
 export const VERSION = import.meta.env.VITE_API_VERSION;
 
 export const ROUTE = {
@@ -35,7 +36,7 @@ const DOMAIN = {
 
 export const API_PATH = {
     OAUTH: {
-        LOGIN: `${BASE_URL}/oauth2/authorization/naver`,
+        LOGIN: `/oauth2/authorization/kakao`,
         LOGOUT: `${DOMAIN.OAUTH}/logout`,
         SIGNUP: `${DOMAIN.OAUTH}/signup`,
         INFO: DOMAIN.OAUTH,

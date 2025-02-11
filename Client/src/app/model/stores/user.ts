@@ -6,6 +6,7 @@ type State = UserBaseType & UserStatusType;
 type Actions = {
     setUserBase: (userInfo: UserBaseType) => void;
     setUserStatus: (userState: UserStatusType) => void;
+    getUserBase: () => UserBaseType;
     reset: () => void;
 };
 
@@ -14,11 +15,11 @@ const initialState: State = {
     mbti: '',
     planetId: 0,
     energy: 0,
-    role: 'GUEST',
+    role: null,
     UserInteractionState: 'idle',
 };
 
-export const useUserStore = create<State & Actions>()((set) => ({
+export const useUserStore = create<State & Actions>()((set, get) => ({
     ...initialState,
     setUserBase: (userInfo: UserBaseType) => {
         const { userId, mbti, planetId, energy, role } = userInfo;
@@ -26,6 +27,10 @@ export const useUserStore = create<State & Actions>()((set) => ({
     },
     setUserStatus: (userState: UserStatusType) => {
         set({ ...userState });
+    },
+    getUserBase: () => {
+        const { userId, mbti, planetId, energy, role } = get();
+        return { userId, mbti, planetId, energy, role };
     },
     reset: () => {
         set(initialState);

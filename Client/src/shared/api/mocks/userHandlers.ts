@@ -25,4 +25,20 @@ export const userHandlers = [
             },
         });
     }),
+
+    http.post(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.SIGNUP}`, () => {
+        return HttpResponse.json({
+            success: true,
+            message: '회원가입에 성공했습니다',
+            data: null,
+        });
+    }),
+
+    http.post(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.LOGOUT}`, () => {
+        return HttpResponse.json({
+            success: true,
+            message: '로그아웃에 성공했습니다',
+            data: null,
+        });
+    }),
 ];

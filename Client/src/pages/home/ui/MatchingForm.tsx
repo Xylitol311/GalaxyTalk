@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MBTI_TYPES } from '@/app/config/constants/mbti';
 import Telescope from '@/widget/Telescope';
+import { usePostMatchStart } from '../../../features/match/api/queries';
+import {
+    MatchStartFormValues,
+    matchStartSchema,
+} from '../../../features/match/model/schema';
 import { Button } from '../../../shared/ui/shadcn/button';
 import {
     Dialog,
@@ -22,8 +27,6 @@ import {
     SelectValue,
 } from '../../../shared/ui/shadcn/select';
 import { Textarea } from '../../../shared/ui/shadcn/textarea';
-import { usePostMatchStart } from '../api/queries';
-import { MatchStartFormValues, matchStartSchema } from '../model/schema';
 
 export default function MatchingForm() {
     const [open, setOpen] = useState(false);

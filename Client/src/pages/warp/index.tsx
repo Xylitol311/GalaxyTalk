@@ -10,7 +10,7 @@ export default function WarpPage() {
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             navigate(PATH.ROUTE.MATCH);
-        }, 5000);
+        }, 6000);
 
         return () => clearTimeout(timeoutId);
     }, [navigate]);
