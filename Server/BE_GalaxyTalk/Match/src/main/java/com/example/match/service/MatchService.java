@@ -88,7 +88,7 @@ public class MatchService {
     public void cancelMatching(String userId) {
         // 매칭 중인 유저인지 확인
         UserMatchStatus userMatchStatus = redisService.getUserStatus(userId);
-        if (userMatchStatus == null || userMatchStatus.getStatus() != MatchStatus.MATCHED ) {
+        if (userMatchStatus == null) {
             throw new BusinessException(ErrorCode.USER_NOT_MATCHED_STATUS);
         }
 
