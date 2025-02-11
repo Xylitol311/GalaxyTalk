@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Html } from '@react-three/drei';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MBTI_TYPES } from '@/app/config/constants/mbti';
+import { IMAGE_PATH } from '@/app/config/constants/path';
 import { PLANETS } from '@/app/config/constants/planet';
 import { usePostSignUp } from '@/features/user/api/queries';
 import { SignupFormValues, signupSchema } from '@/features/user/model/schema';
@@ -85,7 +86,7 @@ export default function SignupForm() {
                         ${isSelected ? 'bg-gray-800' : 'bg-gray-300'}
                         hover:bg-gray-700 hover:scale-105`}>
                                                     <img
-                                                        src={`./src/shared/assets/images/planets/${planet.imageUrl}`}
+                                                        src={`${IMAGE_PATH}images/planets/${planet.imageUrl}`}
                                                         alt={planet.name}
                                                         className="w-32 h-32 object-cover"
                                                     />
@@ -117,7 +118,7 @@ export default function SignupForm() {
                                                 }
                                             </span>
                                             <img
-                                                src={`./src/shared/assets/images/planets/${watch('planetId')}.PNG`}
+                                                src={`${IMAGE_PATH}images/planets/${watch('planetId')}.PNG`}
                                                 alt={
                                                     PLANETS.find(
                                                         (planet) =>
