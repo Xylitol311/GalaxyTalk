@@ -5,6 +5,7 @@ import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExternalApiService {
     private final WebClient aiServiceClientWithoutLoadBalancing;
     private final WebClient chatServiceClient;
@@ -31,6 +33,7 @@ public class ExternalApiService {
      * AI 서버에 두 유저 간의 유사도 점수 계산 요청
      */
     public double calculateSimilarity(UserMatchStatus user1, UserMatchStatus user2) {
+        log.info("calculating similarity 실행");
         Map<String, Object> request = Map.of(
                 "sentence1", user1.getConcern(),
                 "sentence2", user2.getConcern()
