@@ -7,9 +7,10 @@ import EarthSky from '@/widget/EarthSky';
 import SignupForm from './ui/SignupForm';
 
 export default function Signup() {
-    const { role } = useUserStore();
-    const isGuest = role === 'GUEST';
     const navigate = useNavigate();
+    const { role } = useUserStore();
+
+    const isGuest = role === 'GUEST';
 
     useEffect(() => {
         if (isGuest) {
