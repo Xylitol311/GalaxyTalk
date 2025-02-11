@@ -11,7 +11,6 @@ jwt:
 spring:
   main:
     web-application-type: reactive
-    allow-bean-definition-overriding: true
 
 
   #Application name
