@@ -26,7 +26,9 @@ spring:
   cloud:
     gateway:
       forwarded:
-        enabled: false
+        enabled: true  # ✅ X-Forwarded-* 헤더를 한 번만 추가하도록 설정
+      x-forwarded:
+        enabled: true  #
         # 기존 헤더를 유지하지 않고 덮어쓰기
         append: false
       httpclient:
