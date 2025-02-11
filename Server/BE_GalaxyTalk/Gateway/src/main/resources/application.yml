@@ -2,7 +2,6 @@
 #Server Setting
 server:
   port: 8080
-  max-http-request-header-size: 100KB
 
 #FOR TOEKN
 jwt:
