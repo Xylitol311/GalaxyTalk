@@ -1,11 +1,9 @@
 package com.example.match.service;
 
-import com.example.match.constant.MBTI;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

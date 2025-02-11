@@ -18,10 +18,10 @@ public class WebClientConfig {
     @Value("${ai.service.url}")
     private String aiServiceBaseUrl;
 
-    @Value("${auth.service.name}")  // 서비스 이름 주입
+    @Value("${auth.service.url}")  // 서비스 이름 주입
     private String authServiceName;
 
-    @Value("${chat.service.name}")  // 서비스 이름 주입
+    @Value("${chat.service.url}")  // 서비스 이름 주입
     private String chatServiceName;
 
     @PostConstruct
