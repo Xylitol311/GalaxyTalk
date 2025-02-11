@@ -211,6 +211,22 @@ public class ChatController {
     }
 
     /**
+     * 참여자들의 정보(UserId & 고민 & MBTI & 매너온도 2개, 유사도) 반환
+     * @param chatRoomId
+     */
+    @GetMapping("/{chatRoomId}/participants")
+    public ResponseEntity<ApiResponseDto> getParticipants(@PathVariable("chatRoomId") String chatRoomId) {
+        ParticipantsResponse participants = chatService.getParticipantsInfo(chatRoomId);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "참가자 정보 조회 성공",
+                participants
+        ));
+    }
+
+
+    /**
      * 세션과 property 정보를 받아 token을 생성합니다.
      */
     private String generateToken(String roomName, String participantId) {

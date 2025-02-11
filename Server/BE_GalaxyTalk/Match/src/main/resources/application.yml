@@ -15,6 +15,16 @@ swagger:
   match:
     url: ${MATCH_SERVICE_URL}
 
+chat:
+  service:
+    url: ${CHAT_SERVICE_URL}
+auth:
+  service:
+    url: ${AUTH_SERVICE_URL}
+ai:
+  service:
+    url: ${AI_SERVICE_URL}
+
 management:
   endpoints:
     web:

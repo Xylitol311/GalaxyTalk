@@ -103,6 +103,7 @@ services:
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - NAVER_LOGIN_URL=${NAVER_LOGIN_URL}
 
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
@@ -156,6 +157,8 @@ services:
       - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - MATCH_SERVICE_URL=${MATCH_SERVICE_URL}
 
     # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
@@ -194,9 +197,12 @@ services:
       # Docker 네트워크 내부에서는 컨테이너 이름으로 접근
       - AUTH_SERVICE_URL=http://galaxy-auth:8080
       - MATCH_SERVICE_URL=http://galaxy-match:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
       - SUPPORT_SERVICE_URL=http://galaxy-support:8080
       - EUREKA_SERVICE_URL=http://eureka:8080
       - FRONT_URL=${FRONT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
 
     depends_on:
       - eureka
@@ -228,11 +234,13 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
       - COMMENT_SERVICE_URL=http://galaxy-support:8080
       - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
       - LIVEKIT_URL=http://livekit:7880
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
     depends_on:
       - mongodb
       - galaxy-auth

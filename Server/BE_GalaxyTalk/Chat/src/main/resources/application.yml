@@ -8,7 +8,7 @@ spring:
       client:
         config:
           auth-service:
-            url: http://localhost:8081 #auth
+            url: ${AUTH_SERVICE_URL} #auth
 server:
   port: 8084
 
@@ -56,3 +56,12 @@ openai:
   api:
     key: ${OPENAI_API_KEY}
 
+# Actuator 설정 (Spring Boot 3.4.1 기준)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"  # 필요한 엔드포인트들을 쉼표로 구분하여 문자열로 지정합니다.
+  endpoint:
+    health:
+      show-components: always         # 헬스 체크 시 상세 정보를 항상 노출합니다.

@@ -52,6 +52,10 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);  // 필터 통과
         }
 
+        if (path.startsWith("/api/oauth/")) {
+            return chain.filter(exchange);  // 필터 통과
+        }
+
 
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);

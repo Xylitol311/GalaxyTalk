@@ -190,8 +190,8 @@ public class ChatService {
             String otherUserId = other.getUserId();
             previousChatResponse.setMyConcern(me.getConcern());
             previousChatResponse.setParticipantConcern(other.getConcern());
-
-            previousChatResponse.setParticipantPlanet(externalApiService.getUserPlanet(otherUserId));
+            int planetId = (Integer) externalApiService.getUserInfo(otherUserId).get("planetId");
+            previousChatResponse.setParticipantPlanet(planetId);
 
             // TODO: Comment Server 구현 후 연동
             // previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
@@ -243,6 +243,47 @@ public class ChatService {
         chatRepository.updateQuestions(chatRoomId, questions);
     }
 
+
+    /**
+     * 방 Id를 가지고 참여자들을 추출하고, 각 참여자들에 대한 정보를 Auth api에서 가져옵니다.
+     * @param chatRoomId
+     */
+    public ParticipantsResponse getParticipantsInfo(String chatRoomId) {
+        ParticipantsResponse participantsResponse = new ParticipantsResponse();
+
+        // 방 정보에서 유사도 점수와 참가자 정보 추출
+        ChatRoom chatRoom = chatRepository.findChatRoomById(chatRoomId);
+        List<Participant> participants = chatRoom.getParticipants();
+
+        // 반환 형식에 일치하는 DTO 리스트 형태
+        List<ParticipantInfo> participantsList = new ArrayList<>();
+        for(Participant participant : participants) {
+            String userId = participant.getUserId();
+
+            // auth 서버에서 값 추출
+            int planetId = (Integer) externalApiService.getUserInfo(userId).get("planetId");
+            String mbti = (String) externalApiService.getUserInfo(userId).get("mbti");
+            int energy = (Integer) externalApiService.getUserInfo(userId).get("energy");
+
+            // 고민 추출
+            String concern = participant.getConcern();
+
+            // DTO 생성 후 리스트 add
+            participantsList.add(new ParticipantInfo(
+                    userId,
+                    mbti,
+                    concern,
+                    planetId,
+                    energy
+            ));
+        }
+
+        participantsResponse.setParticipants(participantsList);
+        participantsResponse.setSimilarity(chatRoom.getSimilarityScore());
+
+        return participantsResponse;
+    }
+
     private String createPromptwithTwoConcerns(String concern1, String concern2) {
         return String.format(questionsPrompt, concern1, concern2);
     }
@@ -253,4 +294,5 @@ public class ChatService {
                 status
         ));
     }
+
 }
