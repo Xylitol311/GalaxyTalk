@@ -45,6 +45,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //성공할 경우 받은 데이터 처리
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
+
         //데이터 1) provider(네이버)로 부터 받은 serialNumber
         String serialNumber = customUserDetails.getName();
 
