@@ -300,6 +300,7 @@ public class AuthController {
 
         //브라우저가 쿠키값을 전송할 URL 지정
         cookie.setPath("/");
+        cookie.setDomain("i12a503.p.ssafy.io");
 
         //브라우저에서(javascript를 통해) 쿠키에 접근할 수 없도록 제한
         cookie.setHttpOnly(true);
