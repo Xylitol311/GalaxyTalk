@@ -181,6 +181,9 @@ public class AuthController {
         Cookie accessTokenCookie = new Cookie("AccessToken", null);
         accessTokenCookie.setMaxAge(0);
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setAttribute("SameSite","None");
         response.addCookie(accessTokenCookie);
 
         // 4) 사용자 withdrawn 정보 수정
