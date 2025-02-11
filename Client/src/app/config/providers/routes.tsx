@@ -4,6 +4,7 @@ import {
     Route,
 } from 'react-router';
 import Layout from '@/app/ui/logo/Layout';
+import ChattingRoom from '@/pages/chatting';
 import Home from '@/pages/home';
 import MatchingRoom from '@/pages/match';
 import Signup from '@/pages/signup';
@@ -18,6 +19,7 @@ export const router = createBrowserRouter(
             <Route path={ROUTE_PATH.HOME} element={<Home />} />
             <Route path={ROUTE_PATH.SIGN_UP} element={<Signup />} />
             <Route path={ROUTE_PATH.MATCH} element={<MatchingRoom />} />
+            <Route path={ROUTE_PATH.CHAT} element={<ChattingRoom />} />
             <Route path={ROUTE_PATH.WARP} element={<WarpPage />} />
         </Route>
     )

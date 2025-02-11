@@ -24,3 +24,8 @@ export const PLANETS = [
         imageUrl: '4.PNG',
     },
 ];
+
+export const getPlanetNameById = (planetId: number | undefined) => {
+    if (!planetId) return '';
+    return PLANETS.find((planet) => planet.id === planetId)?.name || '';
+};
