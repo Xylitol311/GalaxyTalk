@@ -27,10 +27,10 @@ swagger:
 # application.yml에서
 chat:
   service:
-    url: ${CHAT_SERVICE_URL:chat-service}    # 기본값은 chat-service
+    url: ${CHAT_SERVICE_URL}    # 기본값은 chat-service
 auth:
   service:
-    url: ${AUTH_SERVICE_URL:auth-service}    # 기본값은 auth-service
+    url: ${AUTH_SERVICE_URL}    # 기본값은 auth-service
 ai:
   service:
     url: ${AI_SERVICE_URL}
