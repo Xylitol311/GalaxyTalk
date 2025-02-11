@@ -1,5 +1,6 @@
 package com.example.match.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -14,12 +15,20 @@ import reactor.core.publisher.Mono;
 @Configuration
 @Slf4j
 public class WebClientConfig {
-    @Value("${ai.ip.url}")
-    private static String aiServiceBaseUrl;
-    @Value("${chat.service.url}")
-    private static String chatServiceBaseUrl;
-    @Value("${auth.service.url}")
-    private static String authServiceBaseUrl;
+    @Value("${ai.service.url}")
+    private String aiServiceBaseUrl;
+
+    @Value("${auth.service.name}")  // 서비스 이름 주입
+    private String authServiceName;
+
+    @Value("${chat.service.name}")  // 서비스 이름 주입
+    private String chatServiceName;
+
+    @PostConstruct
+    public void init() {
+        log.info("Initialized WebClient with chat service name: {}", chatServiceName);
+        log.info("Initialized WebClient with auth service name: {}", authServiceName);
+    }
 
     @Bean
     @LoadBalanced // Eureka 기반 로드밸런싱 적용
@@ -43,14 +52,14 @@ public class WebClientConfig {
     @Bean
     public WebClient chatServiceClient(WebClient.Builder webClientBuilder) {
         return webClientBuilder
-                .baseUrl(chatServiceBaseUrl) // Eureka 서비스명 사용
+                .baseUrl("http://" + chatServiceName)
                 .build();
     }
 
     @Bean
     public WebClient authServiceClient(WebClient.Builder webClientBuilder) {
         return webClientBuilder
-                .baseUrl(authServiceBaseUrl) // Eureka 서비스명 사용
+                .baseUrl("http://" + authServiceName)
                 .build();
     }
 
