@@ -300,6 +300,7 @@ public class AuthController {
 
         //브라우저에서(javascript를 통해) 쿠키에 접근할 수 없도록 제한
         cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "None");
 
 
         return cookie;

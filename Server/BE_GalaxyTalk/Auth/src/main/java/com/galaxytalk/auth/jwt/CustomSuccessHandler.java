@@ -71,11 +71,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 권한에 따른 로그인 후 로직 분기
         if(role.equals("ROLE_GUEST")) {
-            response.sendRedirect(frontUrl+"/signup");
+            response.sendRedirect(frontUrl+"signup");
         }else if(role.equals("ROLE_USER")){
             response.sendRedirect(frontUrl);
         }else{
-            response.sendRedirect(frontUrl+"/signup");
+            response.sendRedirect(frontUrl+"signup");
         }
     }
 
