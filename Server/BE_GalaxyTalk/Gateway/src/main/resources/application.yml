@@ -25,8 +25,8 @@ spring:
 #Gateway Setting
   cloud:
     gateway:
-      x-forwarded:
-        enabled: true
+      forwarded:
+        enabled: false
         # 기존 헤더를 유지하지 않고 덮어쓰기
         append: false
       httpclient:
