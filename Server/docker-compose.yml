@@ -185,6 +185,9 @@ services:
       - "7881:7881"
       - "7882:7882/udp"
       - "50000-50020:50000-50020/udp"
+    environment:
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
     volumes:
       # 로컬 파일(./livekit.yaml)을 컨테이너 내부(/app/livekit.yaml)에 연결
       - /home/ubuntu/livekit.yml:/app/livekit.yml
