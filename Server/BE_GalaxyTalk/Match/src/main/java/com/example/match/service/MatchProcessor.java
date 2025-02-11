@@ -3,7 +3,6 @@ package com.example.match.service;
 import com.example.match.domain.MatchResultStatus;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.MatchApproveRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

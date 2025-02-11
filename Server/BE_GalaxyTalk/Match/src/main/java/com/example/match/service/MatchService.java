@@ -4,7 +4,6 @@ import com.example.match.constant.MBTI;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchApproveRequestDto;
-import com.example.match.dto.UserResponseDto;
 import com.example.match.dto.UserStatusDto;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
@@ -195,7 +194,8 @@ public class MatchService {
                 if (user1.getUserId().equals(user2.getUserId()))
                     continue;
 
-                double similarity = externalApiService.calculateSimilarity(user1, user2);
+//                double similarity = externalApiService.calculateSimilarity(user1, user2);
+                double similarity = 0.87976;
                 pairs.add(new MatchPair(user1, user2, similarity));
             }
         }

@@ -1,7 +1,6 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.MessageResponseDto;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
