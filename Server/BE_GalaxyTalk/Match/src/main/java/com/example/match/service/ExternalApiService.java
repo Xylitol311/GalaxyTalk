@@ -20,6 +20,7 @@ public class ExternalApiService {
     private final WebClient authServiceClient;
 
     public UserResponseDto.UserSendDTO getUserInfo(String userId) {
+        log.info("Getting user info from Auth Service...");
         return authServiceClient.get()
                 .uri("/api/oauth")
                 .header("X-User-ID", userId)
@@ -55,6 +56,7 @@ public class ExternalApiService {
      * - Chat 서버에서 sessionId, token 및 chatRoomId 반환
      */
     public ChatRoomResponseDto.ChatResponse createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
+        log.info("Createing chat room from Chat Service...");
         Map<String, Object> requestBody = Map.of(
                 "userId1", user1.getUserId(),
                 "userId2", user2.getUserId(),
@@ -76,6 +78,7 @@ public class ExternalApiService {
      * 세션 서버에 유저 상태 변경 요청 (JSON 형식)
      */
     public void setUserStatus(String userId, String status) {
+        log.info("Setting user status to " + status);
         authServiceClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/oauth/status")

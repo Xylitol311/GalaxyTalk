@@ -5,12 +5,14 @@ import com.example.match.domain.UserMatchStatus;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RedisService {
@@ -22,6 +24,7 @@ public class RedisService {
      * 유저 상태를 Redis에 저장
      */
     public void saveUserStatus(UserMatchStatus user) {
+        log.info("save user status");
         if (user == null || user.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
@@ -32,6 +35,7 @@ public class RedisService {
      * Redis에서 유저 상태 조회
      */
     public UserMatchStatus getUserStatus(String userId) {
+        log.info("Getting user match status...");
         Object data = redisTemplate.opsForValue().get(USER_KEY_PREFIX + userId);
         if (data == null) {
             // 존재하지 않는 경우 null을 반환하도록 (비즈니스 로직에서 처리)
@@ -51,6 +55,7 @@ public class RedisService {
      * - Lazy Deletion 시 매칭 취소 혹은 매칭 성공 시점에 호출
      */
     public void deleteUserStatus(String userId) {
+        log.info("Deleting user match status...");
         redisTemplate.delete(USER_KEY_PREFIX + userId);
     }
 
@@ -58,6 +63,7 @@ public class RedisService {
      * 매칭 정보 저장
      */
     public void saveMatchInfo(String matchId, MatchResultStatus matchResult) {
+        log.info("Setting match info to " + matchResult);
         if (matchId == null || matchResult == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "matchId 혹은 matchResult가 null입니다.");
         }
@@ -68,6 +74,7 @@ public class RedisService {
      * 매칭 정보 조회
      */
     public MatchResultStatus getMatchInfo(String matchId) {
+        log.info("Getting match info...");
         Object data = redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
         if (data == null) {
             // 존재하지 않는 경우 null을 반환
@@ -86,6 +93,7 @@ public class RedisService {
      * 매칭 정보 삭제
      */
     public void deleteMatchInfo(String matchId) {
+        log.info("Deleting match info...");
         redisTemplate.delete(MATCH_KEY_PREFIX + matchId);
     }
 
@@ -94,6 +102,7 @@ public class RedisService {
      * - 실시간 접속 유저 파악 시 사용
      */
     public void addUserToWaitingQueue(UserMatchStatus userMatchStatus) {
+        log.info("Adding user to waiting queue from Redis...");
         if (userMatchStatus == null || userMatchStatus.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
@@ -105,6 +114,7 @@ public class RedisService {
      * - 매칭 취소 혹은 완료된 경우 실행
      */
     public void removeUserFromWaitingQueue(String userId) {
+        log.info("Removing user from waiting queue from Redis...");
         redisTemplate.opsForZSet().remove("waiting_users", userId);
     }
 
@@ -112,6 +122,7 @@ public class RedisService {
      * 실시간 매칭 대기 유저 중 랜덤으로 조회
      */
     public List<String> getRandomWaitingUsers(int count) {
+        log.info("Getting random waiting users...");
         // randomMembers가 null을 반환할 수도 있으므로 안전하게 처리
         List<Object> randomObjects = redisTemplate.opsForZSet().randomMembers("waiting_users", count);
         if (randomObjects == null) {

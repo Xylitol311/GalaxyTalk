@@ -8,12 +8,14 @@ import com.example.match.exception.ErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
+@Slf4j
 @Getter
 @Component
 @RequiredArgsConstructor
@@ -69,6 +71,7 @@ public class MatchingQueueManager {
      * - Redis에 변경 사항을 다시 저장하여 상태 동기화
      */
     public void addToQueue(UserMatchStatus user) {
+        log.info("add to Matching queue");
         try {
             // machingQueues가 null일 수 있으므로 초기화
             if (user.getMachingQueues() == null) {
@@ -109,6 +112,8 @@ public class MatchingQueueManager {
      *   (=매칭되면 안되는 유저이므로 매칭 과정에서 제외)
      */
     public List<UserMatchStatus> getBatchFromQueue(MBTI mbti) {
+        log.info("get batch from Matching queue");
+
         Queue<UserMatchStatus> queue = mbtiQueues.get(mbti);
         List<UserMatchStatus> batch = new ArrayList<>();
 
@@ -130,6 +135,8 @@ public class MatchingQueueManager {
      * - 연관 큐에만 추가하여 매칭 기회를 확대
      */
     public void moveToRelatedQueue(UserMatchStatus user) {
+        log.info("move to another Matching queue");
+
         MBTI userMbti = MBTI.valueOf(user.getMbti());
         Queue<UserMatchStatus> largestQueue = findLargestRelatedQueue(userMbti);
 
@@ -142,6 +149,8 @@ public class MatchingQueueManager {
      * 연관된 MBTI 큐 중 사이즈가 가장 큰 큐를 찾음(매칭 확률을 증가시키기 위해)
      */
     private Queue<UserMatchStatus> findLargestRelatedQueue(MBTI mbti) {
+        log.info("find largest size Matching queue");
+
         List<String> patterns = RELATED_MBTI_PATTERNS.get(mbti);
 
         return patterns.stream()
@@ -157,6 +166,7 @@ public class MatchingQueueManager {
      * - 사용되는 곳: 매칭 시 유저가 null이거나 유효하지 않을 때 제거
      */
     public void removeFromQueueIfInvalid(MBTI mbti, UserMatchStatus user) {
+        log.info("remove from Matching queue");
         Queue<UserMatchStatus> queue = mbtiQueues.get(mbti);
         if (queue != null) {
             queue.removeIf(queuedUser ->
@@ -168,6 +178,7 @@ public class MatchingQueueManager {
      * 특정 MBTI 큐의 크기 반환
      */
     public int getQueueSize(MBTI mbti) {
+        log.info("get Matching queue size");
         return mbtiQueues.get(mbti).size();
     }
 
@@ -179,6 +190,7 @@ public class MatchingQueueManager {
      */
     @Scheduled(fixedDelay = 60000)
     public void garbageCollectQueues() {
+        log.info("garbage collect matching queues");
         for (Map.Entry<MBTI, Queue<UserMatchStatus>> entry : mbtiQueues.entrySet()) {
             Queue<UserMatchStatus> queue = entry.getValue();
 
