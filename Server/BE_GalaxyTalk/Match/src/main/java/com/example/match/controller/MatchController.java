@@ -8,7 +8,6 @@ import com.example.match.dto.MatchRequestDto;
 import com.example.match.dto.UserStatusDto;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
-import com.example.match.service.ExternalApiService;
 import com.example.match.service.MatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
