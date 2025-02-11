@@ -192,9 +192,10 @@ services:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
       LIVEKIT_PORT: 7880
       LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
-      LIVEKIT_WS_URL: "ws://i12a503.p.ssafy.io:7880"
-      LIVEKIT_RTC_PORT: "7882"
+      LIVEKIT_EXTERNAL_IP: "13.124.213.63"  # 이 부분 추가
+      LIVEKIT_RTC_PORT: 7882
       LIVEKIT_NODE_IP: "13.124.213.63"
+      LIVEKIT_WS_URL: "ws://13.124.213.63:7880"
       LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
 
     restart: always
