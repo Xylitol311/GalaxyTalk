@@ -77,7 +77,7 @@ public class ChatService {
         String chatRoomId = chatRepository.save(chatRoom).getId();
 
         // AI 질문을 방 생성 시점에 생성합니다.
-        createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2());
+        // createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2());
 
         return chatRoomId;
     }
