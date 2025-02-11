@@ -3,4 +3,4 @@ RUN npm install -g serve
 RUN mkdir /dist
 ADD ./dist /dist
 EXPOSE 3000
-ENTRYPOINT ["serve", "-s", "dist"]
+ENTRYPOINT ["serve", "-s", "dist", "-l", "0.0.0.0:3000"]
