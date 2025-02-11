@@ -10,7 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
 @Configuration
 public class GatewayConfig {
     @Bean
-    public HttpHeadersFilter xForwardedHeadersFilter() {
+    public HttpHeadersFilter customXForwardedHeadersFilter() {
         return new XForwardedHeadersFilter() {
             @Override
             public HttpHeaders filter(HttpHeaders headers, ServerWebExchange exchange) {
