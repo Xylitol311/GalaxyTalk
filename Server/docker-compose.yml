@@ -103,6 +103,7 @@ services:
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - NAVER_LOGIN_URL=${NAVER_LOGIN_URL}
 
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
