@@ -50,31 +50,16 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         System.out.println("들어오고 있는 경로 : " + path);
 
-        if (path.startsWith("/oauth2/authorization/")) {
-            return chain.filter(exchange);  // 필터 통과
-        }
-
-
-        if (request.getMethod() == HttpMethod.OPTIONS) {
+        // ✅ 특정 경로 제외
+        if (path.startsWith("/oauth2/authorization/") || request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
 
-
-        // 1. 쿠키에서 AccessToken 추출
+        // ✅ AccessToken 쿠키 추출
         String token = request.getCookies().getFirst("AccessToken") != null ?
                 request.getCookies().getFirst("AccessToken").getValue() : null;
 
-        // 에러처리) token이 존재하지 않을 때
-        if (token == null) {
-            return onError(exchange, HttpStatus.UNAUTHORIZED);
-        }
-
-        // 에러처리) token의 유효기간이 지났을 때
-        try {
-            if (jwtUtil.isExpired(token)) {
-                return onError(exchange, HttpStatus.UNAUTHORIZED);
-            }
-        } catch (ExpiredJwtException e){
+        if (token == null || isTokenExpired(token)) {
             return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
 
@@ -85,6 +70,14 @@ public class JwtAuthenticationFilter implements WebFilter {
         // 3. 새로운 요청 객체 생성 (헤더에 userId 추가)
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                 .header("X-User-ID", userId)
+                .headers(httpHeaders -> {
+                    httpHeaders.remove("X-Real-IP"); // 필요 없는 헤더 제거
+                    httpHeaders.remove("X-Forwarded-For");
+                    httpHeaders.remove("X-Forwarded-Proto");
+                    httpHeaders.remove("X-Forwarded-Port");
+                    httpHeaders.remove("X-Forwarded-Host");
+                    httpHeaders.remove("Forwarded");
+                })
                 .build();
 
         System.out.println("User ID: " + userId);
@@ -105,6 +98,13 @@ public class JwtAuthenticationFilter implements WebFilter {
         return chain.filter(exchange.mutate().request(modifiedRequest).build())
                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
 
+    }
+    private boolean isTokenExpired(String token) {
+        try {
+            return jwtUtil.isExpired(token);
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, HttpStatus status) {
