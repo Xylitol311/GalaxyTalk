@@ -39,6 +39,8 @@ public class MatchService {
      * 3. WebSocket으로 대기 시작 알림
      */
     public void startMatching(UserMatchStatus user) {
+        log.info("Starting Matching...");
+
         // 이미 매칭 중인 유저인지 확인
         UserMatchStatus userMatchStatus = redisService.getUserStatus(user.getUserId());
         if (userMatchStatus != null) {
@@ -84,6 +86,12 @@ public class MatchService {
      * 매칭 취소 처리
      */
     public void cancelMatching(String userId) {
+        // 매칭 중인 유저인지 확인
+        UserMatchStatus userMatchStatus = redisService.getUserStatus(userId);
+        if (userMatchStatus == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_MATCHED_STATUS);
+        }
+
         // Redis에서 유저 정보 삭제
         redisService.deleteUserStatus(userId);
 
@@ -124,15 +132,13 @@ public class MatchService {
      */
     @Async
     public CompletableFuture<Void> processMbtiQueue(MBTI mbti) {
-        List<UserMatchStatus> batch = queueManager.getBatchFromQueue(mbti);
-        if (batch.size() < 2) {
-            if (batch.size() == 1) {
-                queueManager.moveToRelatedQueue(batch.get(0));
-            }
+//        List<UserMatchStatus> batch = queueManager.getBatchFromQueue(mbti);
+        List<UserMatchStatus> batch = queueManager.getBatchFromQueue();
+        if (batch.isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
 
-        processMatching(batch, mbti);
+        processMatching(batch);
         return CompletableFuture.completedFuture(null);
     }
 
@@ -141,16 +147,21 @@ public class MatchService {
      * 배치 단위로 매칭 처리
      * 가장 높은 유사도를 가진 페어를 찾아 매칭
      */
-    private void processMatching(List<UserMatchStatus> users, MBTI mbti) {
+    private void processMatching(List<UserMatchStatus> users) {
+        log.info("유저 목록 기반 매칭 처리 시작");
+        log.info("이거봐라 몇명인지" + users.size());
         // 매칭 가능한 유저만 필터링
         List<UserMatchStatus> availableUsers = filterAvailableUsers(users);
-        if (availableUsers.size() < 2) return;
+        if (availableUsers.size() < 2) {
+            log.info("필터링 돼서 두명보다 적음");
+            return;
+        }
 
         // 모든 가능한 페어의 유사도 계산 및 정렬
         List<MatchPair> sortedPairs = calculateAllPairsSimilarity(availableUsers);
 
         // 매칭 쌍 생성 및 처리
-        processMatchPairs(sortedPairs, mbti);
+        processMatchPairs(sortedPairs);
     }
 
     /**
@@ -170,12 +181,17 @@ public class MatchService {
      * 모든 가능한 페어의 유사도 계산
      */
     private List<MatchPair> calculateAllPairsSimilarity(List<UserMatchStatus> users) {
+        log.info("주어진 페어쌍들의 유사도 검사 로직 시작");
         List<MatchPair> pairs = new ArrayList<>();
 
         for (int i = 0; i < users.size() - 1; i++) {
             for (int j = i + 1; j < users.size(); j++) {
                 UserMatchStatus user1 = users.get(i);
                 UserMatchStatus user2 = users.get(j);
+
+                // 자기 자신과 매칭 방지
+                if (user1.getUserId().equals(user2.getUserId()))
+                    continue;
 
                 double similarity = externalApiService.calculateSimilarity(user1, user2);
                 pairs.add(new MatchPair(user1, user2, similarity));
@@ -189,7 +205,9 @@ public class MatchService {
     /**
      * 매칭 쌍 처리
      */
-    private void processMatchPairs(List<MatchPair> sortedPairs, MBTI mbti) {
+    private void processMatchPairs(List<MatchPair> sortedPairs) {
+        log.info("processMatchPairs 시작");
+        // 매칭된 유저를 담는 Set
         Set<String> matchedUsers = new HashSet<>();
 
         for (MatchPair pair : sortedPairs) {
@@ -211,16 +229,6 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUsers.add(pair.user1.getUserId());
                 matchedUsers.add(pair.user2.getUserId());
-            } else {
-                // 취소, 완료된 사용자인 경우 현재 mbti 큐에서 삭제
-                if (currentUser1 == null) {
-                    queueManager.removeFromQueueIfInvalid(
-                            mbti, pair.user1);
-                }
-                if (currentUser2 == null) {
-                    queueManager.removeFromQueueIfInvalid(
-                            mbti, pair.user2);
-                }
             }
         }
     }

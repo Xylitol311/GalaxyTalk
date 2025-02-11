@@ -6,18 +6,21 @@ import com.example.match.dto.MessageResponseDto;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WebSocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void notifyUser(String userId, String type, String message) {
+        log.info("notify user {}", userId + " - " + type + " - " + message);
         if (userId == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "notifyUser: userId가 null입니다.");
         }
@@ -29,6 +32,8 @@ public class WebSocketService {
 
 
     public void notifyMatch(Map<String, Object> user1Data, Map<String, Object> user2Data) {
+        log.info("notify match {}", user1Data);
+        log.info("notify match {}", user2Data);
         String message = "매칭이 성사되었습니다.";
 
         messagingTemplate.convertAndSend(
@@ -47,6 +52,7 @@ public class WebSocketService {
         }
 
         String message = "매칭이 완료되었습니다. 채팅방 정보입니다.";
+        log.info("Matching Success! notify users with chat room {}", chatResponse);
 
         Map<String, Object> user1Data = new HashMap<>();
         user1Data.put("chatRoomId", chatResponse.getChatRoomId());
@@ -69,6 +75,8 @@ public class WebSocketService {
     }
 
     public void broadcastNewUser(UserMatchStatus user) {
+        log.info("broadcastNewUser {}", user);
+
         if (user == null || user.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "broadcastNewUser: UserMatchStatus 혹은 userId가 null입니다.");
         }
@@ -86,6 +94,8 @@ public class WebSocketService {
     }
 
     public void broadcastUserExit(String userId) {
+        log.info("broadcastUserExit {}", userId);
+
         if (userId == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "broadcastUserExit: userId가 null입니다.");
         }

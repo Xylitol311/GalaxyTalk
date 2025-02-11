@@ -5,6 +5,7 @@ import com.example.match.dto.ChatRoomResponseDto;
 import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -12,14 +13,16 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExternalApiService {
     private final WebClient aiServiceClientWithoutLoadBalancing;
     private final WebClient chatServiceClient;
     private final WebClient authServiceClient;
 
     public UserResponseDto.UserSendDTO getUserInfo(String userId) {
+        log.info("Getting user info from Auth Service...");
         return authServiceClient.get()
-                .uri("/api/oauth?userId=" + userId)
+                .uri("/api/oauth")
                 .header("X-User-ID", userId)
                 .retrieve()
                 .bodyToMono(UserResponseDto.class) // 1차적으로 ApiResponseDto로 변환
@@ -31,6 +34,7 @@ public class ExternalApiService {
      * AI 서버에 두 유저 간의 유사도 점수 계산 요청
      */
     public double calculateSimilarity(UserMatchStatus user1, UserMatchStatus user2) {
+        log.info("calculating similarity 실행");
         Map<String, Object> request = Map.of(
                 "sentence1", user1.getConcern(),
                 "sentence2", user2.getConcern()
@@ -52,6 +56,7 @@ public class ExternalApiService {
      * - Chat 서버에서 sessionId, token 및 chatRoomId 반환
      */
     public ChatRoomResponseDto.ChatResponse createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
+        log.info("Createing chat room from Chat Service...");
         Map<String, Object> requestBody = Map.of(
                 "userId1", user1.getUserId(),
                 "userId2", user2.getUserId(),
@@ -73,6 +78,7 @@ public class ExternalApiService {
      * 세션 서버에 유저 상태 변경 요청 (JSON 형식)
      */
     public void setUserStatus(String userId, String status) {
+        log.info("Setting user status to " + status);
         authServiceClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/oauth/status")

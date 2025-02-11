@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest
@@ -160,14 +160,14 @@ class MatchServiceUsersTest {
         });
 
         // Mock QueueManager behavior
-        when(queueManager.getBatchFromQueue(any(MBTI.class))).thenAnswer(invocation -> {
-            MBTI mbti = invocation.getArgument(0);
-            return users.stream()
-                    .filter(u -> u.getMbti().equals(mbti.name()))
-                    .filter(u -> u.getStatus() == MatchStatus.WAITING)
-                    .limit(50)
-                    .collect(Collectors.toList());
-        });
+//        when(queueManager.getBatchFromQueue(any(MBTI.class))).thenAnswer(invocation -> {
+//            MBTI mbti = invocation.getArgument(0);
+//            return users.stream()
+//                    .filter(u -> u.getMbti().equals(mbti.name()))
+//                    .filter(u -> u.getStatus() == MatchStatus.WAITING)
+//                    .limit(50)
+//                    .collect(Collectors.toList());
+//        });
 
         // when
         List<CompletableFuture<Void>> futures = Arrays.stream(MBTI.values())
@@ -247,13 +247,13 @@ class MatchServiceUsersTest {
         });
 
         // Mock QueueManager behavior for both queues
-        when(queueManager.getBatchFromQueue(any(MBTI.class))).thenAnswer(invocation -> {
-            MBTI mbti = invocation.getArgument(0);
-            if (mbti == MBTI.INFP || mbti == MBTI.INFJ) {
-                return users;
-            }
-            return Collections.emptyList();
-        });
+//        when(queueManager.getBatchFromQueue(any(MBTI.class))).thenAnswer(invocation -> {
+//            MBTI mbti = invocation.getArgument(0);
+//            if (mbti == MBTI.INFP || mbti == MBTI.INFJ) {
+//                return users;
+//            }
+//            return Collections.emptyList();
+//        });
 
         // when
         matchService.processMbtiQueue(MBTI.INFP);

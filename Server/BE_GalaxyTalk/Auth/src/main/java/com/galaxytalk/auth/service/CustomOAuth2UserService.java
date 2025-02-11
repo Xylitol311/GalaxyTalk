@@ -1,9 +1,6 @@
 package com.galaxytalk.auth.service;
 
-import com.galaxytalk.auth.dto.CustomOAuth2User;
-import com.galaxytalk.auth.dto.NaverResponse;
-import com.galaxytalk.auth.dto.OAuth2Response;
-import com.galaxytalk.auth.dto.UserDTO;
+import com.galaxytalk.auth.dto.*;
 import com.galaxytalk.auth.entity.Planets;
 import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.entity.Users;
@@ -36,8 +33,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         //Naver로 부터 전달 받은 값
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        OAuth2Response oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
+        OAuth2Response oAuth2Response = null;
+
+        if(registrationId.equals("naver")) {
+
+            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+        }
+        else if(registrationId.equals("kakao")){
+            oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
+        }
         //serialNumber로 유저 검색하기
         String userSerialNumber = oAuth2Response.getProviderId();
         Users user = userService.getUserBySerialNumber(userSerialNumber);
