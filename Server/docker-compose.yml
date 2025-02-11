@@ -184,7 +184,9 @@ services:
     environment:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
       LIVEKIT_LISTEN_ADDRESS: "0.0.0.0"
-      LIVEKIT_API_HOST: "13.124.213.63:7880"  # EC2 퍼블릭 IP 사용
+      LIVEKIT_NODE_IP: "13.124.213.63"        # EC2의 public IP
+      LIVEKIT_API_HOST: "13.124.213.63:7880"  # EC2 퍼블릭 IP:포트
+      LIVEKIT_USE_EXTERNAL_IP: "true"
     restart: always
     networks:
       - my-network
