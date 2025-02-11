@@ -88,8 +88,8 @@ public class MatchService {
     public void cancelMatching(String userId) {
         // 매칭 중인 유저인지 확인
         UserMatchStatus userMatchStatus = redisService.getUserStatus(userId);
-        if (userMatchStatus.getStatus() != MatchStatus.MATCHED ) {
-            throw new BusinessException(ErrorCode.MATCH_ALREADY_IN_PROGRESS);
+        if (userMatchStatus == null || userMatchStatus.getStatus() != MatchStatus.MATCHED ) {
+            throw new BusinessException(ErrorCode.USER_NOT_MATCHED_STATUS);
         }
 
         // Redis에서 유저 정보 삭제
