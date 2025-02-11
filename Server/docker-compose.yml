@@ -183,25 +183,26 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     container_name: livekit
-    network_mode: host
-    # ports:
-    #   - "7880:7880"
-    #   - "7881:7881"
-    #   - "7882:7882/udp"
-    #   - "50000-50020:50000-50020/udp"
+    ports:
+      - "7880:7880"                         # HTTP/WebSocket 포트 (필요시 외부 노출)
+      - "7881:7881"                         # 관리용 혹은 추가 기능 포트
+      - "7882:7882/udp"                     # RTC 미디어 통신 UDP 포트
+      - "50000-50020:50000-50020/udp"        # 추가 UDP 포트 (미디어용)
     environment:
-      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+      # API 키와 시크릿 사이의 공백 제거
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}:${LIVEKIT_API_SECRET}"
       LIVEKIT_PORT: 7880
-      # LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
-      LIVEKIT_EXTERNAL_IP: "13.124.213.63"  # 이 부분 추가
+      LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
+      LIVEKIT_EXTERNAL_IP: "13.124.213.63"
       LIVEKIT_RTC_PORT: 7882
       LIVEKIT_NODE_IP: "13.124.213.63"
-      LIVEKIT_WS_URL: "ws://13.124.213.63:7880"
+      # 외부 프록시(Nginx)를 통한 WSS 연결을 위해 LIVEKIT_WS_URL 수정
+      LIVEKIT_WS_URL: "wss://i12a503.p.ssafy.io/livekitws/"
       LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
-
     restart: always
-    # networks:
-    #   - my-network
+    networks:
+      - my-network
+
 
 
   gateway:
