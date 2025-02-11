@@ -15,15 +15,17 @@ swagger:
   match:
     url: ${MATCH_SERVICE_URL}
 
+# External API url
+# application.yml에서
 chat:
   service:
-    url: ${CHAT_SERVICE_URL}
+    name: ${CHAT_SERVICE_NAME:chat-service}    # 기본값은 chat-service
 auth:
   service:
-    url: ${AUTH_SERVICE_URL}
+    name: ${AUTH_SERVICE_NAME:auth-service}    # 기본값은 auth-service
 ai:
   service:
-    url: ${AI_SERVICE_URL}
+    url: ${MATCH_TO_AI_URL}
 
 management:
   endpoints:
