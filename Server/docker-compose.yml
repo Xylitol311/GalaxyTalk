@@ -98,13 +98,15 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
-      - CLIENT_SECRET=${CLIENT_SECRET}
-      - CLIENT_ID=${CLIENT_ID}
       - FRONT_URL=${FRONT_URL}
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
       - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
       - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
-      - NAVER_LOGIN_URL=${NAVER_LOGIN_URL}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - OAUTH_LOGIN_URL=${OAUTH_LOGIN_URL}
 
     # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
     depends_on:
@@ -181,6 +183,8 @@ services:
     ports:
       - "7880:7880"
       - "7881:7881"
+      - "7882:7882/udp"                        # TURN/STUN 서버용 UDP 포트
+      - "50000-50020:50000-50020/udp" 
     environment:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
       LIVEKIT_LISTEN_ADDRESS: "0.0.0.0"

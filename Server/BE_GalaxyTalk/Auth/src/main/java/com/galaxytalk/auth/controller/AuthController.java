@@ -52,6 +52,7 @@ public class AuthController {
     public ResponseEntity<?> signUp(@RequestHeader("X-User-ID") String serialNumber, HttpServletRequest request, HttpServletResponse response,
                                     @RequestParam("mbti") String mbti, @RequestParam("planetId") int planetId) {
 
+        System.out.println(serialNumber);
         // 1. 쿠키 받아오기 & 없을 경우 에러처리( 리프레시 토큰 가져오기 용 )
         Cookie[] cookies = request.getCookies();
 
@@ -107,7 +108,6 @@ public class AuthController {
         //1. serialNumber로 user 정보 가져오기 & 예외처리
         Users user = userService.getUserBySerialNumber(serialNumber);
 
-        System.out.println(user.getSerialNumber());
 
         if (user == null) {
             return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
@@ -154,16 +154,13 @@ public class AuthController {
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용, HTTP req -> 쿠키까기용(리프레시 가져오는 용) , HTTP res -> 삭제용 쿠키 담아주기 용
     public ResponseEntity<?> withdraw(@RequestHeader("X-User-ID") String serialNumber, HttpServletRequest request, HttpServletResponse response) {
 
-
         // 1. 사용자 조회
         Users user = userService.getUserBySerialNumber(serialNumber);
         if (user == null) {
             return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
         }
 
-
         // 2. 쿠키 조회 및 삭제
-
         //2-1) 토큰 조회 및 예외처리
         Cookie[] cookies = request.getCookies();
 
@@ -192,7 +189,6 @@ public class AuthController {
         // 5) 사용자 role 수정
         user.setRole(Role.ROLE_WITHDRAW);
 
-
         ApiResponseDto goodResponse = new ApiResponseDto("회원탈퇴가 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
@@ -218,7 +214,6 @@ public class AuthController {
         if (accessToken == null) {
             //response status code
 
-            System.out.println("1번");
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
@@ -227,12 +222,10 @@ public class AuthController {
 
         //3. refreshToken 검증
         if(refreshToken==null){
-            System.out.println("2번" + " " + refreshToken);
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
         if(jwtUtil.isExpired(refreshToken)){
-            System.out.println("3번" + " " + refreshToken);
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
         }
 
@@ -279,8 +272,6 @@ public class AuthController {
     @PostMapping("status")
     public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState) {
 
-
-        System.out.println("상태요청 변경 옴" + " " + serialNumber + " " + userInteractionState);
         //1. 회원 상태 저장
         if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
             ApiResponseDto badResponse = new ApiResponseDto(false, "유저 접속 상태 조회 불가", null);
