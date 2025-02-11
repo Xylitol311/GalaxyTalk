@@ -5,6 +5,7 @@ export const ROUTE = {
     HOME: '/',
     SIGN_UP: '/signup',
     MATCH: '/matching-room',
+    WARP: '/warp',
     CHAT: '/chatting-room',
     MY_PAGE: '/mypage',
     get PROFILE() {

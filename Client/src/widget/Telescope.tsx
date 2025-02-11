@@ -31,8 +31,8 @@ function Telescope({ onClick }: TelescopeProps) {
                 castShadow={true}
                 receiveShadow={true}
                 scale={0.3}
-                position={[1, -2.8, 6]}
-                rotation={[0, (65 * Math.PI) / 180, 0]}
+                position={[0, -2.8, 5]}
+                rotation={[0, 180, 0]}
                 hover={hover}
                 onClick={onClick}
             />

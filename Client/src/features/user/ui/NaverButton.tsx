@@ -5,6 +5,7 @@ export default function NaverButton() {
     const handleLogin = () => {
         // Memo: 백엔드 서버 배포 시 주석 해제
         // window.location.href = PATH.API_PATH.OAUTH.LOGIN;
+        console.log('네이버 로그인');
     };
 
     return (
