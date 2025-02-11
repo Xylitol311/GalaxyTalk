@@ -190,7 +190,7 @@ services:
       - "50000-50020:50000-50020/udp"        # 추가 UDP 포트 (미디어용)
     environment:
       # API 키와 시크릿 사이의 공백 제거
-      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}:${LIVEKIT_API_SECRET}"
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
       LIVEKIT_PORT: 7880
       LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
       LIVEKIT_EXTERNAL_IP: "13.124.213.63"
