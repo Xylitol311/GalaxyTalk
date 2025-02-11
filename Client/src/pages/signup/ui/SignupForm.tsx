@@ -85,7 +85,7 @@ export default function SignupForm() {
                         ${isSelected ? 'bg-gray-800' : 'bg-gray-300'}
                         hover:bg-gray-700 hover:scale-105`}>
                                                     <img
-                                                        src={`../../../../src/shared/assets/images/${planet.imageUrl}`}
+                                                        src={`./src/shared/assets/images/planets/${planet.imageUrl}`}
                                                         alt={planet.name}
                                                         className="w-32 h-32 object-cover"
                                                     />
@@ -117,7 +117,7 @@ export default function SignupForm() {
                                                 }
                                             </span>
                                             <img
-                                                src={`../../../../src/shared/assets/images/${watch('planetId')}.PNG`}
+                                                src={`./src/shared/assets/images/planets/${watch('planetId')}.PNG`}
                                                 alt={
                                                     PLANETS.find(
                                                         (planet) =>
