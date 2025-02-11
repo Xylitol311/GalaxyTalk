@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@Validated
 @RequestMapping("/api/match")
 public class MatchController {
     private final MatchService matchService;
@@ -36,6 +34,7 @@ public class MatchController {
     public ResponseEntity<ApiResponseDto> startMatching(
             @RequestHeader("X-User-ID") String userId,
             @Valid @RequestBody MatchRequestDto request) {
+        log.info("Start matching request");
 
         // MBTI 유효성 검증
         if (request.getPreferredMbti() != null) {
@@ -59,6 +58,7 @@ public class MatchController {
     @DeleteMapping
     public ResponseEntity<ApiResponseDto> cancelMatching(
             @RequestHeader("X-User-ID") String userId) {
+        log.info("Cancel matching request");
         matchService.cancelMatching(userId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
@@ -73,6 +73,7 @@ public class MatchController {
      */
     @GetMapping("/waiting-users")
     public ResponseEntity<ApiResponseDto> getWaitingUsers() {
+        log.info("getWaitingUsers");
         List<UserStatusDto> userStatusDtos = matchService.getWaitingUsers();
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
@@ -87,6 +88,7 @@ public class MatchController {
     @GetMapping("/start-time")
     public ResponseEntity<ApiResponseDto> getMatchingStartTime(
             @RequestHeader("X-User-ID") String userId) {
+        log.info("getMatchingStartTime");
         Long startTime = matchService.getMatchingStartTime(userId);
         if (startTime == null) {
             // 매칭 중인 사용자가 아니라면 예외 발생
@@ -108,7 +110,7 @@ public class MatchController {
     public ResponseEntity<ApiResponseDto> handleMatchResponse(
             @RequestHeader("X-User-ID") String userId,
             @Valid @RequestBody MatchApproveRequestDto response) {
-
+        log.info("handleMatchResponse");
         matchService.processMatchApproval(userId, response);
 
         return ResponseEntity.ok(new ApiResponseDto(

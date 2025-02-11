@@ -22,6 +22,7 @@ public class GlobalExceptionHandler {
         String errorMessage = ex.getBindingResult().getFieldError() != null
                 ? ex.getBindingResult().getFieldError().getDefaultMessage()
                 : "유효하지 않은 입력 값입니다.";
+        log.error(errorMessage);
         return ResponseEntity.badRequest()
                 .body(new ApiResponseDto(false, errorMessage, null));
     }
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponseDto> handleConstraintViolationException(ConstraintViolationException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ApiResponseDto(false, ex.getMessage(), null));
     }
