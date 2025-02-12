@@ -32,6 +32,16 @@ export default function TimerConfirm() {
         window.location.href = '/';
     };
 
+    const handlePass = () => {
+        setOpen(false);
+        setRemainingTime(60); // 타이머 초기화
+
+        // 5초 후 다시 다이얼로그 열기
+        setTimeout(() => {
+            setOpen(true);
+        }, 5000);
+    };
+
     useEffect(() => {
         // 5초 후 자동으로 다이얼로그 열기
         const timeout = setTimeout(() => {
@@ -93,9 +103,7 @@ export default function TimerConfirm() {
                                 <CircleCheckBigIcon />
                                 매칭 성사
                             </Button>
-                            <Button
-                                variant="pass"
-                                onClick={() => setOpen(false)}>
+                            <Button variant="pass" onClick={handlePass}>
                                 <SkipForwardIcon />
                                 매칭 거절
                             </Button>
