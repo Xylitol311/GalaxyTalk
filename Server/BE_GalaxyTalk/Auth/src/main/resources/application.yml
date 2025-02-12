@@ -81,20 +81,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-#Eureka settings
-eureka:
-  client:
-    register-with-eureka: true #REGISTER IN EUREKA T/F
-    fetch-registry: true #GET OTHER SERVICE FROM EUREKA AND COMMUNICATE
-    service-url:
-      defaultZone: ${EUREKA_SERVICE_URL}/eureka/ #EUREKA SERVER URL
-  instance:
-    prefer-ip-address: true # FALSE : REGIST SERVICE BY HOSTNAME EX) LOCALHOST(might cause error in docker) / TRUE : REGIST SERVICE BY IP
-    leaseRenewalIntervalInSeconds: 5 #GATEWAY CONNECT TO EUREKA SERVER PER 5SEC, REFRESH SERVICE INSTANCE
-    leaseExpirationDurationInSeconds: 10 #EUREKA DELETE SERVICE INSTANCE IF DOES NOT REFRESH UNTIL 10 SEC
-#    hostname: localhost
-    ip-address: 127.0.0.1
-    instance-id: ${spring.application.name}:${server.port} #MAKE Instance unique ID
+
 
 #Actuator settings : FOR DEBUG
 management:

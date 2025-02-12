@@ -14,3 +14,16 @@ spring:
     url: jdbc:mysql://my-mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # Jenkins에서 EUREKA_SERVICE_URL을 주입받습니다.
+      defaultZone: ${EUREKA_SERVICE_URL}/eureka/
+  instance:
+    prefer-ip-address: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
+    instance-id: ${spring.application.name}:${server.port}
