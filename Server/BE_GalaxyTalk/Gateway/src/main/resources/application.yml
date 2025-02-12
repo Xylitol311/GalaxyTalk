@@ -38,10 +38,6 @@ spring:
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/api/oauth/**
-        - id: auth-service-naver
-          uri: ${AUTH_SERVICE_URL}
-          predicates:
-            - Path=/oauth2/authorization/naver/**
         - id: support-service
           uri: lb://SUPPORT-SERVICE
           predicates:
