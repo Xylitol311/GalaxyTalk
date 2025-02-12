@@ -1,16 +1,15 @@
 import { PersonIcon } from '@radix-ui/react-icons';
 import { BellIcon } from 'lucide-react';
-import { usePostLogout } from '@/features/user/api/queries';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 
 export default function Header() {
-    const { mutate } = usePostLogout();
+    // const { mutate } = usePostLogout();
 
-    const handleLogout = () => {
-        // Memo: 백엔드 서버 배포 시 주석 해제
-        mutate();
-    };
+    // const handleLogout = () => {
+    //     // Memo: 백엔드 서버 배포 시 주석 해제
+    //     mutate();
+    // };
 
     const handleClick = () => {
         toast({
@@ -33,7 +32,7 @@ export default function Header() {
                 variant="ghost"
                 size="icon"
                 className="text-white"
-                onClick={handleLogout}>
+                onClick={handleClick}>
                 <PersonIcon />
             </Button>
         </header>
