@@ -118,7 +118,7 @@ export default function SignupForm() {
                                                 }
                                             </span>
                                             <img
-                                                src={`${IMAGE_PATH}images/planets/${watch('planetId')}.PNG`}
+                                                src={`${IMAGE_PATH}images/planets/${watch('planetId')}.png`}
                                                 alt={
                                                     PLANETS.find(
                                                         (planet) =>
