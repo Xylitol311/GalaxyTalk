@@ -47,9 +47,10 @@ public class JwtAuthenticationFilter implements WebFilter {
         System.out.println("Request Cookies: " + request.getCookies());
 
         // ✅ OPTIONS 요청은 바로 필터 체인을 실행하고 종료
-        if (CorsUtils.isPreFlightRequest(request)) {
+        if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
+
 
         String path = request.getURI().getPath();
         System.out.println("들어오고 있는 경로 : " + path);
