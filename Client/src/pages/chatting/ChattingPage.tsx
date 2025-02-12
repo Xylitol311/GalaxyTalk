@@ -100,7 +100,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     };
 
     const handleLeaveChat = () => {
-        disconnectButtonProps?.onclick();
+        // disconnectButtonProps?.onclick();
         leaveChatRoom(chatRoomId);
     };
 
