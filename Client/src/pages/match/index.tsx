@@ -6,6 +6,7 @@ import { PATH } from '@/app/config/constants';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
 import HealingMessage from './ui/HealingMessage';
+import TimerConfirm from './ui/TimerConfirm';
 
 export default function MatchingRoom() {
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function MatchingRoom() {
                         <ExitIcon />
                         이전 페이지로 이동하기
                     </Button>
+                    <TimerConfirm />
                     <HealingMessage />
                 </div>
             </Html>

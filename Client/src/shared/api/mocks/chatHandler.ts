@@ -69,23 +69,46 @@ export const chatHandlers = [
             data: [
                 {
                     senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content: '안녕하세요',
-                    createdAt: '2025-02-06T14:13:44.526',
+                    content: '오늘도 코딩하느라 고생이 많네요 😅',
+                    createdAt: '2025-02-11T09:13:44.526',
                 },
                 {
                     senderId: 'id2',
-                    content: '저도 안녕하세요.',
-                    createdAt: '2025-02-06T14:36:34.788',
+                    content: '네... 버그 잡느라 힘들어 죽을 것 같아요 💀',
+                    createdAt: '2025-02-11T09:15:34.788',
                 },
                 {
                     senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content: '뭐해요.',
-                    createdAt: '2025-02-06T14:57:31.601',
+                    content:
+                        '저도 타입 에러랑 씨름 중이에요. 타입스크립트 진짜... 🤯',
+                    createdAt: '2025-02-11T09:17:31.601',
                 },
                 {
                     senderId: 'id2',
-                    content: '코딩해요.',
-                    createdAt: '2025-02-06T14:57:38.388',
+                    content:
+                        '아... 타입스크립트요? 저는 지금 리액트 상태관리때문에 머리가 터질 것 같네요 😫',
+                    createdAt: '2025-02-11T09:18:38.388',
+                },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content: '리덕스인가요? 아니면 리코일?',
+                    createdAt: '2025-02-11T09:18:55.123',
+                },
+                {
+                    senderId: 'id2',
+                    content: '주스탠드예요... 러닝커브가 생각보다 높네요 😭',
+                    createdAt: '2025-02-11T09:19:22.456',
+                },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content:
+                        '아... 저도 한번 써봤는데 처음에 많이 헤맸어요. 나중엔 편해질 거에요! 화이팅입니다 💪',
+                    createdAt: '2025-02-11T09:20:15.789',
+                },
+                {
+                    senderId: 'id2',
+                    content: '감사합니다 ㅠㅠ 우리 둘 다 화이팅해요! ✨',
+                    createdAt: '2025-02-11T09:21:03.234',
                 },
             ],
         });
