@@ -85,7 +85,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         cookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
         cookie.setSecure(true);
         cookie.setAttribute("SameSite","None");
-        cookie.setDomain("i12a503.p.ssafy.io");
+//        cookie.setDomain("i12a503.p.ssafy.io");
         response.addCookie(cookie);
     }
 

@@ -29,6 +29,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
+                .cors(cors -> cors.disable())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable) //jwt 토큰으로 인증하는 방식이라 csrf disable 상관 없음
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) //jwt 토큰으로 인증하는 방식이라 보안 컨텐스트 저장 안해도됨

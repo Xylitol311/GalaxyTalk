@@ -8,7 +8,7 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class GlobalCorsConfig {
@@ -20,28 +20,19 @@ public class GlobalCorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 3000 포트에서 오는 요청을 허용
-        configuration.setAllowedOrigins(Arrays.asList(frontUrl));
-        configuration.addAllowedHeader("Content-Type");
-        configuration.addAllowedMethod("GET");
-        configuration.addAllowedMethod("POST");
-        configuration.addAllowedMethod("PUT");
-        configuration.addAllowedMethod("DELETE");
-        configuration.addAllowedMethod("OPTIONS");
+        // 여러 개의 Origin 허용 가능
+        configuration.setAllowedOrigins(List.of(frontUrl, "http://localhost:5173")); // 필요하면 추가
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);  // preflight 응답 캐시 시간 설정 (초 단위)
+        configuration.setMaxAge(3600L);  // preflight 응답 캐시 시간 설정 (1시간)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // 모든 경로에 CORS 설정 적용
-
-        // Swagger 경로에 대해 CORS 허용 추가
-        source.registerCorsConfiguration("/swagger-ui/**", configuration);
-        source.registerCorsConfiguration("/v3/api-docs/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);  // 모든 요청에 적용
 
         return source;
     }
 
-    //cors에 대해 실제 필터링 작업해줌 corsConfigurationSource은 설정임
     @Bean
     public CorsWebFilter corsWebFilter(CorsConfigurationSource corsConfigurationSource) {
         return new CorsWebFilter(corsConfigurationSource);
