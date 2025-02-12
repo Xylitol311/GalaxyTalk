@@ -52,6 +52,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
 
+
         String path = request.getURI().getPath();
         System.out.println("들어오고 있는 경로 : " + path);
 
@@ -82,6 +83,8 @@ public class JwtAuthenticationFilter implements WebFilter {
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                 .header("X-User-ID", userId)
                 .build();
+
+        System.out.println("줄 request" + modifiedRequest);
 
         System.out.println("User ID: " + userId);
         System.out.println("Role: " + role);
