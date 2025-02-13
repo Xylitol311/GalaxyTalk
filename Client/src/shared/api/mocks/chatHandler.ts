@@ -113,6 +113,47 @@ export const chatHandlers = [
                     content: '감사합니다 ㅠㅠ 우리 둘 다 화이팅해요! ✨',
                     createdAt: '2025-02-11T09:21:03.234',
                 },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content:
+                        '그런데 프론트엔드 개발하신지는 얼마나 되셨어요? 🤔',
+                    createdAt: '2025-02-11T09:22:15.123',
+                },
+                {
+                    senderId: 'id2',
+                    content:
+                        '아직 1년 정도밖에 안됐어요. 아직 배울게 너무 많네요 😅',
+                    createdAt: '2025-02-11T09:23:45.456',
+                },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content:
+                        '와! 1년차치고는 정말 열심히 하고 계시네요. 주스탠드까지 도전하시고! 👏',
+                    createdAt: '2025-02-11T09:24:30.789',
+                },
+                {
+                    senderId: 'id2',
+                    content: '감사합니다 😊 요즘은 Next.js도 공부하고 있어요',
+                    createdAt: '2025-02-11T09:25:12.234',
+                },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content:
+                        '오! Next.js 좋죠. SSR이랑 파일 기반 라우팅이 정말 편해요 👍',
+                    createdAt: '2025-02-11T09:26:05.567',
+                },
+                {
+                    senderId: 'id2',
+                    content:
+                        '맞아요! 근데 가끔 hydration 에러가 나서 당황스러울 때가 있어요 😅',
+                    createdAt: '2025-02-11T09:27:23.890',
+                },
+                {
+                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                    content:
+                        '아... 그거 정말 골치 아프죠. useEffect 타이밍 맞추기가 까다로워요 😫',
+                    createdAt: '2025-02-11T09:28:45.123',
+                },
             ],
         });
     }),

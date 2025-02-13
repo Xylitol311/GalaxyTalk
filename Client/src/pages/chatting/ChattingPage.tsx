@@ -3,6 +3,7 @@ import { LiveKitRoom } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { BASE_URL } from '@/app/config/constants/path';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
@@ -32,7 +33,7 @@ interface Participant {
 
 function ChattingPage({ chatData }: ChattingPageProps) {
     // const { sessionId, token, chatRoomId } = chatData;
-    const LIVEKIT_URL = 'wss://i12a503.p.ssafy.io/livekitws/';
+    const LIVEKIT_URL = `wss://${BASE_URL}/livekitws/`;
     const token =
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzNDUiLCJpc3MiOiJnYWxheHkiLCJuYW1lIjoidXNlcjEyMzQ1IiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiIyZWViYjI0OC1jMGM2LTQ4Y2EtYTc2NC1hNmQ4Zjg3OTg1YTcifSwic2lwIjp7fSwiZXhwIjoxNzM5Mjc4Njk3LCJqdGkiOiJ1c2VyMTIzNDUifQ.lV8Ei3Pt_poX8aVY4F-pR8ULkvEhAGjfVZnMS2P6ivk';
     const chatRoomId = 'xxyy';
@@ -112,8 +113,8 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             serverUrl={LIVEKIT_URL}
             data-lk-theme="default">
             {isMobile ? (
-                <div className="h-screen flex flex-col justify-center items-end relative">
-                    <div className="w-full h-14 bg-black text-white flex justify-between items-center p-2">
+                <div className="flex flex-col h-screen justify-center items-end relative">
+                    <div className="absolute top-0 left-0 z-50 w-full h-14 bg-black text-white flex justify-between items-center p-2">
                         <div>
                             <Button
                                 size="icon"
@@ -197,9 +198,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                     <TextChat chatRoomId={chatRoomId} />
                 </div>
             ) : (
-                <div className="w-full h-screen flex justify-center items-center">
-                    <div className="h-screen max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
-                        <div className="flex justify-center items-end my-10">
+                <div className="w-full flex justify-center items-center">
+                    <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
+                        <div className="flex justify-center items-end">
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6">
                                 <h1 className="text-2xl">
                                     {partnerInfo?.planetId
@@ -217,7 +218,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex justify-center items-end my-10 relative">
+                        <div className="flex justify-center items-end relative">
                             {!isAiModalOpen ? (
                                 <div
                                     className="w-full h-32 z-10 absolute top-0 left-0 p-2"
@@ -288,7 +289,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             )}
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
-                        <div className="flex justify-end items-end my-10 flex-col">
+                        <div className="flex justify-end items-end flex-col">
                             <div className="mb-2">
                                 <ReactionPanel />
                             </div>
