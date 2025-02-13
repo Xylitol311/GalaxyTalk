@@ -2,6 +2,7 @@ package com.galaxytalk.auth.controller;
 
 import com.galaxytalk.auth.dto.ApiResponseDto;
 import com.galaxytalk.auth.dto.UserSendDTO;
+import com.galaxytalk.auth.dto.UserSignup;
 import com.galaxytalk.auth.entity.Planets;
 import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.entity.Users;
@@ -50,7 +51,7 @@ public class AuthController {
     @Transactional
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용, HTTP req -> 쿠키까기용(리프레시 갱신 - role 변경), HTTP res -> 쿠키 담아주기 용
     public ResponseEntity<?> signUp(@RequestHeader("X-User-ID") String serialNumber, HttpServletRequest request, HttpServletResponse response,
-                                    @RequestParam("mbti") String mbti, @RequestParam("planetId") int planetId) {
+                                    @RequestBody UserSignup userSignup) {
 
         System.out.println(serialNumber);
         // 1. 쿠키 받아오기 & 없을 경우 에러처리( 리프레시 토큰 가져오기 용 )
@@ -77,11 +78,11 @@ public class AuthController {
         }
 
         // 3. 사용자 정보 수정(mbti & 행성 & ROLE_USER로 승격)
-        user.setMbti(mbti);
+        user.setMbti(userSignup.getMbti());
         user.setRole(Role.ROLE_USER);
 
         // 3-1. 행성 정보 조회 및 설정
-        Planets planet = planetService.getPlanetById(planetId);
+        Planets planet = planetService.getPlanetById(userSignup.getPlanetId());
         if (planet == null) {
             return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
         }
@@ -125,7 +126,7 @@ public class AuthController {
     @Transactional
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용
     public ResponseEntity<?> update(@RequestHeader("X-User-ID") String serialNumber,
-                                    @RequestParam("mbti") String mbti, @RequestParam("planetId") int planetId) {
+                                    @RequestBody UserSignup userSignup) {
 
         //1. 유저 정보 조회 및 예외처리
         Users user = userService.getUserBySerialNumber(serialNumber);
@@ -134,10 +135,10 @@ public class AuthController {
         }
 
         //2. 사용자 정보 수정
-        user.setMbti(mbti);
+        user.setMbti(userSignup.getMbti());
 
         //3. 행성 정보 조회 및 설정
-        Planets planet = planetService.getPlanetById(planetId);
+        Planets planet = planetService.getPlanetById(userSignup.getPlanetId());
         if (planet == null) {
             return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
         }
@@ -273,7 +274,7 @@ public class AuthController {
     // 'matching' : 매칭 큐 진입
     // 'chatting' : 채팅 중
     @PostMapping("status")
-    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState) {
+    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestBody String userInteractionState) {
 
         //1. 회원 상태 저장
         if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
