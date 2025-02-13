@@ -37,6 +37,7 @@ public class SecurityConfiguration {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() //OPTIONS : 브라우저가 요청할 메서드와 헤더를 허용하는지 미리 확인하는용 보안과 관련 없음
                         .pathMatchers("/oauth2/authorization/**", "/webjars/**","/api-docs/**","v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/api/oauth/signup").hasRole("GUEST")
+                        .pathMatchers("/api/oauth/status", "/api/oauth").hasAnyRole("GUEST", "USER")
                         .pathMatchers("api/chat/**", "/api/oauth/**", "api/match/**","api/support/**").hasRole("USER")
                         .anyExchange().authenticated())
                 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.accessDeniedHandler(new CustomAccessDeniedHandler())) //권한이 없을때에 대한 예외 처리
