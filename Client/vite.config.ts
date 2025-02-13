@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vite';
 
@@ -9,5 +10,12 @@ export default defineConfig({
         alias: {
             '@': path.resolve(__dirname, './src'),
         },
+    },
+    server: {
+        https: {
+            key: fs.readFileSync('key.pem'),
+            cert: fs.readFileSync('.cert.pem'),
+        },
+        host: true,
     },
 });
