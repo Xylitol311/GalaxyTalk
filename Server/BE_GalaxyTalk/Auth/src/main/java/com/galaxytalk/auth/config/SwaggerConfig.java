@@ -29,7 +29,7 @@ public class SwaggerConfig {
                 .addServersItem(new Server().url(authServiceUrl).description("Auth Service"))
                 .components(new Components())
                 .servers(List.of(new Server().url(gatewayServiceUrl).description("Gateway Server")))
-                .servers(List.of(new Server().url("https://i12a503.p.ssafy.io/gateway").description("Gateway Server")));
+                .servers(List.of(new Server().url("https://i12a503.p.ssafy.io/gateway").description("Gateway with https Server")));
 
     }
 
@@ -40,20 +40,20 @@ public class SwaggerConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/v3/api-docs/**")
-                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/gateway"})
+                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/**"})
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
                         .maxAge(3600);
 
                 registry.addMapping("/swagger-ui/**")
-                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/gateway"})
+                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/**"})
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
                         .maxAge(3600);
                 registry.addMapping("/webjars/**")
-                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/gateway"})
+                        .allowedOrigins(new String[]{gatewayServiceUrl, "https://i12a503.p.ssafy.io/**"})
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)

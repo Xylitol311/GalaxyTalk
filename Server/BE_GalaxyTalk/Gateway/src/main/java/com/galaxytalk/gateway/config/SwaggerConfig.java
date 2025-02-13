@@ -26,7 +26,7 @@ public class SwaggerConfig {
                         .description("모든 서비스의 API 명세 통합"))
                 .servers(Arrays.asList(
                         new Server().url(gatewayServiceUrl).description("Gateway Service"),
-                        new Server().url("https://i12a503.p.ssafy.io/gateway").description("Production Gateway")
+                        new Server().url("https://i12a503.p.ssafy.io/gateway").description("Gateway with https Gateway")
                 ))
                 .components(new Components());
     }

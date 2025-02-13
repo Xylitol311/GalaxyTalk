@@ -29,14 +29,13 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-                .cors(cors -> cors.disable())
                 .csrf(ServerHttpSecurity.CsrfSpec::disable) //jwt 토큰으로 인증하는 방식이라 csrf disable 상관 없음
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) //jwt 토큰으로 인증하는 방식이라 보안 컨텐스트 저장 안해도됨
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange(auth -> auth
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() //OPTIONS : 브라우저가 요청할 메서드와 헤더를 허용하는지 미리 확인하는용 보안과 관련 없음
-                        .pathMatchers("/login/**", "/oauth2/authorization/**","/api/oauth/refresh", "/webjars/**","/api-docs/**","v3/api-docs/**", "/swagger-ui/**", "/api/oauth/status").permitAll()
+                        .pathMatchers("/oauth2/authorization/**", "/webjars/**","/api-docs/**","v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/api/oauth/signup").hasRole("GUEST")
                         .pathMatchers("api/chat/**", "/api/oauth/**", "api/match/**","api/support/**").hasRole("USER")
                         .anyExchange().authenticated())
