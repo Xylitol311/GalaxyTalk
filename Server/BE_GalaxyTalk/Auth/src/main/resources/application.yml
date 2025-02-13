@@ -6,7 +6,6 @@ spring:
 
   profiles:
     include: redis
-    active: local  # 기본 환경을 local로 설정 (운영 환경에서는 prod로 변경)
 
 
 
