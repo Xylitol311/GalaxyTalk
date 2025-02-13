@@ -3,6 +3,7 @@ package com.example.match.service;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchResultRequest;
 import com.example.match.dto.SimilarityResponseDto;
+import com.example.match.dto.UserStatusRequestDto;
 import com.example.match.feign.AuthClient;
 import com.example.match.feign.ChatClient;
 import lombok.RequiredArgsConstructor;
@@ -108,17 +109,16 @@ public class ExternalApiService {
 //    }
     // Auth server에 유저 정보가 idle 또는 chatting으로 변경됨을 알림
     public void setUserStatus(String userId, String status) {
-
-        System.out.println(userId + " " + status);
-        authServiceClient.changeUserStatus(
-                userId,
-                status
-        );
+        log.info("유저 상태 변경 요청: " + userId + " " + status);
+        UserStatusRequestDto request = new UserStatusRequestDto();
+        request.setUserInteractionState(status);
+        authServiceClient.changeUserStatus(userId, request);
     }
 
     // Auth server에서 상대방 id를 가지고 상대방 정보를 가져옴
     // 행성 ID, MBTI, 매너온도 데이터 추출
     public Map<String, Object> getUserInfo(String userId) {
+        log.info("유저 정보 요청" + userId);
         Map<String, Object> response = (Map<String, Object>) authServiceClient.getUser(userId).getBody();
         return (Map<String, Object>) response.get("data");
     }
