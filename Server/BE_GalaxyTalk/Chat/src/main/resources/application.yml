@@ -8,7 +8,7 @@ spring:
       client:
         config:
           auth-service:
-            url: http://auth-service:8080 #auth
+            url: auth-service #auth
 server:
   port: 8084
 
