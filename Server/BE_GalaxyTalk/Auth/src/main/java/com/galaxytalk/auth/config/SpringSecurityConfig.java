@@ -75,7 +75,7 @@ public class SpringSecurityConfig {
 
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(frontUrl)); // 실제 프론트엔드 도메인
+        configuration.setAllowedOrigins(Arrays.asList(frontUrl,"https://nid.naver.com/**","https://openapi.naver.com/**","https://kauth.kakao.com/**")); // 실제 프론트엔드 도메인
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
