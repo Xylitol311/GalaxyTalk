@@ -44,11 +44,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //path and method verify
         String requestUri = request.getRequestURI();
         if (!requestUri.matches("^\\/api/oauth/logout$")) {
-
             filterChain.doFilter(request, response);
             return;
         }
-
 
 
         // 쿠키 가져오기
