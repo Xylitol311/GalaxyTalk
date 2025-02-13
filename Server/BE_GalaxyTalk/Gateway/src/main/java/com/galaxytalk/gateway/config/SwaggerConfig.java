@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+
 @Configuration
 public class SwaggerConfig {
 
@@ -22,7 +24,10 @@ public class SwaggerConfig {
                 .info(new Info().title("MSA API Gateway")
                         .version("1.0")
                         .description("모든 서비스의 API 명세 통합"))
-                .addServersItem(new Server().url(gatewayServiceUrl).description("Gateway"))
+                .servers(Arrays.asList(
+                        new Server().url(gatewayServiceUrl).description("Gateway Service"),
+                        new Server().url("https://i12a503.p.ssafy.io/gateway").description("Production Gateway")
+                ))
                 .components(new Components());
     }
 
