@@ -21,7 +21,7 @@ public class GlobalCorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 여러 개의 Origin 허용 가능
-        configuration.setAllowedOrigins(List.of(frontUrl)); // 필요하면 추가
+        configuration.setAllowedOrigins(List.of(frontUrl,"https://localhost:5173")); // 필요하면 추가
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true);
