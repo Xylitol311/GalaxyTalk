@@ -21,6 +21,8 @@ springdoc:
   swagger-ui:
     # 외부 클라이언트가 접속할 Swagger UI 경로 (예: Nginx를 통해 https로 노출됨)
     path: /gateway/docs/swagger-ui.html
+    webjars:
+      prefix: /gateway/webjars
     urls:
       - name: auth service
         url: /gateway/auth-service/v3/api-docs
