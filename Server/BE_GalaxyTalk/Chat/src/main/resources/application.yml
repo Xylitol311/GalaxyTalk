@@ -16,11 +16,11 @@ server:
 
 
 # Swagger 관련 설정
-swagger:
-  gateway:
-    url: ${GATEWAY_SERVICE_URL}
-  chat:
-    url: ${CHAT_SERVICE_URL}
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
 
 livekit:
   api:
@@ -32,14 +32,6 @@ mongo:
   initdb:
     uri: ${MONGO_INITDB_URI}
     database: ${MONGO_INITDB_DATABASE}
-
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL}
-
-comment:
-  service:
-    url: ${COMMENT_SERVICE_URL}
 
 openai:
   api:

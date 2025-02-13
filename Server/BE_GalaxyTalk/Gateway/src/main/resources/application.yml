@@ -34,6 +34,7 @@ spring:
         response-timeout: 60s #wating max 10sec until getting response from server
       # route setting
       routes:
+        # 기존 API 라우트
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
@@ -50,27 +51,50 @@ spring:
           uri: lb://CHAT-SERVICE
           predicates:
             - Path=/api/chat/**
+      # 추가: Swagger API 문서를 위한 라우트 (서비스 이름에 맞게 설정)
+        - id: auth-service-swagger
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
+          filters:
+            - RewritePath=/auth-service/(?<remaining>.*), /${remaining}
+        - id: support-service-swagger
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/support-service/v3/api-docs/**
+          filters:
+            - RewritePath=/support-service/(?<remaining>.*), /${remaining}
+        - id: match-service-swagger
+          uri: lb://MATCH-SERVICE
+          predicates:
+            - Path=/match-service/v3/api-docs/**
+          filters:
+            - RewritePath=/match-service/(?<remaining>.*), /${remaining}
+        - id: chat-service-swagger
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/chat-service/v3/api-docs/**
+          filters:
+            - RewritePath=/chat-service/(?<remaining>.*), /${remaining}
 
 
 
 #Swagger setting
 springdoc:
   swagger-ui:
+    # 외부 클라이언트가 접속할 Swagger UI 경로 (예: Nginx를 통해 https로 노출됨)
+    path: /docs/swagger-ui.html
     disable-swagger-default-url: true
     urls:
       - name: auth service
-        url: ${AUTH_SERVICE_URL}/v3/api-docs
+        url: /auth-service/v3/api-docs
       - name: support service
-        url: ${SUPPORT_SERVICE_URL}/v3/api-docs
+        url: /support-service/v3/api-docs
       - name: chat service
-        url: ${CHAT_SERVICE_URL}/v3/api-docs
+        url: /chat-service/v3/api-docs
       - name: match service
-        url: ${MATCH_SERVICE_URL}/v3/api-docs
+        url: /match-service/v3/api-docs
 
 # urls
 front:
   url: ${FRONT_URL}
-
-gateway:
-  service:
-    url: ${GATEWAY_SERVICE_URL}

@@ -6,31 +6,20 @@ spring:
       client:
         config:
           auth-service:
-            url: ${AUTH_SERVICE_URL}
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
           chat-service:
-            url: ${CHAT_SERVICE_URL}
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
-
-# Swagger URL은 환경변수(GATEWAY_SERVICE_URL, MATCH_SERVICE_URL)를 통해 주입받습니다.
-swagger:
-  gateway:
-    url: ${GATEWAY_SERVICE_URL}
-  match:
-    url: ${MATCH_SERVICE_URL}
+    enabled: true
 
 # External API url
-# application.yml에서
-chat:
-  service:
-    url: ${CHAT_SERVICE_URL}    # 기본값은 chat-service
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL}    # 기본값은 auth-service
 ai:
   service:
     url: ${AI_SERVICE_URL}

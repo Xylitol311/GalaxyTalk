@@ -15,11 +15,3 @@ eureka:
     leaseExpirationDurationInSeconds: 10
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:${server.port}
-
-spring:
-  cloud:
-    openfeign:
-      client:
-        config:
-          auth-service:
-            url: http://localhost:8081 #auth

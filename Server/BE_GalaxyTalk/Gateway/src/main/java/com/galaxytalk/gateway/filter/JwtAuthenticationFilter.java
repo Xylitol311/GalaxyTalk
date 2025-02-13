@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galaxytalk.gateway.dto.ApiResponseDto;
 import com.galaxytalk.gateway.jwt.JWTUtil;
-
-
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
@@ -21,7 +19,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -51,13 +48,13 @@ public class JwtAuthenticationFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
-
-
         String path = request.getURI().getPath();
         System.out.println("들어오고 있는 경로 : " + path);
 
         // ✅ 특정 경로 제외
-        if (path.startsWith("/oauth2/authorization/")) {
+        if (path.contains("/v3/api-docs") || path.contains("/api-docs")
+                || path.contains("/swagger-ui") || path.contains("/docs")
+                || path.startsWith("/oauth2/authorization/")) {
             return chain.filter(exchange);
         }
 
