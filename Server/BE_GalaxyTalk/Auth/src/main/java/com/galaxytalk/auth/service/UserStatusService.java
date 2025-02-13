@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,10 +36,15 @@ public class UserStatusService {
     public Map<String, String> getUserStatus(String userId) {
         Optional<UserStatus> userStatusOptional = userStatusRepository.findById(userId);
 
+        if (userStatusOptional.isEmpty()) {
+            // 값이 없는 경우 명시적으로 예외를 던지거나, 빈 Map을 반환할 수 있습니다.
+            return Collections.emptyMap();
+        }
+
         Map<String, String> statusMap = new HashMap<>();
 
-            UserStatus userStatus = userStatusOptional.get();
-            statusMap.put("userInteractionState", userStatus.getUserInteractionState());
+        UserStatus userStatus = userStatusOptional.get();
+        statusMap.put("userInteractionState", userStatus.getUserInteractionState());
 
         return statusMap;
     }

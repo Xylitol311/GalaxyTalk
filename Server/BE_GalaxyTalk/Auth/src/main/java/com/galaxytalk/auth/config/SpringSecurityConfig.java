@@ -73,10 +73,8 @@ public class SpringSecurityConfig {
     }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
-
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(frontUrl,"https://nid.naver.com/**","https://kauth.kakao.com/**"));
+        configuration.setAllowedOriginPatterns(Arrays.asList(frontUrl, "https://nid.naver.com/**", "https://kauth.kakao.com/**"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
