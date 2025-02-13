@@ -1,6 +1,7 @@
 // queries.ts
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
+import { PATH } from '@/app/config/constants';
 import {
     deleteChatRoom,
     getChatMessages,
@@ -27,7 +28,7 @@ export const useDeleteChatRoom = () => {
     return useMutation({
         mutationFn: (chatRoomId: string) => deleteChatRoom(chatRoomId),
         onSuccess: () => {
-            navigate('/'); // 또는 후기 폼 페이지로 이동
+            navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
         },
         onError: (error) => {
             console.error('채팅방 나가기 실패:', error);
@@ -61,7 +62,7 @@ export const usePostChatReconnect = () => {
         mutationFn: postChatReconnect,
         retry: true,
         onError: (error) => {
-            navigate('/'); // 참여할 채팅방이 없다면 홈화면으로 이동
+            navigate(PATH.ROUTE.HOME); // 참여할 채팅방이 없다면 홈화면으로 이동
             console.error('채팅 재연결 실패:', error);
         },
     });
