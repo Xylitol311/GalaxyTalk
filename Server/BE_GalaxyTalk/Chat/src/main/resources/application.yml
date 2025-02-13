@@ -12,19 +12,7 @@ spring:
 server:
   port: 8084
 
-# Eureka 설정
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: ${EUREKA_SERVICE_URL}/eureka/
-  instance:
-    prefer-ip-address: true
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 10
-    ip-address: 127.0.0.1
-    instance-id: ${spring.application.name}:${server.port}
+
 
 # Swagger 관련 설정
 swagger:
