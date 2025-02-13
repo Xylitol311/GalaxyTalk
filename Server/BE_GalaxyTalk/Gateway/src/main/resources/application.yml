@@ -82,8 +82,6 @@ spring:
 #Swagger setting
 springdoc:
   swagger-ui:
-    # 외부 클라이언트가 접속할 Swagger UI 경로 (예: Nginx를 통해 https로 노출됨)
-    path: /docs/swagger-ui.html
     disable-swagger-default-url: true
 
 # urls

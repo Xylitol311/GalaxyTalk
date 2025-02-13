@@ -15,3 +15,18 @@ eureka:
     leaseExpirationDurationInSeconds: 10 #EUREKA DELETE SERVICE INSTANCE IF DOES NOT REFRESH UNTIL 10 SEC
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:${server.port} #MAKE Instance unique ID
+
+#Swagger setting
+springdoc:
+  swagger-ui:
+    # 외부 클라이언트가 접속할 Swagger UI 경로 (예: Nginx를 통해 https로 노출됨)
+    path: /docs/swagger-ui.html
+    urls:
+      - name: auth service
+        url: /auth-service/v3/api-docs
+      - name: support service
+        url: /support-service/v3/api-docs
+      - name: chat service
+        url: /chat-service/v3/api-docs
+      - name: match service
+        url: /match-service/v3/api-docs
