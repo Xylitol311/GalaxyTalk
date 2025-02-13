@@ -10,22 +10,19 @@ spring:
 
   #GATEWAY : HELPING USING DISCOVERY LOCATOR LIKE EUREKA
   cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
     openfeign:
       client:
         config:
           auth-service:
-            url: http://localhost:8081 #auth
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
 
 #Swagger settings : DOCS PATH SETTING
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
+    enabled: true
 
 #Eureka settings
 eureka:
@@ -41,13 +38,3 @@ eureka:
     #    hostname: localhost
     ip-address: 127.0.0.1
     instance-id: ${spring.application.name}:${server.port} #MAKE Instance unique ID
-
-
-#service url
-support:
-  service:
-    url: ${SUPPORT_SERVICE_URL}
-
-gateway:
-  service:
-    url: ${GATEWAY_SERVICE_URL}

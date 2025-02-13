@@ -22,10 +22,3 @@ eureka:
         leaseExpirationDurationInSeconds: 10
         instance-id: ${spring.application.name}:${server.port}
 
-swagger:
-    gateway:
-        # Jenkins에서 GATEWAY_SERVICE_URL을 주입받으며, 기본값은 https://my-remote-domain.com
-        url: ${GATEWAY_SERVICE_URL:https://my-remote-domain.com}
-    match:
-        # Jenkins에서 MATCH_SERVICE_URL을 주입받으며, 기본값은 https://my-remote-domain.com/match
-        url: ${MATCH_SERVICE_URL:https://my-remote-domain.com/match}
