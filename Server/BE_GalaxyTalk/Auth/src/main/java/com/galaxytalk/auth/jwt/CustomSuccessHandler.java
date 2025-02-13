@@ -42,12 +42,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException, IOException {
 
+        System.out.println("onAuthenticationSuccess 메서드에 들어옴");
         //성공할 경우 받은 데이터 처리
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
+        System.out.println("customUserDetails에 값 들어옴");
 
         //데이터 1) provider(네이버)로 부터 받은 serialNumber
         String serialNumber = customUserDetails.getName();
+
+        System.out.println("네이버/카카오로부터 받은 serialNumber" + serialNumber);
 
         //데이터 2) 권한 읽어오기
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -55,18 +59,25 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
+        System.out.println("권한 읽어옴" + role);
+
         //토큰 생성
         String accessToken = jwtUtil.token(serialNumber, role, 1000*60*60*1); //1시간
         String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); //3일
 
+        System.out.println("토큰 생성" + accessToken);
 
         //만들어진 토큰은 클라이언트데 쿠키에 담아서 주기
         response.addCookie(createCookie("AccessToken", accessToken));
         response.setStatus(HttpStatus.OK.value());
 
+        System.out.println("쿠키에 담아서 주기");
+
         //리프레시 토큰 레디스에 넣기, 유저 상태 관리 시작
         refreshTokenService.saveTokenInfo(accessToken,refreshToken);
         userStatusService.saveUserStatus(serialNumber, "idle");
+
+        System.out.println("토큰을 레디스에 넣기.. 끝");
 
 
         // 권한에 따른 로그인 후 로직 분기

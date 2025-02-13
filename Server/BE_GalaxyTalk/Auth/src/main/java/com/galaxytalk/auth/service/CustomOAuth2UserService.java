@@ -33,7 +33,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         //Naver로 부터 전달 받은 값
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
+        System.out.println("provider로 부터 값 받는 중");
+
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+        System.out.println(registrationId);
 
         OAuth2Response oAuth2Response = null;
 
@@ -48,9 +52,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String userSerialNumber = oAuth2Response.getProviderId();
         Users user = userService.getUserBySerialNumber(userSerialNumber);
 
+        System.out.println("유저 검색 시도 완료");
 
         // user 정보가 없을 경우 회원가입 처리
         if (user == null) {
+
+            System.out.println("회원가입 처리 시작");
 
             user = new Users();
             user.setSerialNumber(userSerialNumber);
@@ -62,6 +69,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             //데이터 저장
             userService.saveUser(user);
         }
+
+        System.out.println("UserDTO 만들어소 CustomeOAuth2User에 넣어주기");
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
         UserDTO userDTO = new UserDTO();
