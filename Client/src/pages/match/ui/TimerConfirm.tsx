@@ -25,125 +25,8 @@ type TimerProps = {
     matchData: MatchType;
 };
 
-// export default function TimerConfirm({ matchData }: TimerProps) {
-//     const [open, setOpen] = useState(false);
-//     const [remainingTime, setRemainingTime] = useState(60);
-//     const cancelRef = useRef<HTMLButtonElement | null>(null);
-
-//     const handleConfirm = () => {
-//         window.location.href = '/chatting-room';
-//     };
-
-//     const handleCancel = () => {
-//         window.location.href = '/';
-//     };
-
-//     const handlePass = () => {
-//         setOpen(false);
-//         setRemainingTime(60); // 타이머 초기화
-
-//         // 5초 후 다시 다이얼로그 열기
-//         setTimeout(() => {
-//             setOpen(true);
-//         }, 5000);
-//     };
-
-//     useEffect(() => {
-//         if (matchData) {
-//             setOpen(true);
-//         }
-//     }, [matchData]);
-
-//     useEffect(() => {
-//         if (open) {
-//             setRemainingTime(60);
-//             const interval = setInterval(() => {
-//                 setRemainingTime((prev) => {
-//                     if (prev <= 1) {
-//                         cancelRef.current?.click();
-//                         return 0;
-//                     }
-//                     return prev - 1;
-//                 });
-//             }, 1000);
-
-//             return () => clearInterval(interval);
-//         }
-//     }, [open]);
-
-//     useEffect(() => {
-//         if (open) {
-//             setRemainingTime(60);
-//             const interval = setInterval(() => {
-//                 setRemainingTime((prev) => {
-//                     if (prev <= 1) {
-//                         cancelRef.current?.click();
-//                         return 0;
-//                     }
-//                     return prev - 1;
-//                 });
-//             }, 1000);
-
-//             return () => clearInterval(interval);
-//         }
-//     }, [open]);
-
-//     return (
-//         <Dialog open={open} onOpenChange={setOpen}>
-//             {open && (
-//                 <DialogPortal>
-//                     <DialogOverlay />
-//                     <DialogContent
-//                         showCloseButton={false}
-//                         onInteractOutside={(e) => e.preventDefault()}
-//                         onEscapeKeyDown={(e) => e.preventDefault()}>
-//                         <DialogHeader>
-//                             <DialogTitle>대화 상대를 찾았어요 !</DialogTitle>
-//                             <DialogDescription className="flex flex-col items-start gap-5">
-//                                 <div className="flex flex-col items-start mt-3">
-//                                     <p className="text-black">
-//                                         상대의 고민: 프로젝트가 힘들어요
-//                                     </p>
-//                                     <p className="text-black">
-//                                         상대의 성향: ENTP
-//                                     </p>
-//                                     <p className="text-black">
-//                                         상대의 온도: 62
-//                                     </p>
-//                                 </div>
-
-//                                 <p>
-//                                     {remainingTime}초 후 자동으로 홈으로
-//                                     나가집니다.
-//                                 </p>
-//                             </DialogDescription>
-//                         </DialogHeader>
-//                         <DialogFooter className="flex justify-between">
-//                             <Button variant="confirm" onClick={handleConfirm}>
-//                                 <CircleCheckBigIcon />
-//                                 매칭 성사
-//                             </Button>
-//                             <Button variant="pass" onClick={handlePass}>
-//                                 <SkipForwardIcon />
-//                                 매칭 거절
-//                             </Button>
-//                             <Button
-//                                 ref={cancelRef}
-//                                 variant="warn"
-//                                 onClick={handleCancel}>
-//                                 <CirclePauseIcon />
-//                                 매칭 취소
-//                             </Button>
-//                         </DialogFooter>
-//                     </DialogContent>
-//                 </DialogPortal>
-//             )}
-//         </Dialog>
-//     );
-// }
-
 export default function TimerConfirm({ matchData }: TimerProps) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
     const [remainingTime, setRemainingTime] = useState(60);
     const cancelRef = useRef<HTMLButtonElement | null>(null);
     const { mutate: matchCancelMutate } = useDeleteMatchCancel();
@@ -172,12 +55,6 @@ export default function TimerConfirm({ matchData }: TimerProps) {
     };
 
     useEffect(() => {
-        if (matchData) {
-            setOpen(true);
-        }
-    }, [matchData]);
-
-    useEffect(() => {
         if (open) {
             setRemainingTime(60);
             const interval = setInterval(() => {
@@ -193,8 +70,6 @@ export default function TimerConfirm({ matchData }: TimerProps) {
             return () => clearInterval(interval);
         }
     }, [open]);
-
-    if (!matchData) return null;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

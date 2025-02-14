@@ -30,24 +30,34 @@ export default function MatchingRoom() {
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
 
-    // const createSockJS = (url: string) => {
-    //     const sockJs = new SockJS(url);
-    //     return sockJs as unknown as WebSocket;
-    // };
+    const resetMatchData = () => {
+        setMatchData(null);
+    };
 
     const client = new Client({
         brokerURL: `${BASE_URL}/match/ws`,
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
+            console.log(userId);
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.parse(message.body);
                 if (data.type === 'MATCH_SUCCESS') {
+                    console.log(data.data);
                     setMatchData(data.data);
                 }
                 if (data.type === 'CHAT_CREATED') {
+                    console.log(data.data);
                     navigate(PATH.ROUTE.CHAT);
                 }
-                console.log(`Received: ${message.body}`);
+                if (data.type === 'WAITING') {
+                    console.log(data.data);
+                    resetMatchData();
+                }
+
+                if (data.type === 'MATCH_FAILED') {
+                    console.log(data.data);
+                    resetMatchData();
+                }
             });
             client.subscribe('/topic/matching/users/new', (message) =>
                 console.log(`Received: ${message.body}`)
