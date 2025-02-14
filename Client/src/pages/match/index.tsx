@@ -30,10 +30,9 @@ export default function MatchingRoom() {
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
 
-    // const createSockJS = (url: string) => {
-    //     const sockJs = new SockJS(url);
-    //     return sockJs as unknown as WebSocket;
-    // };
+    const resetMatchData = () => {
+        setMatchData(null);
+    };
 
     const client = new Client({
         brokerURL: `${BASE_URL}/match/ws`,
@@ -42,10 +41,14 @@ export default function MatchingRoom() {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.parse(message.body);
                 if (data.type === 'MATCH_SUCCESS') {
+                    console.log(data.data);
                     setMatchData(data.data);
                 }
                 if (data.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
+                }
+                if (data.type === 'WAITING' || data.type === 'MATCH_FAILED') {
+                    resetMatchData();
                 }
                 console.log(`Received: ${message.body}`);
             });
