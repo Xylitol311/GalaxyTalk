@@ -11,6 +11,7 @@ import { useUserStore } from '@/app/model/stores/user';
 import { useDeleteMatchCancel } from '@/features/match/api/queries';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
+import WarpPage from '../warp';
 import HealingMessage from './ui/HealingMessage';
 import TimerConfirm from './ui/TimerConfirm';
 
@@ -29,6 +30,15 @@ export default function MatchingRoom() {
     const { mutate } = useDeleteMatchCancel();
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
+    const [isMoving, setIsMoving] = useState(true);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setIsMoving(false);
+        }, 6000);
+
+        return () => clearTimeout(timeoutId);
+    }, []);
 
     const resetMatchData = () => {
         setMatchData(null);
@@ -41,6 +51,7 @@ export default function MatchingRoom() {
             console.log(userId);
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.parse(message.body);
+                console.log(data);
                 if (data.type === 'MATCH_SUCCESS') {
                     console.log(data.data);
                     setMatchData(data.data);
@@ -81,26 +92,34 @@ export default function MatchingRoom() {
     };
 
     return (
-        <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
-            <Galaxy />
-            <Html
-                position={[0, 0, 0]}
-                center
-                zIndexRange={[0, 0]}
-                style={{ pointerEvents: 'none' }}>
-                <div className="relative w-screen h-screen flex flex-col justify-between">
-                    <Button
-                        variant="link"
-                        className="text-white self-start"
-                        onClick={handleToHome}
-                        style={{ pointerEvents: 'auto' }}>
-                        <ExitIcon />
-                        이전 페이지로 이동하기
-                    </Button>
-                    {matchData && <TimerConfirm matchData={matchData} />}
-                    <HealingMessage />
-                </div>
-            </Html>
-        </Canvas>
+        <>
+            {isMoving ? (
+                <WarpPage />
+            ) : (
+                <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
+                    <Galaxy />
+                    <Html
+                        position={[0, 0, 0]}
+                        center
+                        zIndexRange={[0, 0]}
+                        style={{ pointerEvents: 'none' }}>
+                        <div className="relative w-screen h-screen flex flex-col justify-between">
+                            <Button
+                                variant="link"
+                                className="text-white self-start"
+                                onClick={handleToHome}
+                                style={{ pointerEvents: 'auto' }}>
+                                <ExitIcon />
+                                이전 페이지로 이동하기
+                            </Button>
+                            {!isMoving && matchData && (
+                                <TimerConfirm matchData={matchData} />
+                            )}
+                            <HealingMessage />
+                        </div>
+                    </Html>
+                </Canvas>
+            )}
+        </>
     );
 }
