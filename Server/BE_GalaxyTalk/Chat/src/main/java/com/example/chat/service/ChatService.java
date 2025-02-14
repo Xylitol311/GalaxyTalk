@@ -78,11 +78,11 @@ public class ChatService {
         String chatRoomId = chatRepository.save(chatRoom).getId();
 
         // AI 질문을 방 생성 시점에 생성합니다.
-        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
-                .exceptionally(throwable -> {
-                    log.error("질문 생성 중 에러 발생", throwable);
-                    return null;
-                });
+//        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
+//                .exceptionally(throwable -> {
+//                    log.error("질문 생성 중 에러 발생", throwable);
+//                    return null;
+//                });
 
         return chatRoomId;
     }
