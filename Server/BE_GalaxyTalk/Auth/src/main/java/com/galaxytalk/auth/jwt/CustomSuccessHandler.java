@@ -62,7 +62,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         System.out.println("권한 읽어옴" + role);
 
         //토큰 생성
-        String accessToken = jwtUtil.token(serialNumber, role, 1000*60*60*1); //1시간
+        String accessToken = jwtUtil.token(serialNumber, role, 1000*60*60*24); //24시간
         String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); //3일
 
         System.out.println("토큰 생성" + accessToken);

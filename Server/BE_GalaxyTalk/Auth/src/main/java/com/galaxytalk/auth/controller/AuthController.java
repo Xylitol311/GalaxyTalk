@@ -234,7 +234,7 @@ public class AuthController {
         }
 
         //4. 새로운 토큰 생성
-        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 1); //1시간
+        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24); //1시간
         String newRefreshToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24*3); //3일
 
 
