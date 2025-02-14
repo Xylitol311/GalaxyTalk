@@ -200,6 +200,10 @@ services:
       LIVEKIT_WS_URL: "wss://i12a503.p.ssafy.io/livekitws/"
       LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
       LIVEKIT_LOG_LEVEL: "debug"
+
+      # CORS 설정 추가
+      LIVEKIT_CORS_ALLOWED_ORIGINS: "https://meet.livekit.io/"
+      LIVEKIT_CORS_ALLOW_CREDENTIALS: "true"
     restart: always
     networks:
       - my-network
