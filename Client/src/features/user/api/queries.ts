@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import { useUserStore } from '@/app/model/stores/user';
@@ -21,20 +21,30 @@ export const useUserStatusQuery = () => {
 
 export const usePostSignUp = () => {
     const navigate = useNavigate();
-
-    const { data: userBaseInfo, isSuccess: isUserInfoSuccess } =
-        useUserInfoQuery();
-    const { data: userStatusInfo, isSuccess: isUserStatusSuccess } =
-        useUserStatusQuery();
+    const queryClient = useQueryClient();
     const { setUserBase, setUserStatus } = useUserStore();
 
     return useMutation({
         mutationFn: (formData: SignupFormValues) => postSignup(formData),
-        onSuccess: (response) => {
-            if (response.success && isUserInfoSuccess && isUserStatusSuccess) {
-                setUserBase(userBaseInfo.data);
-                setUserStatus(userStatusInfo.data);
-                navigate(PATH.ROUTE.HOME);
+        onSuccess: async (response) => {
+            if (response.success) {
+                // React Query에게 기존 데이터를 무효화하고 새로 가져오도록 요청
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
+
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
+                    navigate(PATH.ROUTE.HOME);
+                }
             }
         },
         onError: (error) => {
@@ -44,22 +54,63 @@ export const usePostSignUp = () => {
 };
 
 export const usePostLogout = () => {
-    const { data: userBaseInfo, isSuccess: isUserInfoSuccess } =
-        useUserInfoQuery();
-    const { data: userStatusInfo, isSuccess: isUserStatusSuccess } =
-        useUserStatusQuery();
+    const queryClient = useQueryClient();
     const { setUserBase, setUserStatus } = useUserStore();
 
     return useMutation({
         mutationFn: postLogout,
-        onSuccess: (response) => {
-            if (response.success && isUserInfoSuccess && isUserStatusSuccess) {
-                setUserBase({ ...userBaseInfo.data, userId: '' });
-                setUserStatus(userStatusInfo.data);
+        onSuccess: async (response) => {
+            if (response.success) {
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
+
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
+                }
             }
         },
         onError: (error) => {
             console.error('로그아웃 실패:', error);
+        },
+    });
+};
+
+export const usePostRefresh = () => {
+    const queryClient = useQueryClient();
+    const { setUserBase, setUserStatus } = useUserStore();
+
+    return useMutation({
+        mutationFn: postLogout,
+        onSuccess: async (response) => {
+            if (response.success) {
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
+
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
+                }
+            }
+        },
+        onError: (error) => {
+            console.error('refresh 요청 실패:', error);
         },
     });
 };

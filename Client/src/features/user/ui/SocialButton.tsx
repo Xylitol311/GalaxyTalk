@@ -4,19 +4,16 @@ import { Button } from '@/shared/ui/shadcn/button';
 
 export default function SocialButton() {
     // const { getUserBase, setUserBase } = useUserStore();
-    // const navigate = useNavigate();
     // const userBase = getUserBase();
 
     const handleLogin = () => {
         // Memo: 백엔드 서버 배포 시 주석 해제
         window.location.href = `${BASE_URL}/auth${API_PATH.OAUTH.LOGIN}`;
-        // window.location.href = `https://i12a503.p.ssafy.io/auth/oauth2/authorization/kakao`;
         // setUserBase({
         //     ...userBase,
         //     role: 'GUEST',
         // });
         // window.location.href = '/signup';
-        // navigate(PATH.ROUTE.SIGN_UP);
     };
 
     return (
