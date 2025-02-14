@@ -5,17 +5,19 @@ import { useUserStore } from '@/app/model/stores/user';
 import { SignupFormValues } from '../model/schema';
 import { getUserInfo, getUserStatus, postLogout, postSignup } from './apis';
 
-export const useUserInfoQuery = () => {
+export const useUserInfoQuery = (enabled = true) => {
     return useQuery({
         queryKey: ['userInfo'],
         queryFn: getUserInfo,
+        enabled,
     });
 };
 
-export const useUserStatusQuery = () => {
+export const useUserStatusQuery = (enabled = true) => {
     return useQuery({
         queryKey: ['userStatus'],
         queryFn: getUserStatus,
+        enabled,
     });
 };
 
@@ -54,28 +56,13 @@ export const usePostSignUp = () => {
 };
 
 export const usePostLogout = () => {
-    const queryClient = useQueryClient();
-    const { setUserBase, setUserStatus } = useUserStore();
+    const { reset } = useUserStore();
 
     return useMutation({
         mutationFn: postLogout,
         onSuccess: async (response) => {
             if (response.success) {
-                const [updatedUserBase, updatedUserStatus] = await Promise.all([
-                    queryClient.fetchQuery({
-                        queryKey: ['userInfo'],
-                        queryFn: getUserInfo,
-                    }),
-                    queryClient.fetchQuery({
-                        queryKey: ['userStatus'],
-                        queryFn: getUserStatus,
-                    }),
-                ]);
-
-                if (updatedUserBase?.success && updatedUserStatus?.success) {
-                    setUserBase(updatedUserBase.data);
-                    setUserStatus(updatedUserStatus.data);
-                }
+                reset();
             }
         },
         onError: (error) => {
