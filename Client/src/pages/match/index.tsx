@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { Client } from '@stomp/stompjs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import SockJS from 'sockjs-client';
 import { PATH } from '@/app/config/constants';
 import { BASE_URL } from '@/app/config/constants/path';
 import { useUserStore } from '@/app/model/stores/user';
@@ -29,8 +30,14 @@ export default function MatchingRoom() {
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
 
+    // const createSockJS = (url: string) => {
+    //     const sockJs = new SockJS(url);
+    //     return sockJs as unknown as WebSocket;
+    // };
+
     const client = new Client({
         brokerURL: `${BASE_URL}/match/ws`,
+        webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.parse(message.body);
