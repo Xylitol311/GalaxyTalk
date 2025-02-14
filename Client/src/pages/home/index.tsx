@@ -11,7 +11,7 @@ import Login from './ui/Login';
 export default function Home() {
     const { userId } = useUserStore();
     const { mutate } = usePostLogout();
-    const isLogin = !userId;
+    const isLogin = !!userId;
 
     const handleLogout = () => {
         mutate();
