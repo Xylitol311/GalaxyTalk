@@ -18,7 +18,7 @@ export const usePostMatchStart = () => {
             postMatchStart(formData),
         onSuccess: (response) => {
             if (response.success) {
-                navigate(PATH.ROUTE.WARP);
+                navigate(PATH.ROUTE.MATCH);
             }
         },
         onError: (error) => {

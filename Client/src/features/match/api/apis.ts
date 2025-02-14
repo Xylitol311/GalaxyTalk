@@ -32,8 +32,17 @@ export async function getMatchTime() {
     return data;
 }
 
-export async function postMatchApprove() {
-    const { data } = await fetcher.post(PATH.API_PATH.MATCH.APPROVE);
+export async function postMatchApprove({
+    matchId,
+    accepted,
+}: {
+    matchId: string;
+    accepted: boolean;
+}) {
+    const { data } = await fetcher.post(PATH.API_PATH.MATCH.APPROVE, {
+        matchId,
+        accepted,
+    });
 
     return data;
 }

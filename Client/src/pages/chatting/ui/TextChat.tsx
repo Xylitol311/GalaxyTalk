@@ -91,16 +91,15 @@ function TextChat({ chatRoomId }) {
     };
 
     return (
-        <div className="flex flex-col h-full w-full relative">
+        <div className="flex flex-col justify-between w-screen md:w-full h-screen md:h-full relative">
             {/* // Wrap with ChatMessageList */}
-            <ChatMessageList>
+            <ChatMessageList className="pt-2">
                 {chatMessages.map((msg) => {
                     const isSentByMe = myUserId === msg.from?.identity;
                     return (
                         <ChatBubble
                             key={msg?.id}
                             variant={isSentByMe ? 'sent' : 'received'}>
-                            {/* <ChatBubbleAvatar fallback={isSentByMe ? "US" : "AI"} /> */}
                             <ChatBubbleMessage
                                 variant={isSentByMe ? 'sent' : 'received'}>
                                 {msg.message}
@@ -109,15 +108,15 @@ function TextChat({ chatRoomId }) {
                     );
                 })}
             </ChatMessageList>
-            {isMobile && (
-                <div className="w-full flex justify-end pb-4 pr-4">
-                    <ReactionPanel />
-                </div>
-            )}
 
             <form
-                className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-2"
+                className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-2 "
                 onSubmit={handleMessageSubmit}>
+                {isMobile && (
+                    <div className="w-full flex justify-end absolute -top-14 right-4">
+                        <ReactionPanel />
+                    </div>
+                )}
                 <div className="flex gap-3">
                     {isMobile && (
                         <div className="flex items-center p-1">

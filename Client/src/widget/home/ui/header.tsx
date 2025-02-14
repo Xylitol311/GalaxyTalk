@@ -1,15 +1,16 @@
-import { PersonIcon } from '@radix-ui/react-icons';
-import { BellIcon } from 'lucide-react';
+import { BellIcon, DoorClosedIcon, DoorOpenIcon } from 'lucide-react';
+import { useState } from 'react';
+import { usePostLogout } from '@/features/user/api/queries';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 
 export default function Header() {
-    // const { mutate } = usePostLogout();
+    const { mutate } = usePostLogout();
+    const [isHovered, setIsHovered] = useState(false);
 
-    // const handleLogout = () => {
-    //     // Memo: 백엔드 서버 배포 시 주석 해제
-    //     mutate();
-    // };
+    const handleLogout = () => {
+        mutate();
+    };
 
     const handleClick = () => {
         toast({
@@ -19,7 +20,7 @@ export default function Header() {
     };
 
     return (
-        <header className="fixed w-screen flex justify-end items-center gap-2 py-4 px-4 z-50">
+        <header className="top-0 fixed w-screen flex justify-end items-center gap-2 py-4 px-4 z-50">
             <Button
                 variant="ghost"
                 size="icon"
@@ -32,8 +33,10 @@ export default function Header() {
                 variant="ghost"
                 size="icon"
                 className="text-white"
-                onClick={handleClick}>
-                <PersonIcon />
+                onClick={handleLogout}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}>
+                {isHovered ? <DoorClosedIcon /> : <DoorOpenIcon />}
             </Button>
         </header>
     );

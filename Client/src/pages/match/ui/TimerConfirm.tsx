@@ -1,9 +1,15 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import {
     CircleCheckBigIcon,
     CirclePauseIcon,
     SkipForwardIcon,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import {
+    useDeleteMatchCancel,
+    useMatchApprove,
+} from '@/features/match/api/queries';
+import { queryClient } from '@/shared/api/query/client';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
     Dialog,
@@ -15,41 +21,40 @@ import {
     DialogPortal,
     DialogTitle,
 } from '@/shared/ui/shadcn/dialog';
+import { MatchType } from '..';
 
-export default function TimerConfirm() {
-    const [open, setOpen] = useState(false);
+type TimerProps = {
+    matchData: MatchType;
+};
+
+export default function TimerConfirm({ matchData }: TimerProps) {
+    const [open, setOpen] = useState(true);
     const [remainingTime, setRemainingTime] = useState(60);
     const cancelRef = useRef<HTMLButtonElement | null>(null);
-    // const navigate = useNavigate();
+    const { mutate: matchCancelMutate } = useDeleteMatchCancel();
+    const { mutate: matchApproveMutate } = useMatchApprove();
 
     const handleConfirm = () => {
-        // navigate(PATH.ROUTE.CHAT);
-        window.location.href = '/chatting-room';
+        matchApproveMutate({ matchId: `${matchData.matchId}`, accepted: true });
     };
 
     const handleCancel = () => {
-        // navigate(PATH.ROUTE.HOME);
+        matchApproveMutate({
+            matchId: `${matchData.matchId}`,
+            accepted: false,
+        });
+        matchCancelMutate();
         window.location.href = '/';
     };
 
     const handlePass = () => {
+        matchApproveMutate({
+            matchId: `${matchData.matchId}`,
+            accepted: false,
+        });
         setOpen(false);
-        setRemainingTime(60); // 타이머 초기화
-
-        // 5초 후 다시 다이얼로그 열기
-        setTimeout(() => {
-            setOpen(true);
-        }, 5000);
+        setRemainingTime(60);
     };
-
-    useEffect(() => {
-        // 5초 후 자동으로 다이얼로그 열기
-        const timeout = setTimeout(() => {
-            setOpen(true);
-        }, 5000);
-
-        return () => clearTimeout(timeout);
-    }, []);
 
     useEffect(() => {
         if (open) {
@@ -69,55 +74,61 @@ export default function TimerConfirm() {
     }, [open]);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            {open && (
-                <DialogPortal>
-                    <DialogOverlay />
-                    <DialogContent
-                        showCloseButton={false}
-                        onInteractOutside={(e) => e.preventDefault()}
-                        onEscapeKeyDown={(e) => e.preventDefault()}>
-                        <DialogHeader>
-                            <DialogTitle>대화 상대를 찾았어요 !</DialogTitle>
-                            <DialogDescription className="flex flex-col items-start gap-5">
-                                <div className="flex flex-col items-start mt-3">
-                                    <p className="text-black">
-                                        상대의 고민: 프로젝트가 힘들어요
+        <QueryClientProvider client={queryClient}>
+            <Dialog open={open} onOpenChange={setOpen}>
+                {open && (
+                    <DialogPortal>
+                        <DialogOverlay />
+                        <DialogContent
+                            showCloseButton={false}
+                            onInteractOutside={(e) => e.preventDefault()}
+                            onEscapeKeyDown={(e) => e.preventDefault()}>
+                            <DialogHeader>
+                                <DialogTitle>대화 상대를 찾았어요!</DialogTitle>
+                                <DialogDescription className="flex flex-col items-start gap-5">
+                                    <div className="flex flex-col items-start mt-3">
+                                        <p className="text-black">
+                                            상대의 고민: {matchData.concern}
+                                        </p>
+                                        <p className="text-black">
+                                            상대의 성향: {matchData.mbti}
+                                        </p>
+                                        <p className="text-black">
+                                            상대의 온도: {matchData.energy}
+                                        </p>
+                                        <p className="text-black">
+                                            유사도 점수: {matchData.similarity}%
+                                        </p>
+                                    </div>
+                                    <p>
+                                        {remainingTime}초 후 자동으로 홈으로
+                                        나가집니다.
                                     </p>
-                                    <p className="text-black">
-                                        상대의 성향: ENTP
-                                    </p>
-                                    <p className="text-black">
-                                        상대의 온도: 62
-                                    </p>
-                                </div>
-
-                                <p>
-                                    {remainingTime}초 후 자동으로 홈으로
-                                    나가집니다.
-                                </p>
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter className="flex justify-between">
-                            <Button variant="confirm" onClick={handleConfirm}>
-                                <CircleCheckBigIcon />
-                                매칭 성사
-                            </Button>
-                            <Button variant="pass" onClick={handlePass}>
-                                <SkipForwardIcon />
-                                매칭 거절
-                            </Button>
-                            <Button
-                                ref={cancelRef}
-                                variant="warn"
-                                onClick={handleCancel}>
-                                <CirclePauseIcon />
-                                매칭 취소
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </DialogPortal>
-            )}
-        </Dialog>
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="flex justify-between">
+                                <Button
+                                    variant="confirm"
+                                    onClick={handleConfirm}>
+                                    <CircleCheckBigIcon />
+                                    매칭 성사
+                                </Button>
+                                <Button variant="pass" onClick={handlePass}>
+                                    <SkipForwardIcon />
+                                    매칭 거절
+                                </Button>
+                                <Button
+                                    ref={cancelRef}
+                                    variant="warn"
+                                    onClick={handleCancel}>
+                                    <CirclePauseIcon />
+                                    매칭 취소
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </DialogPortal>
+                )}
+            </Dialog>
+        </QueryClientProvider>
     );
 }
