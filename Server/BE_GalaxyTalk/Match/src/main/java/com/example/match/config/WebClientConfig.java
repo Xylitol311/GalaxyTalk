@@ -36,19 +36,19 @@ public class WebClientConfig {
                 .build();
     }
 
-    @Bean
-    public WebClient chatServiceClient(WebClient.Builder webClientBuilder) {
-        return webClientBuilder
-                .baseUrl("lb://chat-service")
-                .build();
-    }
-
-    @Bean
-    public WebClient authServiceClient(WebClient.Builder webClientBuilder) {
-        return webClientBuilder
-                .baseUrl("lb://auth-service")
-                .build();
-    }
+//    @Bean
+//    public WebClient chatServiceClient(WebClient.Builder webClientBuilder) {
+//        return webClientBuilder
+//                .baseUrl("lb://chat-service")
+//                .build();
+//    }
+//
+//    @Bean
+//    public WebClient authServiceClient(WebClient.Builder webClientBuilder) {
+//        return webClientBuilder
+//                .baseUrl("lb://auth-service")
+//                .build();
+//    }
 
     private ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
