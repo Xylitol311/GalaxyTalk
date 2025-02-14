@@ -35,6 +35,7 @@ function Telescope({ onClick }: TelescopeProps) {
                 rotation={[0, 180, 0]}
                 hover={hover}
                 onClick={onClick}
+                hoverEmissiveMultiplier={400}
             />
         </group>
     );

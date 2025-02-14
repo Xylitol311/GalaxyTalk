@@ -10,6 +10,7 @@ interface RecursiveGLTFProps {
     rotation?: THREE.Euler | [number, number, number];
     hover?: boolean;
     onClick?: () => void;
+    hoverEmissiveMultiplier?: number;
 }
 
 function RecursiveGLTF({
@@ -21,6 +22,7 @@ function RecursiveGLTF({
     rotation,
     hover,
     onClick,
+    hoverEmissiveMultiplier = 1,
 }: RecursiveGLTFProps) {
     // object가 Mesh라면 Mesh 컴포넌트를 반환하고,
     // 추가 props가 있다면 해당 값이 없을 때는 원래 object의 속성을 쓰고,
@@ -29,7 +31,7 @@ function RecursiveGLTF({
     if (object instanceof THREE.Mesh) {
         const modifiedMaterial = object.material.clone();
         if (hover && 'emissiveIntensity' in modifiedMaterial) {
-            modifiedMaterial.emissiveIntensity = 400;
+            modifiedMaterial.emissiveIntensity = hoverEmissiveMultiplier;
         }
 
         return (
@@ -76,6 +78,7 @@ function RecursiveGLTF({
                     onClick={() => {
                         onClick?.();
                     }}
+                    hoverEmissiveMultiplier={hoverEmissiveMultiplier}
                 />
             ))}
         </group>
