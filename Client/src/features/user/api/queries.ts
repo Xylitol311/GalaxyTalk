@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import { useUserStore } from '@/app/model/stores/user';
-import { BaseResponseType } from '@/app/model/types/api';
-import { UserBaseType, UserStatusType } from '@/app/model/types/user';
 import { SignupFormValues } from '../model/schema';
 import { getUserInfo, getUserStatus, postLogout, postSignup } from './apis';
 
@@ -31,24 +29,20 @@ export const usePostSignUp = () => {
         onSuccess: async (response) => {
             if (response.success) {
                 // React Query에게 기존 데이터를 무효화하고 새로 가져오도록 요청
-                await queryClient.invalidateQueries({ queryKey: ['userInfo'] });
-                await queryClient.invalidateQueries({
-                    queryKey: ['userStatus'],
-                });
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
 
-                const updatedUserBase = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserBaseType };
-                }>(['userInfo']);
-                const updatedUserStatus = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserStatusType };
-                }>(['userStatus']);
-
-                if (
-                    updatedUserBase?.data.success &&
-                    updatedUserStatus?.data.success
-                ) {
-                    setUserBase(updatedUserBase.data.data);
-                    setUserStatus(updatedUserStatus.data.data);
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
                     navigate(PATH.ROUTE.HOME);
                 }
             }
@@ -67,24 +61,20 @@ export const usePostLogout = () => {
         mutationFn: postLogout,
         onSuccess: async (response) => {
             if (response.success) {
-                await queryClient.invalidateQueries({ queryKey: ['userInfo'] });
-                await queryClient.invalidateQueries({
-                    queryKey: ['userStatus'],
-                });
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
 
-                const updatedUserBase = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserBaseType };
-                }>(['userInfo']);
-                const updatedUserStatus = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserStatusType };
-                }>(['userStatus']);
-
-                if (
-                    updatedUserBase?.data.success &&
-                    updatedUserStatus?.data.success
-                ) {
-                    setUserBase(updatedUserBase.data.data);
-                    setUserStatus(updatedUserStatus.data.data);
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
                 }
             }
         },
@@ -102,24 +92,20 @@ export const usePostRefresh = () => {
         mutationFn: postLogout,
         onSuccess: async (response) => {
             if (response.success) {
-                await queryClient.invalidateQueries({ queryKey: ['userInfo'] });
-                await queryClient.invalidateQueries({
-                    queryKey: ['userStatus'],
-                });
+                const [updatedUserBase, updatedUserStatus] = await Promise.all([
+                    queryClient.fetchQuery({
+                        queryKey: ['userInfo'],
+                        queryFn: getUserInfo,
+                    }),
+                    queryClient.fetchQuery({
+                        queryKey: ['userStatus'],
+                        queryFn: getUserStatus,
+                    }),
+                ]);
 
-                const updatedUserBase = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserBaseType };
-                }>(['userInfo']);
-                const updatedUserStatus = queryClient.getQueryData<{
-                    data: BaseResponseType & { data: UserStatusType };
-                }>(['userStatus']);
-
-                if (
-                    updatedUserBase?.data.success &&
-                    updatedUserStatus?.data.success
-                ) {
-                    setUserBase(updatedUserBase.data.data);
-                    setUserStatus(updatedUserStatus.data.data);
+                if (updatedUserBase?.success && updatedUserStatus?.success) {
+                    setUserBase(updatedUserBase.data);
+                    setUserStatus(updatedUserStatus.data);
                 }
             }
         },
