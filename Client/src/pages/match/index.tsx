@@ -3,6 +3,7 @@ import { Html } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
+import { useDeleteMatchCancel } from '@/features/match/api/queries';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
 import HealingMessage from './ui/HealingMessage';
@@ -10,8 +11,10 @@ import TimerConfirm from './ui/TimerConfirm';
 
 export default function MatchingRoom() {
     const navigate = useNavigate();
+    const { mutate } = useDeleteMatchCancel();
 
     const handleToHome = () => {
+        mutate();
         navigate(PATH.ROUTE.HOME);
     };
 
