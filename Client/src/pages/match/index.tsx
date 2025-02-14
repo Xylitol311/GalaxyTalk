@@ -38,6 +38,7 @@ export default function MatchingRoom() {
         brokerURL: `${BASE_URL}/match/ws`,
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
+            console.log(userId);
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.parse(message.body);
                 if (data.type === 'MATCH_SUCCESS') {
@@ -45,12 +46,18 @@ export default function MatchingRoom() {
                     setMatchData(data.data);
                 }
                 if (data.type === 'CHAT_CREATED') {
+                    console.log(data.data);
                     navigate(PATH.ROUTE.CHAT);
                 }
-                if (data.type === 'WAITING' || data.type === 'MATCH_FAILED') {
+                if (data.type === 'WAITING') {
+                    console.log(data.data);
                     resetMatchData();
                 }
-                console.log(`Received: ${message.body}`);
+
+                if (data.type === 'MATCH_FAILED') {
+                    console.log(data.data);
+                    resetMatchData();
+                }
             });
             client.subscribe('/topic/matching/users/new', (message) =>
                 console.log(`Received: ${message.body}`)
