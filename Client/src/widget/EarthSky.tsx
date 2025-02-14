@@ -25,10 +25,18 @@ function EarthSky() {
             />
             <ambientLight intensity={2} />
             <directionalLight
-                position={[-4, 8, 6]}
+                position={[-4, 7, 6]}
                 intensity={6}
                 castShadow
                 scale={10}
+                // 그림자 지도 해상도 조정 (기본값보다 높게 설정하면 더 선명한 그림자)
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
+                // 그림자 카메라 범위를 설정해서 두 객체가 모두 포함되도록 합니다.
+                shadow-camera-left={-10}
+                shadow-camera-right={10}
+                shadow-camera-top={10}
+                shadow-camera-bottom={-10}
             />
             <Ground />
 
@@ -37,7 +45,7 @@ function EarthSky() {
                     mipmapBlur
                     luminanceThreshold={1}
                     levels={levels}
-                    intensity={intensity * 4}
+                    intensity={intensity * 1}
                 />
                 <ToneMapping />
             </EffectComposer>
