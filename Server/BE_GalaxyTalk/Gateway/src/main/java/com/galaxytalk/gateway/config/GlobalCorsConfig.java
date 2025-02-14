@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
@@ -17,24 +16,20 @@ public class GlobalCorsConfig {
     private String frontUrl;
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsWebFilter corsWebFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 여러 개의 Origin 허용 가능
-        configuration.setAllowedOrigins(List.of(frontUrl,"https://localhost:5173")); // 필요하면 추가
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
+        configuration.setAllowedOrigins(List.of(frontUrl, "https://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*")); // 클라이언트가 접근할 수 있는 헤더
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);  // preflight 응답 캐시 시간 설정 (1시간)
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // 모든 요청에 적용
+        source.registerCorsConfiguration("/**", configuration);
 
-        return source;
-    }
-
-    @Bean
-    public CorsWebFilter corsWebFilter(CorsConfigurationSource corsConfigurationSource) {
-        return new CorsWebFilter(corsConfigurationSource);
+        return new CorsWebFilter(source);
     }
 }
