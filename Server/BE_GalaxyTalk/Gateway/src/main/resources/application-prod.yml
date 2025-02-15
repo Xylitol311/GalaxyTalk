@@ -32,5 +32,3 @@ springdoc:
         url: /gateway/chat-service/v3/api-docs
       - name: match service
         url: /gateway/match-service/v3/api-docs
-      - name: letter service
-        url: /gateway/letter-service/v3/api-docs
