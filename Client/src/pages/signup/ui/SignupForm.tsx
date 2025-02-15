@@ -4,7 +4,6 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { MBTI_TYPES } from '@/app/config/constants/mbti';
 import { IMAGE_PATH } from '@/app/config/constants/path';
 import { PLANETS } from '@/app/config/constants/planet';
-import { useUserStore } from '@/app/model/stores/user';
 import { usePostSignUp } from '@/features/user/api/queries';
 import { SignupFormValues, signupSchema } from '@/features/user/model/schema';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -33,7 +32,6 @@ import {
 } from '@/shared/ui/shadcn/select';
 
 export default function SignupForm() {
-    const { role } = useUserStore();
     const { mutate } = usePostSignUp();
     const {
         handleSubmit,
@@ -49,7 +47,6 @@ export default function SignupForm() {
     });
 
     const handleFormSubmit: SubmitHandler<SignupFormValues> = (data) => {
-        console.log(role);
         mutate(data);
     };
 
@@ -171,13 +168,7 @@ export default function SignupForm() {
                             </div>
 
                             <DialogFooter className="flex justify-between">
-                                <Button
-                                    type="submit"
-                                    onClick={() => {
-                                        console.log('가입');
-                                    }}>
-                                    가입
-                                </Button>
+                                <Button type="submit">가입</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>
