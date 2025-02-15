@@ -150,7 +150,12 @@ function Galaxy() {
                 ]}
                 background={true}
             />
-            <OrbitControls enableDamping minDistance={3} maxDistance={10} />
+            <OrbitControls
+                enableDamping
+                minDistance={3}
+                maxDistance={10}
+                enablePan={false}
+            />
             <points>
                 <bufferGeometry>
                     <bufferAttribute

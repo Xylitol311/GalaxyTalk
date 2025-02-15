@@ -15,6 +15,7 @@ export default defineConfig(({ command }) => {
                 '@': path.resolve(__dirname, './src'),
             },
         },
+        define: { global: 'window' },
         server: {
             // 개발 환경에서만 HTTPS 설정 적용
             ...(isDev && {
