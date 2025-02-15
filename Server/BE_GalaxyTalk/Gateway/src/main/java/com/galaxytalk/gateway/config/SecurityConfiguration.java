@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                         .pathMatchers("/oauth2/authorization/**", "/webjars/**", "/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/docs/**", "/{serviceName}/v3/api-docs/**").permitAll()
                         .pathMatchers("/api/oauth/signup").hasAnyRole("GUEST","WITHDRAW")
                         .pathMatchers("/api/oauth/status", "/api/oauth").hasAnyRole("GUEST", "USER","WITHDRAW","RESTRICTED")
-                        .pathMatchers("api/chat/**", "/api/oauth/**", "api/match/**","api/support/**").hasRole("USER")
+                        .pathMatchers("api/chat/**","api/letter/**", "/api/oauth/**", "api/match/**","api/support/**").hasRole("USER")
                         .anyExchange().authenticated())
                 // 1) Access Denied Handler (권한 없는 경우)
                 .exceptionHandling(e -> e

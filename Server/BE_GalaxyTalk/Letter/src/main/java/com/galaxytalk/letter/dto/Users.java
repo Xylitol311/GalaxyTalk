@@ -1,4 +1,4 @@
-package com.galaxytalk.auth.entity;
+package com.galaxytalk.letter.dto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@EntityListeners(AuditingEntityListener.class) //데이터 생성시 생성일자 자동 업로드 위한 어노테이션
+@EntityListeners(AuditingEntityListener.class)
 @Table(name="Users")
 public class Users {
 
@@ -32,7 +32,6 @@ public class Users {
     @Column
     private String mbti;
 
-    // 행성 1 : 유저 N 관계, 지연로딩 설정, planet_id 로 join
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "planet_id")
     private Planets planets;
@@ -45,7 +44,6 @@ public class Users {
     @ColumnDefault("0")
     private int numberOfBlocks;
 
-    //ADMIN, USER로 열거형 맵핑
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -56,5 +54,5 @@ public class Users {
 
     @Column
     private LocalDateTime withdrawnAt;
-
+    
 }

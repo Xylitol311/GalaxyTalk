@@ -51,6 +51,10 @@ spring:
           uri: lb://CHAT-SERVICE
           predicates:
             - Path=/api/chat/**
+        - id: letter-service
+          uri: lb://LETTER-SERVICE
+          predicates:
+            - Path=/api/letter/**
       # 추가: Swagger API 문서를 위한 라우트 (서비스 이름에 맞게 설정)
         - id: auth-service-swagger
           uri: lb://AUTH-SERVICE
@@ -76,6 +80,12 @@ spring:
             - Path=/chat-service/v3/api-docs/**
           filters:
             - RewritePath=/chat-service/(?<remaining>.*), /${remaining}
+        - id: letter-service-swagger
+          uri: lb://LETTER-SERVICE
+          predicates:
+            - Path=/letter-service/v3/api-docs/**
+          filters:
+            - RewritePath=/letter-service/(?<remaining>.*), /${remaining}
 
 
 

@@ -1,6 +1,7 @@
 package com.galaxytalk.auth.controller;
 
 import com.galaxytalk.auth.dto.ApiResponseDto;
+import com.galaxytalk.auth.dto.EnergyRequest;
 import com.galaxytalk.auth.dto.UserSendDTO;
 import com.galaxytalk.auth.dto.UserSignup;
 import com.galaxytalk.auth.entity.Planets;
@@ -11,7 +12,6 @@ import com.galaxytalk.auth.service.PlanetService;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import com.galaxytalk.auth.service.UserService;
 import com.galaxytalk.auth.service.UserStatusService;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -276,7 +276,6 @@ public class AuthController {
     @PostMapping("status")
     public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestBody String userInteractionState) {
 
-        System.out.println("상태 auth에 들어옴?");
         //1. 회원 상태 저장
         if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
             ApiResponseDto badResponse = new ApiResponseDto(false, "유저 접속 상태 조회 불가", null);
@@ -285,6 +284,24 @@ public class AuthController {
 
 
         ApiResponseDto goodResponse = new ApiResponseDto("유저 상태 변경에 성공했습니다", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
+    }
+
+    //energy 1도 상승
+    @PostMapping("energy")
+    public ResponseEntity<?> increaseEnergy(@RequestBody EnergyRequest energyRequest) {
+
+        //1. 유저 이름으로 검색
+        Users user1 = userService.getUserBySerialNumber(energyRequest.getReceiverId());
+        Users user2 = userService.getUserBySerialNumber(energyRequest.getSenderId());
+
+
+        //2. 유저 energy 온도 하나 올려주기
+        user1.setEnergy(user1.getEnergy() +1);
+        user2.setEnergy(user2.getEnergy()+1);
+
+
+        ApiResponseDto goodResponse = new ApiResponseDto("유저 에너지 상승에 성공했습니다", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 

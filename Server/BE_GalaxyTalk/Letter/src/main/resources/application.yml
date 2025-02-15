@@ -1,0 +1,33 @@
+# SERVER SETTING in local or prod file
+
+spring:
+  application:
+    name: letter-service
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+
+#MVC : HELPING FIND PATH LIKE /** OR /*
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+#JPA
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+#Swagger settings : DOCS PATH SETTING
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
