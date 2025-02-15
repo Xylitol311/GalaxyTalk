@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -56,8 +58,9 @@ public class MatchProcessor {
         user2Data.put("energy", user1.getEnergy());
         user2Data.put("similarity", similarity);
 
-
-        webSocketService.notifyMatch(user1Data, user2Data);
+        // 5초 후에 notifyMatch 호출
+        CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS)
+                .execute(() -> webSocketService.notifyMatch(user1Data, user2Data));
     }
 
     /**
