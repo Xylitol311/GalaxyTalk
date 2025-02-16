@@ -1,9 +1,6 @@
 package com.galaxytalk.letter.controller;
 
-import com.galaxytalk.letter.dto.ApiResponseDto;
-import com.galaxytalk.letter.dto.EnergyRequest;
-import com.galaxytalk.letter.dto.Letter;
-import com.galaxytalk.letter.dto.LetterIdRequest;
+import com.galaxytalk.letter.dto.*;
 import com.galaxytalk.letter.feign.AuthClient;
 import com.galaxytalk.letter.service.LetterService;
 import feign.FeignException;
@@ -28,15 +25,14 @@ public class LetterController {
 
 
     //후기 쓰기
-    //user로 가서 에너지 1 늘려주기
+    //user로 가서 에너지 1 늘려주기, requestId는 요청하지 말기
+    @Transactional
     @PostMapping
-    public ResponseEntity<?> writeLetter(@RequestBody Letter letter) {
+    public ResponseEntity<?> writeLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody LetterRequest letterreq) {
 
         try {
             //1. 받는 사람이 존재하는지 확인
-            authClient.getUserInfo(letter.getReceiverId());
-            //2. 주는 사람이 존재하는지 확인
-            authClient.getUserInfo(letter.getSenderId());
+            authClient.getUserInfo(letterreq.getReceiverId());
 
         } catch (FeignException ex) {
             String errorMessage = "서버와의 연결에 문제가 발생했습니다.";
@@ -50,18 +46,25 @@ public class LetterController {
             return new ResponseEntity<>(new ApiResponseDto(false, "알 수 없는 오류가 발생했습니다.", null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        letterService.saveLetter(letter);
+        Letter saveLetter = new Letter();
+        saveLetter.setSenderId(serialNumber);
+        saveLetter.setContent(letterreq.getContent());
+        saveLetter.setChatRoomId(letterreq.getChatRoomId());
+        saveLetter.setReceiverId(letterreq.getReceiverId());
+
+
+        letterService.saveLetter(saveLetter);
 
 
         ApiResponseDto successResponse = new ApiResponseDto(true, "편지 저장 성공", null);
 
-        authClient.increaseEnergy(new EnergyRequest(letter.getSenderId(), letter.getReceiverId()));
+        authClient.increaseEnergy(new EnergyRequest(saveLetter.getSenderId(), saveLetter.getReceiverId()));
 
         return ResponseEntity.ok(successResponse);
 
     }
 
-    //내게 남겨진 후기 목록 보기
+    //내게 남겨진 후기 목록 보기, hide=1는 주지말기
     @GetMapping
     public ResponseEntity<?> getLetters(@RequestHeader("X-User-ID") String serialNumber) {
 
@@ -96,7 +99,6 @@ public class LetterController {
     @Transactional
     public ResponseEntity<?> hideLetter(@RequestBody LetterIdRequest letterId) {
 
-        System.out.println("들어오긴하고있나??");
         Letter letter = letterService.getAletter(letterId.getLetterId());
 
 
@@ -109,19 +111,6 @@ public class LetterController {
     }
 
 
-    //내게 남겨진 후기 하나 보기
-    @GetMapping("/{letterId}")
-    public ResponseEntity<?> getLetter(@PathVariable Long letterId) {
-
-        Letter letter = letterService.getAletter(letterId);
-
-
-        if (letter == null)
-            return ResponseEntity.ok(new ApiResponseDto(true, "편지가 비었어요", null));
-
-        ApiResponseDto successResponse = new ApiResponseDto(true, "편지 불러오기 성공", letter);
-        return ResponseEntity.ok(successResponse);
-    }
 
     //채팅방에 따라 내가 작성한 후기 보기
     @GetMapping("/chat/{chatRoomId}")

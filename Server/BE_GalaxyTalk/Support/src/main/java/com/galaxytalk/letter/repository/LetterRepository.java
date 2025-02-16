@@ -13,7 +13,7 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
     // 특정 chatRoomId 내에서 특정 senderId의 Letter 검색 ( 내가 보낸 건 채팅룸에서 확인)
     Letter findByChatRoomIdAndSenderId(String chatRoomId, String senderId);
 
-    // receiverId를 기준으로 (내가 받은 편지들)
-    List<Letter> findByReceiverId(String receiverId);
+    // receiverId를 기준으로 (내가 받은 편지들이면서 숨기지 않은 편지들)
+    List<Letter> findByReceiverIdAndIsHide(String receiverId, int isHide);
 
 }

@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LetterRequest {
 
-    private String senderId;
-
     private String receiverId;
 
     private String content;

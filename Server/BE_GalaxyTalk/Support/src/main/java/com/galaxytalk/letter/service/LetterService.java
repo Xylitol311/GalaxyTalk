@@ -28,8 +28,7 @@ public class LetterService {
 
     //내가 받은 편지 목록들
     public List<Letter> getLetters(String receiverId){
-        return letterRepository.
-                findByReceiverId(receiverId);
+        return letterRepository.findByReceiverIdAndIsHide(receiverId,0);
     }
 
     //편지 하나씩 열람
