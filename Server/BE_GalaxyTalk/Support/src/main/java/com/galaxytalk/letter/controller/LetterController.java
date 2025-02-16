@@ -97,9 +97,13 @@ public class LetterController {
     //편지 hide true로 바꾸기
     @PutMapping("/hide")
     @Transactional
-    public ResponseEntity<?> hideLetter(@RequestBody LetterIdRequest letterId) {
+    public ResponseEntity<?> hideLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody LetterIdRequest letterId) {
 
         Letter letter = letterService.getAletter(letterId.getLetterId());
+
+        if(!letter.getReceiverId().equals(serialNumber))
+            return new ResponseEntity<>(new ApiResponseDto(false, "잘못된 사용자 접근", null), HttpStatus.BAD_REQUEST);
+
 
 
         if (letter == null)
