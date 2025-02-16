@@ -1,11 +1,8 @@
 package com.galaxytalk.auth.jwt;
 
 import com.galaxytalk.auth.dto.CustomOAuth2User;
-
-import com.galaxytalk.auth.entity.RefreshToken;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import com.galaxytalk.auth.service.UserStatusService;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +39,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException, IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         try {
             log.info("onAuthenticationSuccess 메서드에 들어옴");
             // 성공 시 받은 사용자 정보 처리

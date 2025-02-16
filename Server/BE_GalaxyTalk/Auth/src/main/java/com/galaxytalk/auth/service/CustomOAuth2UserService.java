@@ -1,7 +1,6 @@
 package com.galaxytalk.auth.service;
 
 import com.galaxytalk.auth.dto.*;
-import com.galaxytalk.auth.entity.Planets;
 import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.entity.Users;
 import org.springframework.dao.DataIntegrityViolationException;
