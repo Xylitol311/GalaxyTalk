@@ -6,7 +6,6 @@ import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserStatusRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -42,8 +41,8 @@ public class ExternalApiService {
 
     /**
      * 채팅방 생성 요청
-     * - Match 서버에서 유저 아이디, 고민 내용, 유사도 점수를 Chat 서버로 전달
-     * - Chat 서버에서 sessionId, token 및 chatRoomId 반환
+     * - Match 서버에서 유저 정보, 고민 내용, 유사도 점수를 Chat 서버로 전달하여
+     * 채팅방 생성 후 sessionId, token, chatRoomId 반환
      */
     public Map<String, Object> createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
         log.info("채팅방 생성 요청");

@@ -1,10 +1,7 @@
 package com.example.match.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
