@@ -153,15 +153,14 @@ public class MatchProcessor {
                 .allMatch(UserMatchStatus::isAccepted);
     }
 
+
     /**
      * 매칭 거절 처리
-     * 1. 상대방 유저 정보 조회
-     * 2. 두 유저의 상태 초기화
-     * 3. 거절 알림 전송
+     * - 거절한 경우, 양쪽 유저의 rejectedUserIds에 서로의 ID를 추가하여 재매칭 방지
+     * - 이후 상태 초기화 후 재큐
      */
     private void processRejection(UserMatchStatus user) {
         String matchId = user.getMatchId();
-
         MatchResultStatus matchResultStatus = redisService.getMatchInfo(matchId);
         List<String> userIds = matchResultStatus.getUserIds();
 
@@ -170,7 +169,6 @@ public class MatchProcessor {
                     .filter(id -> !id.equals(user.getUserId()))
                     .findFirst()
                     .orElse(null);
-
             if (otherUserId != null) {
                 UserMatchStatus otherUser = redisService.getUserStatus(otherUserId);
                 if (otherUser != null) {
