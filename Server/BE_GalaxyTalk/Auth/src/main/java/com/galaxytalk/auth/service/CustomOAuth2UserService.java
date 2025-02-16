@@ -4,6 +4,7 @@ import com.galaxytalk.auth.dto.*;
 import com.galaxytalk.auth.entity.Planets;
 import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.entity.Users;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -67,7 +68,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setRole(role);
 
             //데이터 저장
-            userService.saveUser(user);
+            try {
+                // 중복 등록 방지를 위한 try-catch 추가
+                userService.saveUser(user);
+            } catch (DataIntegrityViolationException e) {
+                System.out.println("중복 회원가입 시도 감지, 기존 사용자 재조회");
+                user = userService.getUserBySerialNumber(userSerialNumber);
+            }
         }
 
         System.out.println("UserDTO 만들어소 CustomeOAuth2User에 넣어주기");
