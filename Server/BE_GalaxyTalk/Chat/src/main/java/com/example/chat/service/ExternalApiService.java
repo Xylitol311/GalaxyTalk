@@ -2,6 +2,7 @@ package com.example.chat.service;
 
 import com.example.chat.dto.UserStatusRequest;
 import com.example.chat.feign.AuthClient;
+import com.example.chat.feign.LetterClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,14 +20,12 @@ public class ExternalApiService {
 
     private final AuthClient authServiceClient;
 
-    private final WebClient commentServiceClient;
+    private final LetterClient supportServiceClient;
 
     private final WebClient gptClient;
 
     // Auth server에 유저 정보가 idle 또는 chatting으로 변경됨을 알림
     public void updateUserStatus(UserStatusRequest userStatusRequest) {
-
-        System.out.println(userStatusRequest.getUserId() + " " + userStatusRequest.getStatus());
         authServiceClient.changeUserStatus(
                 userStatusRequest.getUserId(),
                 userStatusRequest.getStatus()
@@ -40,13 +39,10 @@ public class ExternalApiService {
         return (Map<String, Object>) response.get("data");
     }
 
-    // Comment server에서 내가 남긴 상대에 대한 리뷰 받아오기
-    public String getCommentByUserId(String userId) {
-        return commentServiceClient.get()
-                .uri("/review/" + userId)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+    // support server에서 내가 남긴 상대에 대한 리뷰 받아오기
+    public Map<String, Object> getLetter(String userId, String chatRoomId) {
+        Map<String, Object> response = (Map<String, Object>) supportServiceClient.getLetter(userId, chatRoomId).getBody();
+        return (Map<String, Object>) response.get("data");
     }
 
     // GPT 통해 10개의 질문 생성

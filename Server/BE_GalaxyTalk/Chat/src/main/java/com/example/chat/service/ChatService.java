@@ -193,13 +193,23 @@ public class ChatService {
                     .orElseThrow();
 
             String otherUserId = other.getUserId();
+
+            // 상대방 ID set
+            previousChatResponse.setParticipantId(otherUserId);
+
+            // 내 고민 set
             previousChatResponse.setMyConcern(me.getConcern());
+
+            // 상대방 고민 set
             previousChatResponse.setParticipantConcern(other.getConcern());
+
+            // 상대방 행성 set
             int planetId = (Integer) externalApiService.getUserInfo(otherUserId).get("planetId");
             previousChatResponse.setParticipantPlanet(planetId);
 
-            // TODO: Comment Server 구현 후 연동
-            // previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
+            // support api에서 후기 가져와 상대방에 대한 내 후기 set
+            String letter = (String) externalApiService.getLetter(otherUserId, chatRoom.getId()).get("content");
+            previousChatResponse.setParticipantReview(letter);
 
             responseList.add(previousChatResponse);
         }
