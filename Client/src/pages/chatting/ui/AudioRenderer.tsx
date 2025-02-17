@@ -83,23 +83,15 @@ function AudioVisualizer({
         processedDataRef.current = groupedAverages;
     }, 1000); // 1000ms 쓰로틀
 
-    useEffect(() => {
-        const barsOriginal = audioWaves?.bars || [];
-        processAudioData(barsOriginal);
-        // Throttle된 함수는 내부적으로 업데이트를 제한하므로 별도의 클린업이 꼭 필요한 것은 아니지만,
-        // 필요한 경우 추가 클린업 로직을 구현할 수 있습니다.
-    }, [audioWaves, groupCount, processAudioData]);
-
-    // Canvas에 그리기: requestAnimationFrame을 통해 지속 렌더링
+    // Canvas에 그리기: 이제 requestAnimationFrame 대신 setInterval을 사용하여 1000ms마다 업데이트
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let animationFrameId: number;
-
         const draw = () => {
+            // 캔버스 클리어
             ctx.clearRect(0, 0, width, height);
 
             const groupedAverages = processedDataRef.current;
@@ -113,14 +105,14 @@ function AudioVisualizer({
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, barWidth - spacing, halfBarHeight * 2);
             });
-
-            animationFrameId = requestAnimationFrame(draw);
         };
 
+        // 처음 한 번 그린 후 1000ms마다 업데이트
         draw();
+        const intervalId = setInterval(draw, 1000);
 
         return () => {
-            cancelAnimationFrame(animationFrameId);
+            clearInterval(intervalId);
         };
     }, [width, height, groupCount, color, spacing]);
 
