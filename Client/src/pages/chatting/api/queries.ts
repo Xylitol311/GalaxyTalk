@@ -24,12 +24,11 @@ export const usePostChatMessage = (chatRoomId: string) => {
 
 // 채팅방 나가기
 export const useDeleteChatRoom = () => {
-    const navigate = useNavigate();
-
     return useMutation({
         mutationFn: (chatRoomId: string) => deleteChatRoom(chatRoomId),
         onSuccess: () => {
-            navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+            // navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+            // 폼 모달을 띄우기 위해 라우팅 하지 않음.
         },
         onError: (error) => {
             console.error('채팅방 나가기 실패:', error);
