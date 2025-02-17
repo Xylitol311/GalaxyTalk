@@ -1,51 +1,44 @@
 // import '@livekit/components-styles';
-import { LiveKitRoom } from '@livekit/components-react';
+import {
+    Toast,
+    useConnectionState,
+    useDisconnectButton,
+    useParticipants,
+} from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { BASE_URL } from '@/app/config/constants/path';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
 import { Button } from '@/shared/ui/shadcn/button';
 import { postAIQuestions } from './api/apis';
 import { useDeleteChatRoom, useGetChatParticipants } from './api/queries';
-import { ChatData } from './model/interfaces';
+import { AIQuestion, ChatData, Participant } from './model/interfaces';
+import AudioRenderer from './ui/AudioRenderer';
+import CustomAudioControl from './ui/CustomAudioControl';
+import CustomVideoControl from './ui/CustomVideoControl';
+import LetterFormModal from './ui/LetterFormModal';
 import ReactionPanel from './ui/ReactionPanel';
 import TextChat from './ui/TextChat';
+import VideoRenderer from './ui/VideoRenderer';
 
 interface ChattingPageProps {
     chatData: ChatData;
 }
 
-interface Question {
-    questionId: string;
-    content: string;
-}
-
-interface Participant {
-    userId: string;
-    mbti: string;
-    concern: string;
-    planetId: number;
-    energy: number;
-}
-
 function ChattingPage({ chatData }: ChattingPageProps) {
-    // const { sessionId, token, chatRoomId } = chatData;
-    const LIVEKIT_URL = `wss://${BASE_URL}/livekitws/`;
-    const token =
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzNDUiLCJpc3MiOiJnYWxheHkiLCJuYW1lIjoidXNlcjEyMzQ1IiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiIyZWViYjI0OC1jMGM2LTQ4Y2EtYTc2NC1hNmQ4Zjg3OTg1YTcifSwic2lwIjp7fSwiZXhwIjoxNzM5Mjc4Njk3LCJqdGkiOiJ1c2VyMTIzNDUifQ.lV8Ei3Pt_poX8aVY4F-pR8ULkvEhAGjfVZnMS2P6ivk';
-    const chatRoomId = 'xxyy';
+    const { sessionId, token, chatRoomId } = chatData;
+
     const isMobile = useIsMobile();
-    const disconnectButtonProps = {};
-    // const { buttonProps: disconnectButtonProps } = useDisconnectButton({});
+    const { buttonProps: disconnectButtonProps } = useDisconnectButton({});
 
     const [isAiModalOpen, setAiModalOpen] = useState(false);
-    const [AIQuestions, setAIQuestions] = useState<Question[]>([]);
+    const [AIQuestions, setAIQuestions] = useState<AIQuestion[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [myInfo, setMyInfo] = useState<Participant | null>(null);
     const [partnerInfo, setPartnerInfo] = useState<Participant | null>(null);
+    const [isLetterModalOpen, setLetterModalOpen] = useState(false);
 
     const { mutate: generateAIQuestions } = useMutation({
         mutationFn: () => postAIQuestions(chatRoomId),
@@ -59,6 +52,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const { data: response } = useGetChatParticipants(chatRoomId);
 
     const { userId: myUserId } = useUserStore();
+
+    const participants = useParticipants();
+    const connectionState = useConnectionState();
 
     useEffect(() => {
         if (response?.success && response.data) {
@@ -75,7 +71,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             if (me) setMyInfo(me);
             if (partner) setPartnerInfo(partner);
         }
-    }, [response]);
+    }, [response, myUserId]);
 
     const handleAIQuestionButton = () => {
         if (!AIQuestions.length) {
@@ -101,17 +97,27 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     };
 
     const handleLeaveChat = () => {
-        // disconnectButtonProps?.onclick();
-        leaveChatRoom(chatRoomId);
+        disconnectButtonProps.onClick();
+        // leaveChatRoom(chatRoomId);
+        setLetterModalOpen(true);
     };
 
+    if (connectionState !== 'connected') {
+        return (
+            <>
+                <Toast className="text-white">Connecting...</Toast>
+                {isLetterModalOpen && partnerInfo && (
+                    <LetterFormModal
+                        chatRoomId={chatRoomId}
+                        receiverId={partnerInfo?.userId}
+                    />
+                )}
+            </>
+        );
+    }
+
     return (
-        <LiveKitRoom
-            video={false}
-            audio={false}
-            token={token}
-            serverUrl={LIVEKIT_URL}
-            data-lk-theme="default">
+        <>
             {isMobile ? (
                 <div className="flex flex-col h-screen justify-center items-end relative">
                     <div className="absolute top-0 left-0 z-50 w-full h-14 bg-black text-white flex justify-between items-center p-2">
@@ -129,7 +135,8 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 />
                             </Button>
                         </div>
-                        <div>
+                        <div className="flex items-center">
+                            <CustomAudioControl />
                             <Button
                                 size="icon"
                                 variant="ghost"
@@ -146,9 +153,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 size="icon"
                                 variant="ghost"
                                 className="dark w-12 h-12"
-
-                                // onClick={handleClickPrevQuestion}
-                            >
+                                onClick={handleClickPrevQuestion}>
                                 <Menu
                                     style={{
                                         height: '20px',
@@ -200,8 +205,13 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             ) : (
                 <div className="w-full flex justify-center items-center">
                     <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
-                        <div className="flex justify-center items-end">
-                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6">
+                        <div className="flex flex-col justify-end">
+                            <VideoRenderer userId={participants[1]?.identity} />
+                            <AudioRenderer userId={participants[1]?.identity} />
+                            <div className="mb-2">
+                                <ReactionPanel userId={myUserId} />
+                            </div>
+                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 mt-2">
                                 <h1 className="text-2xl">
                                     {partnerInfo?.planetId
                                         ? getPlanetNameById(
@@ -290,8 +300,10 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
                         <div className="flex justify-end items-end flex-col">
+                            <VideoRenderer userId={participants[0]?.identity} />
+                            <AudioRenderer userId={participants[0]?.identity} />
                             <div className="mb-2">
-                                <ReactionPanel />
+                                <ReactionPanel userId={myUserId} />
                             </div>
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 flex flex-col justify-between relative">
                                 <div>
@@ -308,23 +320,29 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                         °C
                                     </p>
                                 </div>
-                                <div className="">
-                                    <Button
-                                        onClick={handleLeaveChat}
-                                        disabled={
-                                            disconnectButtonProps?.disabled
-                                        }
-                                        className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
-                                        <LogOut size={28} />
-                                        나가기
-                                    </Button>
+                                <div>
+                                    <div className="flex justify-around flex-wrap">
+                                        <CustomAudioControl />
+                                        <CustomVideoControl />
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <Button
+                                            onClick={handleLeaveChat}
+                                            disabled={
+                                                disconnectButtonProps.disabled
+                                            }
+                                            className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
+                                            <LogOut size={28} />
+                                            나가기
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-        </LiveKitRoom>
+        </>
     );
 }
 

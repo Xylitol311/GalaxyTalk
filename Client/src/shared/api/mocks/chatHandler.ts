@@ -262,4 +262,13 @@ export const chatHandlers = [
             });
         }
     ),
+
+    // 편지 저장 API mocking
+    http.post(`${BASE_URL}/${VERSION}${API_PATH.LETTER.CREATE}`, () => {
+        return HttpResponse.json({
+            success: true,
+            message: '편지 저장 성공',
+            data: null,
+        });
+    }),
 ];
