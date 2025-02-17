@@ -59,7 +59,7 @@ public class MatchProcessor {
         user2Data.put("similarity", similarity);
 
         // 5초 후에 매칭 알림 전송 (비동기 처리)
-        CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS)
+        CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS)
                 .execute(() -> webSocketService.notifyMatch(user1Data, user2Data));
     }
 
