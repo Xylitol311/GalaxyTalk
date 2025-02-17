@@ -1,5 +1,5 @@
 // apis.ts
-import { fetcher } from '@/app/api/axios';
+import useFetcher from '@/app/api/axios';
 import { PATH } from '@/app/config/constants';
 import { BaseResponseType } from '@/app/model/types/api';
 import {
@@ -9,6 +9,8 @@ import {
     PreviousMessagesResponse,
     ReconnectDataResponse,
 } from '../model/interfaces';
+
+const { fetcher } = useFetcher();
 
 // 메시지 전송
 export async function postChatMessage(chatRoomId: string, content: string) {

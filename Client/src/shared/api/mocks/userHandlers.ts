@@ -11,7 +11,7 @@ export const userHandlers = [
                 energy: 15,
                 mbti: 'ENFJ',
                 planetId: 1,
-                role: 'USER',
+                role: 'ROLE_USER',
             },
         });
     }),
@@ -35,10 +35,18 @@ export const userHandlers = [
     }),
 
     http.post(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.LOGOUT}`, () => {
-        return HttpResponse.json({
-            success: true,
-            message: '로그아웃에 성공했습니다',
-            data: null,
-        });
+        // return HttpResponse.json({
+        //     success: true,
+        //     message: '로그아웃에 성공했습니다',
+        //     data: null,
+        // });
+        return new HttpResponse(
+            JSON.stringify({
+                success: false,
+                message: '로그아웃 실패: 인증 정보가 유효하지 않습니다.',
+                data: null,
+            }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
     }),
 ];

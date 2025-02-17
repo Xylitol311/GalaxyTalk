@@ -1,7 +1,9 @@
-import { fetcher } from '@/app/api/axios';
+import useFetcher from '@/app/api/axios';
 import { PATH } from '@/app/config/constants';
 import { BaseResponseType } from '@/app/model/types/api';
 import { MatchStartFormValues } from '../model/schema';
+
+const { fetcher } = useFetcher();
 
 export async function postMatchStart(formData: MatchStartFormValues) {
     const { data } = await fetcher.post<BaseResponseType>(
