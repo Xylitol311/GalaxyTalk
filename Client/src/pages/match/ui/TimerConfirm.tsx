@@ -37,7 +37,7 @@ export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
     const handleConfirm = () => {
         matchApproveMutate({ matchId: `${matchData.matchId}`, accepted: true });
         toast({
-            title: '상대방의 대화 수락 여부를 기다립니다.',
+            title: '상대방의 대화 수락 여부를 기다립니다',
         });
         setOpen(false);
     };
@@ -55,6 +55,9 @@ export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
         matchApproveMutate({
             matchId: `${matchData.matchId}`,
             accepted: false,
+        });
+        toast({
+            title: '다른 대화 상대를 찾아볼게요',
         });
         setOpen(false);
         setRemainingTime(60);

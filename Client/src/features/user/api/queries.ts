@@ -10,7 +10,7 @@ export const useUserInfoQuery = (enabled = true) => {
         queryKey: ['userInfo'],
         queryFn: getUserInfo,
         enabled,
-    });
+    });  
 };
 
 export const useUserStatusQuery = (enabled = true) => {
