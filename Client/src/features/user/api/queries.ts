@@ -30,7 +30,6 @@ export const usePostSignUp = () => {
         mutationFn: (formData: SignupFormValues) => postSignup(formData),
         onSuccess: async (response) => {
             if (response.success) {
-                // React Query에게 기존 데이터를 무효화하고 새로 가져오도록 요청
                 const [updatedUserBase, updatedUserStatus] = await Promise.all([
                     queryClient.fetchQuery({
                         queryKey: ['userInfo'],
@@ -60,7 +59,7 @@ export const usePostLogout = () => {
 
     return useMutation({
         mutationFn: postLogout,
-        onSuccess: async (response) => {
+        onSuccess: (response) => {
             if (response.success) {
                 reset();
             }
