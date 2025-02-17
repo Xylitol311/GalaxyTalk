@@ -35,6 +35,7 @@ public class MatchProcessor {
      */
     public void createMatch(UserMatchStatus user1, UserMatchStatus user2, double similarity) {
         String matchId = UUID.randomUUID().toString();
+        similarity = (double) Math.round(similarity * 10000) / 100.0;
         updateMatchStatus(user1, user2, matchId, similarity);
 
         // 매칭 성공 시, 대기 큐(Redis Waiting Pool)에서 해당 유저 제거
