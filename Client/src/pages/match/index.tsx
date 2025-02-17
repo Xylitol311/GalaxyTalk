@@ -2,7 +2,7 @@ import { ExitIcon } from '@radix-ui/react-icons';
 import { Html } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Client } from '@stomp/stompjs';
-import { parse } from 'flatted';
+import { parse, stringify } from 'flatted';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import SockJS from 'sockjs-client';
@@ -55,8 +55,16 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                const data = parse(message.body);
-                console.log(data);
+                console.log('메시지 출력 :', message);
+                console.log('메시지 바디 출력 :', message.body);
+                // console.log('메시지 바디 타입 출력 :', message.body.type);
+                // console.log('메시지 바디 데이터 출력 :', message.body.data);
+                const stringifiedData = stringify(message.body);
+                console.log('직렬화 : ', stringifiedData);
+
+                const data = parse(stringifiedData);
+                console.log('파싱 데이터 : ', data);
+
                 if (data.type === 'MATCH_SUCCESS') {
                     setMatchData(data.data);
                 }
