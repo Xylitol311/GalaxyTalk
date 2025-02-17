@@ -9,7 +9,10 @@ import SockJS from 'sockjs-client';
 import { PATH } from '@/app/config/constants';
 import { BASE_URL } from '@/app/config/constants/path';
 import { useUserStore } from '@/app/model/stores/user';
-import { useDeleteMatchCancel } from '@/features/match/api/queries';
+import {
+    useDeleteMatchCancel,
+    useMatchApprove,
+} from '@/features/match/api/queries';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
@@ -33,6 +36,7 @@ export default function MatchingRoom() {
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
     const [isMoving, setIsMoving] = useState(true);
+    const { mutate: matchApproveMutate } = useMatchApprove();
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -96,6 +100,31 @@ export default function MatchingRoom() {
         navigate(PATH.ROUTE.HOME);
     };
 
+    const handleConfirm = () => {
+        matchApproveMutate({
+            matchId: `${matchData?.matchId}`,
+            accepted: true,
+        });
+
+        navigate(PATH.ROUTE.CHAT);
+    };
+
+    const handleCancel = () => {
+        matchApproveMutate({
+            matchId: `${matchData?.matchId}`,
+            accepted: false,
+        });
+
+        navigate(PATH.ROUTE.HOME);
+    };
+
+    const handlePass = () => {
+        matchApproveMutate({
+            matchId: `${matchData?.matchId}`,
+            accepted: false,
+        });
+    };
+
     return (
         <>
             {isMoving ? (
@@ -109,14 +138,37 @@ export default function MatchingRoom() {
                         zIndexRange={[0, 0]}
                         style={{ pointerEvents: 'none' }}>
                         <div className="relative w-screen h-screen flex flex-col justify-between">
-                            <Button
-                                variant="link"
-                                className="text-white self-start"
-                                onClick={handleToHome}
-                                style={{ pointerEvents: 'auto' }}>
-                                <ExitIcon />
-                                이전 페이지로 이동하기
-                            </Button>
+                            <div className="">
+                                <Button
+                                    variant="link"
+                                    className="text-white"
+                                    onClick={handleToHome}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    <ExitIcon />
+                                    이전 페이지로 이동하기
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    className="text-white"
+                                    onClick={handleCancel}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    매칭 거절
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    className="text-white"
+                                    onClick={handlePass}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    매칭 대기
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    className="text-white"
+                                    onClick={handleConfirm}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    매칭 수락
+                                </Button>
+                            </div>
                             {!isMoving && matchData && (
                                 <TimerConfirm matchData={matchData} />
                             )}
