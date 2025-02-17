@@ -1,4 +1,4 @@
-import { useChat } from '@livekit/components-react';
+import { useChat, useParticipants } from '@livekit/components-react';
 import { ArrowUp, Plus } from 'lucide-react';
 import {
     FormEvent,
@@ -44,6 +44,8 @@ function TextChat({ chatRoomId }) {
     const textareaRef = useRef<AutosizeTextAreaRef>(null);
     const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
     const { userId: myUserId } = useUserStore();
+
+    const participants = useParticipants();
 
     useEffect(() => {
         if (response) {
@@ -141,7 +143,8 @@ function TextChat({ chatRoomId }) {
                 className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-2 "
                 onSubmit={handleMessageSubmit}>
                 {isMobile && (
-                    <div className="w-full flex justify-end absolute -top-14 right-4">
+                    <div className="w-full flex justify-between absolute -top-14 right-0 px-4">
+                        <ReactionPanel userId={participants[1]?.identity} />
                         <ReactionPanel userId={myUserId} />
                     </div>
                 )}

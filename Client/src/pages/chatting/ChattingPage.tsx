@@ -4,6 +4,8 @@ import {
     useConnectionState,
     useDisconnectButton,
     useParticipants,
+    useRoomContext,
+    useRoomInfo,
 } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
@@ -54,8 +56,11 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const { userId: myUserId } = useUserStore();
 
     const participants = useParticipants();
-    console.log(participants);
     const connectionState = useConnectionState();
+    const roomContext = useRoomContext();
+    const roomInfo = useRoomInfo();
+    console.log(roomContext);
+    console.log(roomInfo);
 
     useEffect(() => {
         if (response?.success && response.data) {
