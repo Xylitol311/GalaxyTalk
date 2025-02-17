@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { createContext, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import { fetcher } from '@/app/api/axios';
 import { eventBus } from '@/app/api/eventBus';
 import { toast } from '@/shared/model/hooks/use-toast';
@@ -11,8 +10,6 @@ const ApiContext = createContext<{ fetcher: typeof fetcher }>({
 });
 
 export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
-    const navigate = useNavigate();
-
     const refreshTokenMutation = useMutation({
         mutationFn: async () => {
             const response = await fetcher.post(
@@ -72,7 +69,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
                         variant: 'destructive',
                         title: '세션이 만료되었습니다. 다시 로그인해주세요.',
                     });
-                    navigate(PATH.ROUTE.HOME);
+                    window.location.href = '/';
                     break;
                 default:
                     toast({
@@ -87,7 +84,7 @@ export const ApiProvider = ({ children }: { children: React.ReactNode }) => {
         return () => {
             eventBus.off('apiError', handleApiError); // 클린업
         };
-    }, [navigate, refreshTokenMutation]);
+    }, [refreshTokenMutation]);
 
     return (
         <ApiContext.Provider value={{ fetcher }}>
