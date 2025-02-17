@@ -210,7 +210,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
                             <div className="mb-2">
-                                <ReactionPanel userId={myUserId} />
+                                <ReactionPanel
+                                    userId={participants[1]?.identity}
+                                />
                             </div>
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 mt-2">
                                 <h1 className="text-2xl">
@@ -304,7 +306,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <VideoRenderer userId={participants[0]?.identity} />
                             <AudioRenderer userId={participants[0]?.identity} />
                             <div className="mb-2">
-                                <ReactionPanel userId={myUserId} />
+                                <ReactionPanel
+                                    userId={participants[0]?.identity}
+                                />
                             </div>
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 flex flex-col justify-between relative">
                                 <div>
