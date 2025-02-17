@@ -62,25 +62,28 @@ export default function MatchingRoom() {
                 console.log('직렬화 : ', stringifiedData);
 
                 const data = JSON.parse(stringifiedData);
-                console.log('파싱 데이터 : ', data);
-                console.log(data);
-                console.log('데이터 타입 : ', data.type);
+                console.log('타입 확인', typeof data);
+                const parsedData = JSON.parse(data);
+                console.log('타입 확인2', typeof parsedData);
+                console.log('파싱 데이터 : ', parsedData);
+                console.log(parsedData);
+                console.log('데이터 타입 : ', parsedData.type);
 
-                if (data.type === 'MATCH_SUCCESS') {
-                    console.log(data.data);
-                    setMatchData(data.data);
+                if (parsedData.type === 'MATCH_SUCCESS') {
+                    console.log(parsedData.data);
+                    setMatchData(parsedData.data);
                 }
-                if (data.type === 'CHAT_CREATED') {
+                if (parsedData.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
                 }
-                if (data.type === 'WAITING') {
+                if (parsedData.type === 'WAITING') {
                     toast({
                         title: '다른 사람을 찾아볼게요',
                     });
                     resetMatchData();
                 }
 
-                if (data.type === 'MATCH_FAILED') {
+                if (parsedData.type === 'MATCH_FAILED') {
                     toast({
                         variant: 'destructive',
                         title: '매칭에 실패했어요',
