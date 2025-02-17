@@ -89,7 +89,7 @@ public class AuthController {
 
         // 4. 토큰 수정하기
         //4-1) 다시 넣어줄 토큰 생성(ROLE이 변경되었기 때문에)
-        String newAccessToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 1); //1시간
+        String newAccessToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 *24 *7); //7일
         String newRefreshToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 24 * 3); //3일
 
         //4-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
@@ -311,7 +311,7 @@ public class AuthController {
         Cookie cookie = new Cookie(key, value);
 
         //쿠키의 유효기간 설정
-        cookie.setMaxAge(60 ); //1분 *60 해야 1시간
+        cookie.setMaxAge(60*60 * 24 *7 ); //1분 *60 해야 1시간
 
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
         cookie.setSecure(true);

@@ -58,7 +58,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             log.info("권한 읽어옴: {}", role);
 
             // 토큰 생성
-            String accessToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 1); // 1분임 ->  * 60(1시간) * 24(하루)
+            String accessToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 *24 *7); // 7일
             String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); // 3일
             log.info("토큰 생성 완료, accessToken: {}", accessToken);
 
@@ -92,7 +92,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Cookie cookie = new Cookie(key, value) ;
 
         //쿠키의 유효기간 설정
-        cookie.setMaxAge(60); //1시간간 //*60해야지 1시간
+        cookie.setMaxAge(60*60 * 24 *7 ); //7일
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
         cookie.setSecure(true);
 
