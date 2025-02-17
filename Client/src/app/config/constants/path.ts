@@ -29,7 +29,7 @@ const DOMAIN = {
     OAUTH: '/oauth',
     MATCH: '/match',
     CHAT: '/chat',
-    LETTER: '/comment',
+    LETTER: '/letter',
     ALARM: '/notification',
     INQUIRY: '/inquiry',
     REPORT: '/report',
@@ -56,13 +56,19 @@ export const API_PATH = {
         ROOMS: `${DOMAIN.CHAT}/rooms`,
         GETMSG: `${DOMAIN.CHAT}/messages`,
         RECONNECT: `${DOMAIN.CHAT}/reconnect`,
-
         // 채팅방 ID가 필요한 엔드포인트를 위한 함수
         room: (chatRoomId: string) => ({
+            GETMSG: `${DOMAIN.CHAT}/${chatRoomId}/messages`,
             SENDMSG: `${DOMAIN.CHAT}/${chatRoomId}/message`,
             LEAVE: `${DOMAIN.CHAT}/${chatRoomId}/leave`,
             AI: `${DOMAIN.CHAT}/${chatRoomId}/ai`,
             PARTICIPANTS: `${DOMAIN.CHAT}/${chatRoomId}/participants`,
         }),
+    },
+
+    LETTER: {
+        CREATE: `${DOMAIN.LETTER}`,
+        LIST: `${DOMAIN.LETTER}`,
+        HIDE: `${DOMAIN.LETTER}/hide`,
     },
 };

@@ -4,7 +4,6 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { MBTI_TYPES } from '@/app/config/constants/mbti';
 import { IMAGE_PATH } from '@/app/config/constants/path';
 import { PLANETS } from '@/app/config/constants/planet';
-import { useUserStore } from '@/app/model/stores/user';
 import { usePostSignUp } from '@/features/user/api/queries';
 import { SignupFormValues, signupSchema } from '@/features/user/model/schema';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -33,7 +32,6 @@ import {
 } from '@/shared/ui/shadcn/select';
 
 export default function SignupForm() {
-    const { role } = useUserStore();
     const { mutate } = usePostSignUp();
     const {
         handleSubmit,
@@ -49,9 +47,23 @@ export default function SignupForm() {
     });
 
     const handleFormSubmit: SubmitHandler<SignupFormValues> = (data) => {
-        console.log(role);
-        mutate(data);
+        const formattedData = {
+            ...data,
+            mbti: data.mbti === 'null' ? null : data.mbti,
+        };
+        mutate(formattedData);
     };
+
+    const HandlePlanetSelect = (id: number) => {
+        setValue('planetId', id);
+    };
+
+    const handleMbtiChange = (value: string) => {
+        setValue('mbti', value);
+    };
+
+    const selectValue =
+        watch('mbti') === 'null' ? '잘 모르겠어요' : watch('mbti');
 
     return (
         <Html position={[0, 0, 0]} center zIndexRange={[100, 0]}>
@@ -66,9 +78,11 @@ export default function SignupForm() {
                         </DialogHeader>
                         <form
                             onSubmit={handleSubmit(handleFormSubmit)}
-                            className="space-y-5 flex flex-col">
+                            className="space-y-6 flex flex-col">
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="planetId">
+                                <Label
+                                    htmlFor="planetId"
+                                    className="text-gray-400">
                                     나의 행성 고르기
                                 </Label>
                                 <Carousel className="max-w-sm self-center">
@@ -80,14 +94,15 @@ export default function SignupForm() {
                                                 <CarouselItem
                                                     key={planet.id}
                                                     onClick={() =>
-                                                        setValue(
-                                                            'planetId',
+                                                        HandlePlanetSelect(
                                                             planet.id
                                                         )
                                                     }
-                                                    className={`min-w-[calc(100%/3)] flex flex-col items-center justify-center p-4 space-y-2 cursor-pointer transition duration-200 ease-in-out shrink-0
-                        ${isSelected ? 'bg-gray-800' : 'bg-gray-300'}
-                        hover:bg-gray-700 hover:scale-105`}>
+                                                    className={`
+                        min-w-[calc(100%/3)] flex flex-col items-center justify-center p-4 space-y-2 cursor-pointer transition duration-200 ease-in-out shrink-0
+                        ${isSelected ? 'bg-gray-800' : 'bg-gray-300'} 
+                        hover:bg-gray-700 hover:scale-105
+                    `}>
                                                     <img
                                                         src={`${IMAGE_PATH}images/planets/${planet.imageUrl}`}
                                                         alt={planet.name}
@@ -109,29 +124,26 @@ export default function SignupForm() {
 
                                 {watch('planetId') && (
                                     <p className="flex gap-2 mt-2 text-sm text-gray-600 text-center justify-center">
-                                        나의 행성:{' '}
-                                        <div className="flex gap-1">
-                                            <span className="font-medium text-gray-800">
-                                                {
-                                                    PLANETS.find(
-                                                        (planet) =>
-                                                            planet.id ===
-                                                            watch('planetId')
-                                                    )?.name
-                                                }
-                                            </span>
-                                            <img
-                                                src={`${IMAGE_PATH}images/planets/${watch('planetId')}.png`}
-                                                alt={
-                                                    PLANETS.find(
-                                                        (planet) =>
-                                                            planet.id ===
-                                                            watch('planetId')
-                                                    )?.name
-                                                }
-                                                className="w-4 h-4 object-cover"
-                                            />
-                                        </div>
+                                        나의 행성:
+                                        {(() => {
+                                            const planet = PLANETS.find(
+                                                (planet) =>
+                                                    planet.id ===
+                                                    watch('planetId')
+                                            );
+                                            return planet ? (
+                                                <div className="flex gap-1">
+                                                    <span className="font-medium text-gray-800">
+                                                        {planet.name}
+                                                    </span>
+                                                    <img
+                                                        src={`${IMAGE_PATH}images/planets/${planet.id}.png`}
+                                                        alt={planet.name}
+                                                        className="w-4 h-4 object-cover"
+                                                    />
+                                                </div>
+                                            ) : null;
+                                        })()}
                                     </p>
                                 )}
 
@@ -143,19 +155,18 @@ export default function SignupForm() {
                             </div>
 
                             <div>
-                                <Label htmlFor="preferredMbti">
+                                <Label
+                                    htmlFor="preferredMbti"
+                                    className="text-gray-400">
                                     MBTI (선택)
                                 </Label>
                                 <Select
-                                    onValueChange={(value) =>
-                                        setValue(
-                                            'mbti',
-                                            value === 'null' ? null : value
-                                        )
-                                    }
+                                    onValueChange={handleMbtiChange}
                                     value={watch('mbti') || ''}>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="MBTI를 선택해주세요" />
+                                        <SelectValue placeholder="MBTI를 선택해주세요">
+                                            {selectValue}
+                                        </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="null">
@@ -171,13 +182,7 @@ export default function SignupForm() {
                             </div>
 
                             <DialogFooter className="flex justify-between">
-                                <Button
-                                    type="submit"
-                                    onClick={() => {
-                                        console.log('가입');
-                                    }}>
-                                    가입
-                                </Button>
+                                <Button type="submit">가입</Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>

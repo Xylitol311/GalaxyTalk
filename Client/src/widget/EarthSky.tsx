@@ -22,6 +22,7 @@ function EarthSky() {
                 maxPolarAngle={1.6}
                 minDistance={10}
                 maxDistance={14}
+                enablePan={false}
             />
             <ambientLight intensity={2} />
             <directionalLight

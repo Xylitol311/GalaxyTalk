@@ -1,5 +1,4 @@
 import react from '@vitejs/plugin-react';
-import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vite';
 
@@ -15,15 +14,16 @@ export default defineConfig(({ command }) => {
                 '@': path.resolve(__dirname, './src'),
             },
         },
-        server: {
-            // 개발 환경에서만 HTTPS 설정 적용
-            ...(isDev && {
-                https: {
-                    key: fs.readFileSync('key.pem'),
-                    cert: fs.readFileSync('.cert.pem'),
-                },
-                host: true,
-            }),
-        },
+        define: { global: 'window' },
+        // server: {
+        //     // 개발 환경에서만 HTTPS 설정 적용
+        //     ...(isDev && {
+        //         https: {
+        //             key: fs.readFileSync('key.pem'),
+        //             cert: fs.readFileSync('.cert.pem'),
+        //         },
+        //         host: true,
+        //     }),
+        // },
     };
 });

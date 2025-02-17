@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import {
     deleteChatRoom,
-    getChatMessages,
     getChatParticipants,
+    getPreviousMessages,
     postAIQuestions,
     postChatMessage,
     postChatReconnect,
+    postLetter,
 } from './apis';
 
 // 메시지 전송
@@ -23,12 +24,11 @@ export const usePostChatMessage = (chatRoomId: string) => {
 
 // 채팅방 나가기
 export const useDeleteChatRoom = () => {
-    const navigate = useNavigate();
-
     return useMutation({
         mutationFn: (chatRoomId: string) => deleteChatRoom(chatRoomId),
         onSuccess: () => {
-            navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+            // navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+            // 폼 모달을 띄우기 위해 라우팅 하지 않음.
         },
         onError: (error) => {
             console.error('채팅방 나가기 실패:', error);
@@ -36,11 +36,12 @@ export const useDeleteChatRoom = () => {
     });
 };
 
-// 메시지 목록 조회
-export const useChatMessagesQuery = () => {
+// 메시지 목록 조회 Hook
+export const useChatMessagesQuery = (chatRoomId: string) => {
     return useQuery({
-        queryKey: ['chat-messages'],
-        queryFn: getChatMessages,
+        queryKey: ['chat-messages', chatRoomId],
+        queryFn: () => getPreviousMessages(chatRoomId),
+        retry: false,
     });
 };
 
@@ -74,5 +75,21 @@ export const useGetChatParticipants = (chatRoomId: string) => {
         queryKey: ['chatParticipants', chatRoomId],
         queryFn: () => getChatParticipants(chatRoomId),
         retry: true,
+    });
+};
+
+// 편지 보내기
+export const usePostLetter = () => {
+    const navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: postLetter,
+        retry: true,
+        onSuccess: () => {
+            navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+        },
+        onError: (error) => {
+            console.error('편지 전송 실패:', error);
+        },
     });
 };

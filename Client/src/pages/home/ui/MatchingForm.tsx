@@ -3,6 +3,7 @@ import { Html } from '@react-three/drei';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { MBTI_TYPES } from '@/app/config/constants/mbti';
+import { Textarea } from '@/shared/ui/shadcn/textarea';
 import Telescope from '@/widget/Telescope';
 import { usePostMatchStart } from '../../../features/match/api/queries';
 import {
@@ -26,7 +27,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '../../../shared/ui/shadcn/select';
-import { Textarea } from '../../../shared/ui/shadcn/textarea';
 
 export default function MatchingForm() {
     const [open, setOpen] = useState(false);
@@ -50,8 +50,23 @@ export default function MatchingForm() {
     };
 
     const handleFormSubmit: SubmitHandler<MatchStartFormValues> = (data) => {
-        mutate(data);
+        const formattedData = {
+            ...data,
+            preferredMbti:
+                data.preferredMbti === 'null' ? null : data.preferredMbti,
+        };
+        console.log(formattedData);
+        mutate(formattedData);
     };
+
+    const handleMbtiChange = (value: string) => {
+        setValue('preferredMbti', value);
+    };
+
+    const selectValue =
+        watch('preferredMbti') === 'null'
+            ? '잘 모르겠어요'
+            : watch('preferredMbti');
 
     return (
         <>
@@ -71,11 +86,14 @@ export default function MatchingForm() {
 
                         <form
                             onSubmit={handleSubmit(handleFormSubmit)}
-                            className="space-y-5">
+                            className="space-y-6">
                             <div>
-                                <Label htmlFor="concern">
+                                <Label
+                                    htmlFor="concern"
+                                    className="text-gray-400">
                                     고민을 적어주세요
                                 </Label>
+
                                 <Textarea
                                     id="concern"
                                     {...register('concern')}
@@ -84,6 +102,7 @@ export default function MatchingForm() {
                                     }
                                     placeholder="고민을 10자 이상 100자 이하로 입력해주세요."
                                 />
+
                                 {errors.concern && (
                                     <p className="text-sm text-red-500">
                                         {errors.concern.message}
@@ -92,19 +111,18 @@ export default function MatchingForm() {
                             </div>
 
                             <div>
-                                <Label htmlFor="preferredMbti">
-                                    오늘은 어떤 마음을 가진 상대가 필요하신가요?
+                                <Label
+                                    htmlFor="preferredMbti"
+                                    className="text-gray-400">
+                                    어떤 마음을 가진 상대가 필요하신가요?
                                 </Label>
                                 <Select
-                                    onValueChange={(value) =>
-                                        setValue(
-                                            'preferredMbti',
-                                            value === 'null' ? null : value
-                                        )
-                                    }
+                                    onValueChange={handleMbtiChange}
                                     value={watch('preferredMbti') || ''}>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="MBTI를 선택해주세요" />
+                                        <SelectValue placeholder="MBTI를 선택해주세요">
+                                            {selectValue}
+                                        </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="null">

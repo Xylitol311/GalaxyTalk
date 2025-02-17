@@ -65,98 +65,103 @@ export const chatHandlers = [
     }),
 
     // 메시지 목록 조회
-    http.get(`${BASE_URL}/${VERSION}${API_PATH.CHAT.GETMSG}`, () => {
-        return HttpResponse.json({
-            success: true,
-            message: '이전 대화 조회 성공',
-            data: [
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content: '오늘도 코딩하느라 고생이 많네요 😅',
-                    createdAt: '2025-02-11T09:13:44.526',
-                },
-                {
-                    senderId: 'id2',
-                    content: '네... 버그 잡느라 힘들어 죽을 것 같아요 💀',
-                    createdAt: '2025-02-11T09:15:34.788',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '저도 타입 에러랑 씨름 중이에요. 타입스크립트 진짜... 🤯',
-                    createdAt: '2025-02-11T09:17:31.601',
-                },
-                {
-                    senderId: 'id2',
-                    content:
-                        '아... 타입스크립트요? 저는 지금 리액트 상태관리때문에 머리가 터질 것 같네요 😫',
-                    createdAt: '2025-02-11T09:18:38.388',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content: '리덕스인가요? 아니면 리코일?',
-                    createdAt: '2025-02-11T09:18:55.123',
-                },
-                {
-                    senderId: 'id2',
-                    content: '주스탠드예요... 러닝커브가 생각보다 높네요 😭',
-                    createdAt: '2025-02-11T09:19:22.456',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '아... 저도 한번 써봤는데 처음에 많이 헤맸어요. 나중엔 편해질 거에요! 화이팅입니다 💪',
-                    createdAt: '2025-02-11T09:20:15.789',
-                },
-                {
-                    senderId: 'id2',
-                    content: '감사합니다 ㅠㅠ 우리 둘 다 화이팅해요! ✨',
-                    createdAt: '2025-02-11T09:21:03.234',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '그런데 프론트엔드 개발하신지는 얼마나 되셨어요? 🤔',
-                    createdAt: '2025-02-11T09:22:15.123',
-                },
-                {
-                    senderId: 'id2',
-                    content:
-                        '아직 1년 정도밖에 안됐어요. 아직 배울게 너무 많네요 😅',
-                    createdAt: '2025-02-11T09:23:45.456',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '와! 1년차치고는 정말 열심히 하고 계시네요. 주스탠드까지 도전하시고! 👏',
-                    createdAt: '2025-02-11T09:24:30.789',
-                },
-                {
-                    senderId: 'id2',
-                    content: '감사합니다 😊 요즘은 Next.js도 공부하고 있어요',
-                    createdAt: '2025-02-11T09:25:12.234',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '오! Next.js 좋죠. SSR이랑 파일 기반 라우팅이 정말 편해요 👍',
-                    createdAt: '2025-02-11T09:26:05.567',
-                },
-                {
-                    senderId: 'id2',
-                    content:
-                        '맞아요! 근데 가끔 hydration 에러가 나서 당황스러울 때가 있어요 😅',
-                    createdAt: '2025-02-11T09:27:23.890',
-                },
-                {
-                    senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                    content:
-                        '아... 그거 정말 골치 아프죠. useEffect 타이밍 맞추기가 까다로워요 😫',
-                    createdAt: '2025-02-11T09:28:45.123',
-                },
-            ],
-        });
-    }),
+    http.get(
+        `${BASE_URL}/${VERSION}${API_PATH.CHAT.room(':chatRoomId').GETMSG}`,
+        () => {
+            return HttpResponse.json({
+                success: true,
+                message: '이전 대화 조회 성공',
+                data: [
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content: '오늘도 코딩하느라 고생이 많네요 😅',
+                        createdAt: '2025-02-11T09:13:44.526',
+                    },
+                    {
+                        senderId: 'id2',
+                        content: '네... 버그 잡느라 힘들어 죽을 것 같아요 💀',
+                        createdAt: '2025-02-11T09:15:34.788',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '저도 타입 에러랑 씨름 중이에요. 타입스크립트 진짜... 🤯',
+                        createdAt: '2025-02-11T09:17:31.601',
+                    },
+                    {
+                        senderId: 'id2',
+                        content:
+                            '아... 타입스크립트요? 저는 지금 리액트 상태관리때문에 머리가 터질 것 같네요 😫',
+                        createdAt: '2025-02-11T09:18:38.388',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content: '리덕스인가요? 아니면 리코일?',
+                        createdAt: '2025-02-11T09:18:55.123',
+                    },
+                    {
+                        senderId: 'id2',
+                        content:
+                            '주스탠드예요... 러닝커브가 생각보다 높네요 😭',
+                        createdAt: '2025-02-11T09:19:22.456',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '아... 저도 한번 써봤는데 처음에 많이 헤맸어요. 나중엔 편해질 거에요! 화이팅입니다 💪',
+                        createdAt: '2025-02-11T09:20:15.789',
+                    },
+                    {
+                        senderId: 'id2',
+                        content: '감사합니다 ㅠㅠ 우리 둘 다 화이팅해요! ✨',
+                        createdAt: '2025-02-11T09:21:03.234',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '그런데 프론트엔드 개발하신지는 얼마나 되셨어요? 🤔',
+                        createdAt: '2025-02-11T09:22:15.123',
+                    },
+                    {
+                        senderId: 'id2',
+                        content:
+                            '아직 1년 정도밖에 안됐어요. 아직 배울게 너무 많네요 😅',
+                        createdAt: '2025-02-11T09:23:45.456',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '와! 1년차치고는 정말 열심히 하고 계시네요. 주스탠드까지 도전하시고! 👏',
+                        createdAt: '2025-02-11T09:24:30.789',
+                    },
+                    {
+                        senderId: 'id2',
+                        content:
+                            '감사합니다 😊 요즘은 Next.js도 공부하고 있어요',
+                        createdAt: '2025-02-11T09:25:12.234',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '오! Next.js 좋죠. SSR이랑 파일 기반 라우팅이 정말 편해요 👍',
+                        createdAt: '2025-02-11T09:26:05.567',
+                    },
+                    {
+                        senderId: 'id2',
+                        content:
+                            '맞아요! 근데 가끔 hydration 에러가 나서 당황스러울 때가 있어요 😅',
+                        createdAt: '2025-02-11T09:27:23.890',
+                    },
+                    {
+                        senderId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+                        content:
+                            '아... 그거 정말 골치 아프죠. useEffect 타이밍 맞추기가 까다로워요 😫',
+                        createdAt: '2025-02-11T09:28:45.123',
+                    },
+                ],
+            });
+        }
+    ),
 
     // AI 질문 생성
     http.post(
@@ -262,4 +267,13 @@ export const chatHandlers = [
             });
         }
     ),
+
+    // 편지 저장 API mocking
+    http.post(`${BASE_URL}/${VERSION}${API_PATH.LETTER.CREATE}`, () => {
+        return HttpResponse.json({
+            success: true,
+            message: '편지 저장 성공',
+            data: null,
+        });
+    }),
 ];
