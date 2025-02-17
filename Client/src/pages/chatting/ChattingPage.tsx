@@ -4,6 +4,8 @@ import {
     useConnectionState,
     useDisconnectButton,
     useParticipants,
+    useRoomContext,
+    useRoomInfo,
 } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
@@ -55,6 +57,10 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     const participants = useParticipants();
     const connectionState = useConnectionState();
+    const roomContext = useRoomContext();
+    const roomInfo = useRoomInfo();
+    console.log(roomContext);
+    console.log(roomInfo);
 
     useEffect(() => {
         if (response?.success && response.data) {
@@ -104,6 +110,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     if (connectionState !== 'connected') {
         // disconnected, connecting, connected
+        console.log(connectionState);
+        console.log(isLetterModalOpen);
+        console.log(partnerInfo);
         return (
             <>
                 <Toast className="text-white">Connecting...</Toast>
@@ -210,7 +219,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
                             <div className="mb-2">
-                                <ReactionPanel userId={myUserId} />
+                                <ReactionPanel
+                                    userId={participants[1]?.identity}
+                                />
                             </div>
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 mt-2">
                                 <h1 className="text-2xl">
@@ -304,7 +315,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <VideoRenderer userId={participants[0]?.identity} />
                             <AudioRenderer userId={participants[0]?.identity} />
                             <div className="mb-2">
-                                <ReactionPanel userId={myUserId} />
+                                <ReactionPanel
+                                    userId={participants[0]?.identity}
+                                />
                             </div>
                             <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 flex flex-col justify-between relative">
                                 <div>
