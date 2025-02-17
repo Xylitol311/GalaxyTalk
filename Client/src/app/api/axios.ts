@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { BASE_URL, VERSION } from '../config/constants/path';
+import { eventBus } from './eventBus';
 
 export const fetcher = axios.create({
     baseURL: `${BASE_URL}/${VERSION}`,
@@ -24,6 +25,10 @@ fetcher.interceptors.response.use(
     (response) => response,
     (error) => {
         // Todo: 에러 처리
+        const { status, config } = error.response || {};
+
+        eventBus.emit('apiError', { status, config, error });
+
         console.error('API 요청 실패:', error);
 
         return Promise.reject(error);
