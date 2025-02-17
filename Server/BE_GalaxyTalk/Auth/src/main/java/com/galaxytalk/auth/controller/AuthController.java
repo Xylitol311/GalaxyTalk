@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
@@ -234,7 +233,7 @@ public class AuthController {
         }
 
         //4. 새로운 토큰 생성
-        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24); //1시간
+        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 1); //1분 60 *24 => 하루
         String newRefreshToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24*3); //3일
 
 
@@ -312,7 +311,7 @@ public class AuthController {
         Cookie cookie = new Cookie(key, value);
 
         //쿠키의 유효기간 설정
-        cookie.setMaxAge(60 * 60); //1시간간
+        cookie.setMaxAge(60 ); //1분 *60 해야 1시간
 
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
         cookie.setSecure(true);
