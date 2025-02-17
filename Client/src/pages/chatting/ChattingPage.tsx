@@ -5,7 +5,6 @@ import {
     useDisconnectButton,
     useParticipants,
     useRoomContext,
-    useRoomInfo,
 } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { RemoteParticipant, RoomEvent } from 'livekit-client';
@@ -58,10 +57,6 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     const participants = useParticipants();
     const connectionState = useConnectionState();
-    const roomContext = useRoomContext();
-    const roomInfo = useRoomInfo();
-    console.log(roomContext);
-    console.log(roomInfo);
 
     useEffect(() => {
         if (response?.success && response.data) {
