@@ -1,7 +1,6 @@
 import { LiveKitRoom } from '@livekit/components-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { BASE_URL } from '@/app/config/constants/path';
 import { usePostChatReconnect } from './api/queries';
 import ChattingPage from './ChattingPage';
 import { ChatData } from './model/interfaces';
@@ -10,7 +9,7 @@ export default function ChattingRoom() {
     const navigate = useNavigate();
     const [chatData, setChatData] = useState<ChatData | null>(null);
 
-    const LIVEKIT_URL = `wss://${BASE_URL}/livekitws/`;
+    const LIVEKIT_URL = `wss://i12a503.p.ssafy.io/livekitws/`;
 
     const { mutate: reconnect, isPending } = usePostChatReconnect();
 
