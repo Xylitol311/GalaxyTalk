@@ -8,6 +8,7 @@ import {
     useDeleteMatchCancel,
     useMatchApprove,
 } from '@/features/match/api/queries';
+import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
     Dialog,
@@ -23,9 +24,10 @@ import { MatchType } from '..';
 
 type TimerProps = {
     matchData: MatchType;
+    handleToHome: () => void;
 };
 
-export default function TimerConfirm({ matchData }: TimerProps) {
+export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
     const [open, setOpen] = useState(true);
     const [remainingTime, setRemainingTime] = useState(60);
     const cancelRef = useRef<HTMLButtonElement | null>(null);
@@ -34,6 +36,10 @@ export default function TimerConfirm({ matchData }: TimerProps) {
 
     const handleConfirm = () => {
         matchApproveMutate({ matchId: `${matchData.matchId}`, accepted: true });
+        toast({
+            title: '상대방의 대화 수락 여부를 기다립니다.',
+        });
+        setOpen(false);
     };
 
     const handleCancel = () => {
@@ -42,7 +48,7 @@ export default function TimerConfirm({ matchData }: TimerProps) {
             accepted: false,
         });
         matchCancelMutate();
-        window.location.href = '/';
+        handleToHome();
     };
 
     const handlePass = () => {

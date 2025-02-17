@@ -9,10 +9,7 @@ import SockJS from 'sockjs-client';
 import { PATH } from '@/app/config/constants';
 import { BASE_URL } from '@/app/config/constants/path';
 import { useUserStore } from '@/app/model/stores/user';
-import {
-    useDeleteMatchCancel,
-    useMatchApprove,
-} from '@/features/match/api/queries';
+import { useDeleteMatchCancel } from '@/features/match/api/queries';
 import { queryClient } from '@/shared/api/query/client';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -37,7 +34,6 @@ export default function MatchingRoom() {
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchType | null>(null);
     const [isMoving, setIsMoving] = useState(true);
-    const { mutate: matchApproveMutate } = useMatchApprove();
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -57,13 +53,11 @@ export default function MatchingRoom() {
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const stringifiedData = JSON.stringify(message.body);
-                const data = JSON.parse(stringifiedData);
-                const parsedData = JSON.parse(data);
+                const stringData = JSON.parse(stringifiedData);
+                const parsedData = JSON.parse(stringData);
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
-                    console.log(parsedData.data);
                     setMatchData(parsedData.data);
-                    console.log(matchData);
                 }
                 if (parsedData.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
@@ -104,20 +98,6 @@ export default function MatchingRoom() {
         navigate(PATH.ROUTE.HOME);
     };
 
-    const handleConfirm = () => {
-        matchApproveMutate({
-            matchId: `${matchData?.matchId}`,
-            accepted: true,
-        });
-    };
-
-    const handleCancel = () => {
-        matchApproveMutate({
-            matchId: `${matchData?.matchId}`,
-            accepted: false,
-        });
-    };
-
     return (
         <>
             {isMoving ? (
@@ -140,22 +120,11 @@ export default function MatchingRoom() {
                                     <ExitIcon />
                                     이전 페이지로 이동하기
                                 </Button>
-                                <Button
-                                    variant="link"
-                                    className="text-white self-start"
-                                    onClick={handleCancel}
-                                    style={{ pointerEvents: 'auto' }}>
-                                    매칭 거절
-                                </Button>
-                                <Button
-                                    variant="link"
-                                    className="text-white self-start"
-                                    onClick={handleConfirm}
-                                    style={{ pointerEvents: 'auto' }}>
-                                    매칭 수락
-                                </Button>
                                 {!isMoving && matchData && (
-                                    <TimerConfirm matchData={matchData} />
+                                    <TimerConfirm
+                                        matchData={matchData}
+                                        handleToHome={handleToHome}
+                                    />
                                 )}
                                 <HealingMessage />
                             </div>
