@@ -32,7 +32,7 @@ public class SecurityConfiguration {
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange(auth -> auth
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() //OPTIONS : 브라우저가 요청할 메서드와 헤더를 허용하는지 미리 확인하는용 보안과 관련 없음
-                        .pathMatchers("/oauth2/authorization/**", "/webjars/**", "/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/docs/**", "/{serviceName}/v3/api-docs/**").permitAll()
+                        .pathMatchers("/oauth2/authorization/**","/api/oauth/logout", "/webjars/**", "/api-docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/docs/**", "/{serviceName}/v3/api-docs/**").permitAll()
                         .pathMatchers("/api/oauth/signup").hasAnyRole("GUEST","WITHDRAW")
                         .pathMatchers("/api/oauth/status", "/api/oauth").hasAnyRole("GUEST", "USER","WITHDRAW","RESTRICTED")
                         .pathMatchers("api/chat/**","api/letter/**", "/api/oauth/**", "api/match/**").hasRole("USER")
