@@ -194,7 +194,7 @@ services:
       LIVEKIT_PORT: 7880
       LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
       LIVEKIT_EXTERNAL_IP: "13.124.213.63"
-      LIVEKIT_RTC_PORT: 7882
+      LIVEKIT_RTC_PORT: 8882
       LIVEKIT_NODE_IP: "13.124.213.63"
       # 외부 프록시(Nginx)를 통한 WSS 연결을 위해 LIVEKIT_WS_URL 수정
       LIVEKIT_WS_URL: "wss://i12a503.p.ssafy.io/livekitws"
