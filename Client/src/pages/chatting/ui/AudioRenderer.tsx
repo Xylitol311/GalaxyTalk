@@ -81,7 +81,7 @@ function AudioVisualizer({
         }
 
         processedDataRef.current = groupedAverages;
-    }, 300);
+    }, 1000); // 1000ms 쓰로틀
 
     useEffect(() => {
         const barsOriginal = audioWaves?.bars || [];

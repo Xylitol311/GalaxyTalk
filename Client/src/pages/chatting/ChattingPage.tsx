@@ -8,6 +8,7 @@ import {
     useRoomInfo,
 } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
+import { RemoteParticipant, RoomEvent } from 'livekit-client';
 import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
@@ -79,6 +80,32 @@ function ChattingPage({ chatData }: ChattingPageProps) {
         }
     }, [response, myUserId]);
 
+    const room = useRoomContext();
+
+    useEffect(() => {
+        if (!room) return;
+
+        const handleParticipantDisconnected = (
+            participant: RemoteParticipant
+        ) => {
+            console.log('상대방이 나갔습니다.', participant);
+        };
+
+        // RoomEvent를 이용해 이벤트 리스너 등록
+        room.on(
+            RoomEvent.ParticipantDisconnected,
+            handleParticipantDisconnected
+        );
+
+        return () => {
+            // 컴포넌트 언마운트 또는 room 변경 시 리스너 해제
+            room.off(
+                RoomEvent.ParticipantDisconnected,
+                handleParticipantDisconnected
+            );
+        };
+    }, [room]);
+
     const handleAIQuestionButton = () => {
         if (!AIQuestions.length) {
             generateAIQuestions();
@@ -109,7 +136,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     };
 
     if (connectionState !== 'connected') {
-        // disconnected, connecting, connected
+        // disconnected, connecting, connected, reconnecting, signalReconnecting
         console.log(connectionState);
         console.log(isLetterModalOpen);
         console.log(partnerInfo);
