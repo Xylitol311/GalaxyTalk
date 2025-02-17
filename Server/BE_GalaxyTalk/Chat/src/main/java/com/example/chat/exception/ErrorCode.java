@@ -12,22 +12,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    // 매칭 관련 에러 코드
-    INVALID_MBTI("M001", "Invalid MBTI value"),
-    MATCH_NOT_FOUND("M002", "매칭 중인 유저가 아닙니다."),
-    MATCH_ALREADY_IN_PROGRESS("M003", "이미 매칭 중인 유저입니다."),
-    USER_NOT_MATCHED_STATUS("M004", "매칭 중인 유저가 아닙니다."),
+    // LiveKit 관련 오류
+    LIVEKIT_ROOM_CREATION_FAILED("L001", "LiveKit 방 생성에 실패했습니다."),
 
-    // 사용자 정보 관련 에러 코드
-    USER_INFO_NOT_FOUND("U001", "유저 정보를 찾을 수 없습니다."),
-    USER_NOT_FOUND("U002", "해당 유저 정보를 찾을 수 없습니다."),
+    // 채팅방 관련 오류
+    CHAT_ROOM_NOT_FOUND("C002", "채팅방을 찾을 수 없습니다."),
+    ACTIVE_CHAT_ROOM_NOT_FOUND("C003", "활성 채팅방이 존재하지 않습니다."),
+    CHAT_ROOM_QUESTION_NOT_FOUND("C004", "채팅방의 질문이 아직 생성되지 않았습니다."),
+    CHAT_ROOM_SAVE_FAILED("C005", "채팅방 저장에 실패했습니다."),
 
-    // Redis 관련 (새로 추가 예시)
-    REDIS_DATA_MISMATCH("R001", "Redis에 저장된 데이터 형식이 올바르지 않습니다."),
+    // 사용자 관련 오류
+    USER_STATUS_UPDATE_FAILED("U001", "사용자 상태 업데이트에 실패했습니다."),
+    USER_INFO_NOT_FOUND("U002", "유저 정보를 찾을 수 없습니다."),
+    LETTER_NOT_FOUND("L002", "후기 정보를 찾을 수 없습니다."),
 
-    // 공통 에러 코드
-    ILLEGAL_ARGUMENT("C001", "잘못된 요청입니다."),
-    INTERNAL_SERVER_ERROR("C002", "서버 내부 오류가 발생했습니다.");
+    // GPT 관련 오류
+    GPT_API_FAILED("G001", "GPT API 호출에 실패했습니다."),
+
+    // 메시지 저장 관련 오류
+    MESSAGE_SAVE_FAILED("M003", "메시지 저장에 실패했습니다."),
+
+    // 입력값 오류
+    INVALID_INPUT("C005", "잘못된 요청입니다.");
 
     private final String code;
     private final String message;

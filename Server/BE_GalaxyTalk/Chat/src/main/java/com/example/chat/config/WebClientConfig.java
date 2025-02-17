@@ -17,26 +17,6 @@ public class WebClientConfig {
     private String apiKey;
 
     @Bean
-    public WebClient authServiceClient() {
-        return WebClient.builder()
-                .baseUrl("lb://auth-service")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
-                .build();
-    }
-
-    @Bean
-    public WebClient commentServiceClient() {
-        return WebClient.builder()
-                .baseUrl("lb://comment-service")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
-                .build();
-    }
-
-    @Bean
     public WebClient gptClient() {
         return WebClient.builder()
                 .baseUrl("https://api.openai.com/v1/chat/completions")
