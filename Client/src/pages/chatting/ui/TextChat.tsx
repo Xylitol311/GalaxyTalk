@@ -38,7 +38,7 @@ function TextChat({ chatRoomId }) {
     const { send, update, chatMessages, isSending } = useChat();
 
     const { mutate: postMessage } = usePostChatMessage(chatRoomId);
-    const { data: response } = useChatMessagesQuery();
+    const { data: response } = useChatMessagesQuery(chatRoomId);
 
     const isMobile = useIsMobile();
     const textareaRef = useRef<AutosizeTextAreaRef>(null);

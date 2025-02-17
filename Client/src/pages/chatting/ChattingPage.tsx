@@ -54,6 +54,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const { userId: myUserId } = useUserStore();
 
     const participants = useParticipants();
+    console.log(participants);
     const connectionState = useConnectionState();
 
     useEffect(() => {
