@@ -7,6 +7,7 @@ import {
 import { getEmptyAudioStreamTrack, Track } from 'livekit-client';
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
+import { throttle } from '@/shared/lib/utils';
 
 function AudioRenderer({ userId }: { userId: string }) {
     const trackRefs = useTracks([Track.Source.Microphone]);
@@ -54,67 +55,74 @@ function AudioVisualizer({
     spacing,
 }: AudioVisualizerProps) {
     const audioWaves = useAudioWaveform(micTrackRef);
-    // Canvas DOM을 참조하기 위한 Ref
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    // 처리된 그룹 평균 데이터를 저장하는 Ref
+    const processedDataRef = useRef<number[]>(new Array(groupCount).fill(0));
 
+    // Throttle을 사용해서 오디오 데이터 처리 (예: 300ms마다 업데이트)
+    const processAudioData = throttle((barsOriginal: number[]) => {
+        let groupedAverages: number[] = [];
+
+        if (barsOriginal.length > 0) {
+            for (let i = 0; i < groupCount; i++) {
+                const start = Math.floor(
+                    (i * barsOriginal.length) / groupCount
+                );
+                const end = Math.floor(
+                    ((i + 1) * barsOriginal.length) / groupCount
+                );
+                const group = barsOriginal.slice(start, end);
+                const avg =
+                    group.reduce((sum, value) => sum + value, 0) / group.length;
+                groupedAverages.push(avg);
+            }
+        } else {
+            groupedAverages = new Array(groupCount).fill(0);
+        }
+
+        processedDataRef.current = groupedAverages;
+    }, 300);
+
+    useEffect(() => {
+        const barsOriginal = audioWaves?.bars || [];
+        processAudioData(barsOriginal);
+        // Throttle된 함수는 내부적으로 업데이트를 제한하므로 별도의 클린업이 꼭 필요한 것은 아니지만,
+        // 필요한 경우 추가 클린업 로직을 구현할 수 있습니다.
+    }, [audioWaves, groupCount, processAudioData]);
+
+    // Canvas에 그리기: requestAnimationFrame을 통해 지속 렌더링
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
         let animationFrameId: number;
 
-        // Canvas에 그리기 함수
         const draw = () => {
-            // Canvas 클리어
             ctx.clearRect(0, 0, width, height);
 
-            // 원본 bars 데이터를 가져오기 (값은 0~1 사이)
-            const barsOriginal = audioWaves?.bars || [];
-
-            // 데이터를 7등분하여 각 그룹의 평균값 계산
-            let groupedAverages = [];
-            if (barsOriginal.length > 0) {
-                for (let i = 0; i < groupCount; i++) {
-                    const start = Math.floor(
-                        (i * barsOriginal.length) / groupCount
-                    );
-                    const end = Math.floor(
-                        ((i + 1) * barsOriginal.length) / groupCount
-                    );
-                    const group = barsOriginal.slice(start, end);
-                    const avg =
-                        group.reduce((sum, value) => sum + value, 0) /
-                        group.length;
-                    groupedAverages.push(avg);
-                }
-            } else {
-                groupedAverages = new Array(groupCount).fill(0);
-            }
-
-            // 각 그룹의 평균값을 사용해 바 그리기
+            const groupedAverages = processedDataRef.current;
             const barWidth = width / groupCount;
             const center = height / 2;
+
             groupedAverages.forEach((avg, index) => {
-                // 최대 높이의 절반 값으로 확장 (최대값 1이면 양쪽으로 center 만큼 늘어남)
                 const halfBarHeight = avg * (height / 2);
                 const x = index * barWidth;
-                const y = center - halfBarHeight; // 중앙에서 위로 halfBarHeight만큼 이동
+                const y = center - halfBarHeight;
                 ctx.fillStyle = color;
-                // 바의 높이를 위, 아래로 동시에 확장
                 ctx.fillRect(x, y, barWidth - spacing, halfBarHeight * 2);
             });
 
-            // 반복 호출 (requestAnimationFrame을 통해 최적화)
             animationFrameId = requestAnimationFrame(draw);
         };
 
-        // 애니메이션 시작
         draw();
 
         return () => {
             cancelAnimationFrame(animationFrameId);
         };
-    }, [audioWaves]);
+    }, [width, height, groupCount, color, spacing]);
 
     return <canvas ref={canvasRef} width={width} height={height} />;
 }

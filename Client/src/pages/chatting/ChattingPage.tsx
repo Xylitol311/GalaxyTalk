@@ -110,6 +110,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     if (connectionState !== 'connected') {
         // disconnected, connecting, connected
+        console.log(connectionState);
+        console.log(isLetterModalOpen);
+        console.log(partnerInfo);
         return (
             <>
                 <Toast className="text-white">Connecting...</Toast>
