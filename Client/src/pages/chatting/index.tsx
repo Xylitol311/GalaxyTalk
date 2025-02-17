@@ -17,6 +17,7 @@ export default function ChattingRoom() {
         reconnect(undefined, {
             onSuccess: (response) => {
                 const { chatRoomId, sessionId, token } = response.data;
+                console.log(chatRoomId, sessionId, token);
                 setChatData({
                     sessionId,
                     token,
