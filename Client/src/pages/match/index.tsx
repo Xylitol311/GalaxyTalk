@@ -66,6 +66,7 @@ export default function MatchingRoom() {
                 console.log('파싱 데이터 : ', data);
 
                 if (data.type === 'MATCH_SUCCESS') {
+                    console.log(data.data);
                     setMatchData(data.data);
                 }
                 if (data.type === 'CHAT_CREATED') {
