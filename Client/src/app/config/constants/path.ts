@@ -56,9 +56,9 @@ export const API_PATH = {
         ROOMS: `${DOMAIN.CHAT}/rooms`,
         GETMSG: `${DOMAIN.CHAT}/messages`,
         RECONNECT: `${DOMAIN.CHAT}/reconnect`,
-
         // 채팅방 ID가 필요한 엔드포인트를 위한 함수
         room: (chatRoomId: string) => ({
+            GETMSG: `${DOMAIN.CHAT}/${chatRoomId}/messages`,
             SENDMSG: `${DOMAIN.CHAT}/${chatRoomId}/message`,
             LEAVE: `${DOMAIN.CHAT}/${chatRoomId}/leave`,
             AI: `${DOMAIN.CHAT}/${chatRoomId}/ai`,

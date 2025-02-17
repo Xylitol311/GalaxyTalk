@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import {
     deleteChatRoom,
-    getChatMessages,
     getChatParticipants,
+    getPreviousMessages,
     postAIQuestions,
     postChatMessage,
     postChatReconnect,
@@ -37,11 +37,12 @@ export const useDeleteChatRoom = () => {
     });
 };
 
-// 메시지 목록 조회
-export const useChatMessagesQuery = () => {
+// 메시지 목록 조회 Hook
+export const useChatMessagesQuery = (chatRoomId: string) => {
     return useQuery({
-        queryKey: ['chat-messages'],
-        queryFn: getChatMessages,
+        queryKey: ['chat-messages', chatRoomId],
+        queryFn: () => getPreviousMessages(chatRoomId),
+        retry: false,
     });
 };
 

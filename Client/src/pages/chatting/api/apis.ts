@@ -29,9 +29,9 @@ export async function deleteChatRoom(chatRoomId: string) {
 }
 
 // 메시지 목록 조회
-export async function getChatMessages() {
+export async function getPreviousMessages(chatRoomId: string) {
     const { data } = await fetcher.get<PreviousMessagesResponse>(
-        PATH.API_PATH.CHAT.GETMSG
+        PATH.API_PATH.CHAT.room(chatRoomId).GETMSG
     );
     return data;
 }
