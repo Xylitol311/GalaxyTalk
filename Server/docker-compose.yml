@@ -185,8 +185,8 @@ services:
     container_name: livekit
     ports:
       - "8880:8880"                         # HTTP/WebSocket 포트 (필요시 외부 노출)
-      - "8881:7881"                         # 관리용 혹은 추가 기능 포트
-      - "8882:7882/udp"                     # RTC 미디어 통신 UDP 포트
+      - "8881:8881"                         # 관리용 혹은 추가 기능 포트
+      - "8882:8882/udp"                     # RTC 미디어 통신 UDP 포트
       - "50000-50020:50000-50020/udp"        # 추가 UDP 포트 (미디어용)
     environment:
       # API 키와 시크릿 사이의 공백 제거
@@ -194,6 +194,7 @@ services:
       LIVEKIT_PORT: 8880
       LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
       LIVEKIT_EXTERNAL_IP: "13.124.213.63"
+      rtc.tcp_port: 8881
       LIVEKIT_RTC_PORT: 8882
       LIVEKIT_NODE_IP: "13.124.213.63"
       # 외부 프록시(Nginx)를 통한 WSS 연결을 위해 LIVEKIT_WS_URL 수정
