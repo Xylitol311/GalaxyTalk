@@ -223,7 +223,7 @@ public class ChatService {
             previousChatResponse.setParticipantPlanet(planetId);
 
             // support api에서 후기 가져와 상대방에 대한 내 후기 set
-            Map<String, Object> response = externalApiService.getLetter(otherUserId, chatRoom.getId());
+            Map<String, Object> response = externalApiService.getLetter(userId, chatRoom.getId());
 
             // 후기를 조회할 수 없는 경우
             if(response == null) {
