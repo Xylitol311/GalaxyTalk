@@ -276,6 +276,33 @@ public class MatchService {
         return matchCount / 4.0;
     }
 
+    /**
+     * 매칭 대기 중인 유저 중, 시작 후 10분이 지난 유저를 자동 취소합니다.
+     * 이 메서드는 1분마다 실행됩니다.
+     */
+    @Scheduled(fixedDelay = 60000)
+    public void checkWaitingTimeout() {
+        log.info("대기 시간 초과 유저 검사 시작");
+        Set<String> waitingUserIds = redisService.getAllWaitingUsers();
+        long now = Instant.now().toEpochMilli();
+        for (String userId : waitingUserIds) {
+            UserMatchStatus user = redisService.getUserStatus(userId);
+            if (user != null && user.getStatus() == MatchStatus.WAITING) {
+                // 시작 시각으로부터 10분(600,000ms) 경과 여부 확인
+                if (now - user.getStartTime() > 600_000) {
+                    log.info("유저 {} 대기 시간 초과로 매칭 취소", userId);
+                    // Redis에서 상태 삭제 및 대기 큐에서 제거
+                    redisService.deleteUserStatus(userId);
+                    redisService.removeUserFromWaitingQueue(userId);
+                    // 외부 API를 통해 세션 상태 변경 (예: idle)
+                    externalApiService.setUserStatus(userId, "idle");
+                    // WebSocket 알림 전송
+                    webSocketService.notifyUser(userId, "CANCEL_WAITING", "매칭 대기 취소");
+                }
+            }
+        }
+    }
+
 
     @Getter
     private static class MatchPair {
