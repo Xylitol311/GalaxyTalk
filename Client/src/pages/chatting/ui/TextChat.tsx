@@ -35,19 +35,19 @@ interface ApiMessage {
 }
 
 function TextChat({ chatRoomId }) {
-    const { send, update, chatMessages: temp, isSending } = useChat();
+    const { send, update, chatMessages, isSending } = useChat();
 
     const { mutate: postMessage } = usePostChatMessage(chatRoomId);
     const { data: response } = useChatMessagesQuery();
 
     const isMobile = useIsMobile();
     const textareaRef = useRef<AutosizeTextAreaRef>(null);
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
     const { userId: myUserId } = useUserStore();
 
     useEffect(() => {
         if (response) {
-            const transformedMessages: ChatMessage[] = response.data.map(
+            const previousChatMessages: ChatMessage[] = response.data.map(
                 (msg: ApiMessage) => ({
                     id: msg.createdAt, // createdAt을 유니크 키로 사용
                     message: msg.content,
@@ -57,24 +57,39 @@ function TextChat({ chatRoomId }) {
                 })
             );
 
-            setChatMessages(transformedMessages);
+            setInitialMessages(previousChatMessages);
         }
     }, [response]);
 
+    // 디바운스 타이머 저장용 ref
+    const debounceTimeout = useRef<number | null>(null);
+
     const handleMessageSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const message = formData.get('message')?.toString().trim();
+        // SyntheticEvent의 재활용을 막기 위해 현재 폼 요소를 미리 저장
+        const formElement = e.currentTarget;
 
-        if (!message) return;
+        // 기존 타이머가 있다면 취소
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
 
-        send(message);
-        // 서버저장용 api
-        postMessage(message);
+        // 100ms 후에 실행하도록 타이머 설정
+        debounceTimeout.current = window.setTimeout(async () => {
+            const formData = new FormData(formElement);
+            const message = formData.get('message')?.toString().trim();
 
-        // 폼과 textarea 초기화
-        textareaRef.current?.reset(); // reset 메서드 호출
-        e.currentTarget.reset();
+            if (!message) return;
+
+            // 메시지 전송
+            send(message);
+            // 서버저장용 API 호출 (주석 처리된 부분 예시)
+            postMessage(message);
+
+            // 폼과 textarea 초기화
+            textareaRef.current?.reset(); // ref를 이용한 초기화 (커스텀 컴포넌트의 경우 채택)
+            formElement.reset();
+        }, 100);
     };
 
     const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
@@ -94,6 +109,19 @@ function TextChat({ chatRoomId }) {
         <div className="flex flex-col justify-between w-screen md:w-full h-screen md:h-full relative">
             {/* // Wrap with ChatMessageList */}
             <ChatMessageList className="pt-2">
+                {initialMessages.map((msg) => {
+                    const isSentByMe = myUserId === msg.from?.identity;
+                    return (
+                        <ChatBubble
+                            key={msg?.id}
+                            variant={isSentByMe ? 'sent' : 'received'}>
+                            <ChatBubbleMessage
+                                variant={isSentByMe ? 'sent' : 'received'}>
+                                {msg.message}
+                            </ChatBubbleMessage>
+                        </ChatBubble>
+                    );
+                })}
                 {chatMessages.map((msg) => {
                     const isSentByMe = myUserId === msg.from?.identity;
                     return (
@@ -114,7 +142,7 @@ function TextChat({ chatRoomId }) {
                 onSubmit={handleMessageSubmit}>
                 {isMobile && (
                     <div className="w-full flex justify-end absolute -top-14 right-4">
-                        <ReactionPanel />
+                        <ReactionPanel userId={myUserId} />
                     </div>
                 )}
                 <div className="flex gap-3">

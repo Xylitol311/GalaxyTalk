@@ -9,6 +9,7 @@ import {
     postAIQuestions,
     postChatMessage,
     postChatReconnect,
+    postLetter,
 } from './apis';
 
 // 메시지 전송
@@ -74,5 +75,21 @@ export const useGetChatParticipants = (chatRoomId: string) => {
         queryKey: ['chatParticipants', chatRoomId],
         queryFn: () => getChatParticipants(chatRoomId),
         retry: true,
+    });
+};
+
+// 편지 보내기
+export const usePostLetter = () => {
+    const navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: postLetter,
+        retry: true,
+        onSuccess: () => {
+            navigate(PATH.ROUTE.HOME); // 또는 후기 폼 페이지로 이동
+        },
+        onError: (error) => {
+            console.error('편지 전송 실패:', error);
+        },
     });
 };

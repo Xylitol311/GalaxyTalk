@@ -29,7 +29,7 @@ const DOMAIN = {
     OAUTH: '/oauth',
     MATCH: '/match',
     CHAT: '/chat',
-    LETTER: '/comment',
+    LETTER: '/letter',
     ALARM: '/notification',
     INQUIRY: '/inquiry',
     REPORT: '/report',
@@ -64,5 +64,11 @@ export const API_PATH = {
             AI: `${DOMAIN.CHAT}/${chatRoomId}/ai`,
             PARTICIPANTS: `${DOMAIN.CHAT}/${chatRoomId}/participants`,
         }),
+    },
+
+    LETTER: {
+        CREATE: `${DOMAIN.LETTER}`,
+        LIST: `${DOMAIN.LETTER}`,
+        HIDE: `${DOMAIN.LETTER}/hide`,
     },
 };
