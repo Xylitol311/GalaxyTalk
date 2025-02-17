@@ -45,20 +45,20 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ex.getErrorCode();
 
         // 에러 코드에 따라 적절한 상태 코드를 맵핑.
-        HttpStatus status;
+        int status;
         // 특정 조건별 상태 코드 매핑
         if (errorCode == ErrorCode.CHAT_ROOM_NOT_FOUND ||
                 errorCode == ErrorCode.ACTIVE_CHAT_ROOM_NOT_FOUND ||
                 errorCode == ErrorCode.USER_INFO_NOT_FOUND ||
                 errorCode == ErrorCode.LETTER_NOT_FOUND) {
-            status = HttpStatus.NOT_FOUND;
+            status = HttpStatus.NOT_FOUND.value();
         } else if (errorCode == ErrorCode.INVALID_INPUT) {
-            status = HttpStatus.BAD_REQUEST;
+            status = HttpStatus.BAD_REQUEST.value();
         } else if (errorCode == ErrorCode.CHAT_ROOM_QUESTION_NOT_FOUND) {
-            status = HttpStatus.valueOf(CUSTOM_QUESTION_NOT_FOUND_STATUS);
+            status = CUSTOM_QUESTION_NOT_FOUND_STATUS;
         } else {
             // LIVEKIT_ROOM_CREATION_FAILED, USER_STATUS_UPDATE_FAILED, GPT_API_FAILED, MESSAGE_SAVE_FAILED 등
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            status = HttpStatus.INTERNAL_SERVER_ERROR.value();
         }
 
         log.error("Business exception occurred: {}, message: {}", errorCode.getCode(), ex.getMessage());

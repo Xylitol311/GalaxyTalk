@@ -60,6 +60,8 @@ public class ExternalApiService {
             log.error("리뷰 정보 조회 실패: userId={}, chatRoomId={}", userId, chatRoomId);
             throw new BusinessException(ErrorCode.LETTER_NOT_FOUND);
         }
+        
+        log.info("리뷰 정보 조회 요청: userId={}, chatRoomId={}", userId, chatRoomId);
         Map<String, Object> response = (Map<String, Object>) responseEntity.getBody();
         return (Map<String, Object>) response.get("data");
     }

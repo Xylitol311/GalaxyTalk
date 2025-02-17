@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -222,7 +223,15 @@ public class ChatService {
             previousChatResponse.setParticipantPlanet(planetId);
 
             // support api에서 후기 가져와 상대방에 대한 내 후기 set
-            String letter = (String) externalApiService.getLetter(otherUserId, chatRoom.getId()).get("content");
+            Map<String, Object> response = externalApiService.getLetter(otherUserId, chatRoom.getId());
+
+            // 후기를 조회할 수 없는 경우
+            if(response == null) {
+                throw new BusinessException(ErrorCode.LETTER_NOT_FOUND);
+            }
+
+            String letter = (String) response.get("content");
+
             previousChatResponse.setParticipantReview(letter);
 
             responseList.add(previousChatResponse);
