@@ -98,11 +98,12 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     const handleLeaveChat = () => {
         disconnectButtonProps.onClick();
-        // leaveChatRoom(chatRoomId);
+        leaveChatRoom(chatRoomId);
         setLetterModalOpen(true);
     };
 
     if (connectionState !== 'connected') {
+        // disconnected, connecting, connected
         return (
             <>
                 <Toast className="text-white">Connecting...</Toast>
