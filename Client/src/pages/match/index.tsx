@@ -2,6 +2,7 @@ import { ExitIcon } from '@radix-ui/react-icons';
 import { Html } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Client } from '@stomp/stompjs';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import SockJS from 'sockjs-client';
@@ -12,6 +13,7 @@ import {
     useDeleteMatchCancel,
     useMatchApprove,
 } from '@/features/match/api/queries';
+import { queryClient } from '@/shared/api/query/client';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
@@ -54,24 +56,14 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                console.log('메시지 출력 :', message);
-                console.log('메시지 바디 출력 :', message.body);
-                // console.log('메시지 바디 타입 출력 :', message.body.type);
-                // console.log('메시지 바디 데이터 출력 :', message.body.data);
                 const stringifiedData = JSON.stringify(message.body);
-                console.log('직렬화 : ', stringifiedData);
-
                 const data = JSON.parse(stringifiedData);
-                console.log('타입 확인', typeof data);
                 const parsedData = JSON.parse(data);
-                console.log('타입 확인2', typeof parsedData);
-                console.log('파싱 데이터 : ', parsedData);
-                console.log(parsedData);
-                console.log('데이터 타입 : ', parsedData.type);
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
                     console.log(parsedData.data);
                     setMatchData(parsedData.data);
+                    console.log(matchData);
                 }
                 if (parsedData.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
@@ -138,34 +130,36 @@ export default function MatchingRoom() {
                         center
                         zIndexRange={[0, 0]}
                         style={{ pointerEvents: 'none' }}>
-                        <div className="relative w-screen h-screen flex flex-col justify-between">
-                            <Button
-                                variant="link"
-                                className="text-white self-start"
-                                onClick={handleToHome}
-                                style={{ pointerEvents: 'auto' }}>
-                                <ExitIcon />
-                                이전 페이지로 이동하기
-                            </Button>
-                            <Button
-                                variant="link"
-                                className="text-white self-start"
-                                onClick={handleCancel}
-                                style={{ pointerEvents: 'auto' }}>
-                                매칭 거절
-                            </Button>
-                            <Button
-                                variant="link"
-                                className="text-white self-start"
-                                onClick={handleConfirm}
-                                style={{ pointerEvents: 'auto' }}>
-                                매칭 수락
-                            </Button>
-                            {!isMoving && matchData && (
-                                <TimerConfirm matchData={matchData} />
-                            )}
-                            <HealingMessage />
-                        </div>
+                        <QueryClientProvider client={queryClient}>
+                            <div className="relative w-screen h-screen flex flex-col justify-between">
+                                <Button
+                                    variant="link"
+                                    className="text-white self-start"
+                                    onClick={handleToHome}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    <ExitIcon />
+                                    이전 페이지로 이동하기
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    className="text-white self-start"
+                                    onClick={handleCancel}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    매칭 거절
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    className="text-white self-start"
+                                    onClick={handleConfirm}
+                                    style={{ pointerEvents: 'auto' }}>
+                                    매칭 수락
+                                </Button>
+                                {!isMoving && matchData && (
+                                    <TimerConfirm matchData={matchData} />
+                                )}
+                                <HealingMessage />
+                            </div>
+                        </QueryClientProvider>
                     </Html>
                 </Canvas>
             )}

@@ -1,4 +1,3 @@
-import { QueryClientProvider } from '@tanstack/react-query';
 import {
     CircleCheckBigIcon,
     CirclePauseIcon,
@@ -9,7 +8,6 @@ import {
     useDeleteMatchCancel,
     useMatchApprove,
 } from '@/features/match/api/queries';
-import { queryClient } from '@/shared/api/query/client';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
     Dialog,
@@ -74,61 +72,57 @@ export default function TimerConfirm({ matchData }: TimerProps) {
     }, [open]);
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <Dialog open={open} onOpenChange={setOpen}>
-                {open && (
-                    <DialogPortal>
-                        <DialogOverlay />
-                        <DialogContent
-                            showCloseButton={false}
-                            onInteractOutside={(e) => e.preventDefault()}
-                            onEscapeKeyDown={(e) => e.preventDefault()}>
-                            <DialogHeader>
-                                <DialogTitle>대화 상대를 찾았어요!</DialogTitle>
-                                <DialogDescription className="flex flex-col items-start gap-5">
-                                    <div className="flex flex-col items-start mt-3">
-                                        <p className="text-black">
-                                            상대의 고민: {matchData.concern}
-                                        </p>
-                                        <p className="text-black">
-                                            상대의 성향: {matchData.mbti}
-                                        </p>
-                                        <p className="text-black">
-                                            상대의 온도: {matchData.energy}
-                                        </p>
-                                        <p className="text-black">
-                                            유사도 점수: {matchData.similarity}%
-                                        </p>
-                                    </div>
-                                    <p>
-                                        {remainingTime}초 후 자동으로 홈으로
-                                        나가집니다.
+        <Dialog open={open} onOpenChange={setOpen}>
+            {open && (
+                <DialogPortal>
+                    <DialogOverlay />
+                    <DialogContent
+                        showCloseButton={false}
+                        onInteractOutside={(e) => e.preventDefault()}
+                        onEscapeKeyDown={(e) => e.preventDefault()}>
+                        <DialogHeader>
+                            <DialogTitle>대화 상대를 찾았어요!</DialogTitle>
+                            <DialogDescription className="flex flex-col items-start gap-5">
+                                <div className="flex flex-col items-start mt-3">
+                                    <p className="text-black">
+                                        상대의 고민: {matchData.concern}
                                     </p>
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter className="flex justify-between">
-                                <Button
-                                    variant="confirm"
-                                    onClick={handleConfirm}>
-                                    <CircleCheckBigIcon />
-                                    매칭 성사
-                                </Button>
-                                <Button variant="pass" onClick={handlePass}>
-                                    <SkipForwardIcon />
-                                    매칭 거절
-                                </Button>
-                                <Button
-                                    ref={cancelRef}
-                                    variant="warn"
-                                    onClick={handleCancel}>
-                                    <CirclePauseIcon />
-                                    매칭 취소
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </DialogPortal>
-                )}
-            </Dialog>
-        </QueryClientProvider>
+                                    <p className="text-black">
+                                        상대의 성향: {matchData.mbti}
+                                    </p>
+                                    <p className="text-black">
+                                        상대의 온도: {matchData.energy}
+                                    </p>
+                                    <p className="text-black">
+                                        유사도 점수: {matchData.similarity}%
+                                    </p>
+                                </div>
+                                <p>
+                                    {remainingTime}초 후 자동으로 홈으로
+                                    나가집니다.
+                                </p>
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex justify-between">
+                            <Button variant="confirm" onClick={handleConfirm}>
+                                <CircleCheckBigIcon />
+                                매칭 성사
+                            </Button>
+                            <Button variant="pass" onClick={handlePass}>
+                                <SkipForwardIcon />
+                                매칭 거절
+                            </Button>
+                            <Button
+                                ref={cancelRef}
+                                variant="warn"
+                                onClick={handleCancel}>
+                                <CirclePauseIcon />
+                                매칭 취소
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </DialogPortal>
+            )}
+        </Dialog>
     );
 }
