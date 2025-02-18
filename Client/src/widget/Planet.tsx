@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';
 import { WaitingUserType } from '@/features/match/model/types';
+import { formatTimeDifference } from '@/shared/lib/utils';
 import { Card, CardContent } from '@/shared/ui/shadcn/card';
 
 type PlanetProps = {
@@ -98,7 +99,8 @@ export default function Planet({ userInfo, position, color }: PlanetProps) {
                                 상대방의 MBTI : {userInfo.mbti}
                             </div>
                             <div className="text-xs text-gray-500">
-                                매칭 시작 시간 : {userInfo.startTime}
+                                매칭 시작 시간 :{' '}
+                                {formatTimeDifference(+userInfo.startTime)}
                             </div>
                         </CardContent>
                     </Card>
