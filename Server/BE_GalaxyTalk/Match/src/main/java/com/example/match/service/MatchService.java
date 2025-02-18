@@ -221,9 +221,14 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
+
                 // 매칭된 유저는 대기 큐에서 제거
                 redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
                 redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
+
+                // 브로드 캐스팅
+                webSocketService.broadcastUserExit(pair.user1.getUserId());
+                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
 
@@ -241,9 +246,14 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
+
                 // 매칭된 유저는 대기 큐에서 제거
                 redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
                 redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
+
+                // 브로드 캐스팅
+                webSocketService.broadcastUserExit(pair.user1.getUserId());
+                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
     }
