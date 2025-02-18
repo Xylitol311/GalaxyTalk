@@ -1,5 +1,7 @@
 package com.galaxytalk.feedback.controller;
 
+import com.galaxytalk.exception.BusinessException;
+import com.galaxytalk.exception.ErrorCode;
 import com.galaxytalk.feedback.dto.ApiResponseDto;
 import com.galaxytalk.feedback.dto.FeedbackRequestDto;
 import com.galaxytalk.feedback.service.FeedbackService;
@@ -23,6 +25,10 @@ public class FeedbackController {
     public ResponseEntity<?> writeLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody FeedbackRequestDto requestDto) {
         feedbackService.saveFeedback(serialNumber, requestDto);
 
+        // 작성자 정보 유효성 검증(추가적인 검증이 필요한 경우)
+        if (serialNumber == null || serialNumber.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "유효한 작성자 정보가 없습니다.");
+        }
 
         ApiResponseDto successResponse = new ApiResponseDto(true, "피드백 저장 성공", null);
 
