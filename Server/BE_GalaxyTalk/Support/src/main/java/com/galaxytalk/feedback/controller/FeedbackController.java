@@ -1,0 +1,34 @@
+package com.galaxytalk.feedback.controller;
+
+import com.galaxytalk.feedback.dto.ApiResponseDto;
+import com.galaxytalk.feedback.dto.FeedbackRequestDto;
+import com.galaxytalk.feedback.service.FeedbackService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/feedback")
+@RequiredArgsConstructor
+public class FeedbackController {
+
+    private final FeedbackService feedbackService;
+
+
+    //후기 쓰기
+    //user로 가서 에너지 1 늘려주기, requestId는 요청하지 말기
+    @Transactional
+    @PostMapping
+    public ResponseEntity<?> writeLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody FeedbackRequestDto requestDto) {
+        feedbackService.saveFeedback(serialNumber, requestDto);
+
+
+        ApiResponseDto successResponse = new ApiResponseDto(true, "피드백 저장 성공", null);
+
+
+        return ResponseEntity.ok(successResponse);
+
+    }
+
+}
