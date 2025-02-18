@@ -84,6 +84,7 @@ public class WebSocketService {
         data.put("concern", user.getConcern());
         data.put("mbti", user.getMbti());
         data.put("status", user.getStatus());
+        data.put("startTime", user.getStartTime());
         messagingTemplate.convertAndSend("/topic/matching/users/new",
                 new MessageResponseDto("NEW_USER", message, data));
     }

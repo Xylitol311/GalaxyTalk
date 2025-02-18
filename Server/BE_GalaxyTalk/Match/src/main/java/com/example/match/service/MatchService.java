@@ -79,6 +79,9 @@ public class MatchService {
         // WebSocket 알림 전송 (매칭 대기 시작)
         externalApiService.setUserStatus(user.getUserId(), "matching");
         webSocketService.notifyUser(user.getUserId(), "WAITING", "매칭 대기 시작");
+
+        // broadCasting
+        webSocketService.broadcastNewUser(user);
     }
 
 
