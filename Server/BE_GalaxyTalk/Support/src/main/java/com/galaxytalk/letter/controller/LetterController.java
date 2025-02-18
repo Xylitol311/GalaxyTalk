@@ -6,7 +6,6 @@ import com.galaxytalk.letter.service.LetterService;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,39 +25,35 @@ public class LetterController {
 
     //후기 쓰기
     //user로 가서 에너지 1 늘려주기, requestId는 요청하지 말기
-    @Transactional
     @PostMapping
     public ResponseEntity<?> writeLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody LetterRequest letterreq) {
 
         try {
-            //1. 받는 사람이 존재하는지 확인
             authClient.getUserInfo(letterreq.getReceiverId());
-
         } catch (FeignException ex) {
+            HttpStatus status = HttpStatus.BAD_REQUEST;
             String errorMessage = "서버와의 연결에 문제가 발생했습니다.";
+
             if (ex.status() == 400) {
-                // 400 BadRequest 시 추가적인 메시지 처리
                 errorMessage = "유저가 확인되지 않습니다.";
+            } else if (ex.status() == 404) {
+                errorMessage = "받는 유저가 존재하지 않습니다.";
+            } else if (ex.status() >= 500) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                errorMessage = "외부 서비스 오류가 발생했습니다.";
             }
-            return new ResponseEntity<>(new ApiResponseDto(false, errorMessage, null), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            // 다른 예외 처리
-            return new ResponseEntity<>(new ApiResponseDto(false, "알 수 없는 오류가 발생했습니다.", null), HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return new ResponseEntity<>(new ApiResponseDto(false, errorMessage, null), status);
         }
 
-        Letter saveLetter = new Letter();
-        saveLetter.setSenderId(serialNumber);
-        saveLetter.setContent(letterreq.getContent());
-        saveLetter.setChatRoomId(letterreq.getChatRoomId());
-        saveLetter.setReceiverId(letterreq.getReceiverId());
 
 
-        letterService.saveLetter(saveLetter);
+        letterService.saveLetter(serialNumber,letterreq);
 
 
         ApiResponseDto successResponse = new ApiResponseDto(true, "편지 저장 성공", null);
 
-        authClient.increaseEnergy(new EnergyRequest(saveLetter.getSenderId(), saveLetter.getReceiverId()));
+        authClient.increaseEnergy(new EnergyRequest(serialNumber, letterreq.getReceiverId()));
 
         return ResponseEntity.ok(successResponse);
 
@@ -96,22 +91,16 @@ public class LetterController {
 
     //편지 hide true로 바꾸기
     @PutMapping("/hide")
-    @Transactional
     public ResponseEntity<?> hideLetter(@RequestHeader("X-User-ID") String serialNumber, @RequestBody LetterIdRequest letterId) {
 
-        Letter letter = letterService.getAletter(letterId.getLetterId());
-
-        if (!letter.getReceiverId().equals(serialNumber))
+        if(!letterService.hideLetter(letterId.getLetterId()))
             return new ResponseEntity<>(new ApiResponseDto(false, "잘못된 사용자 접근", null), HttpStatus.BAD_REQUEST);
 
 
-        if (letter == null)
-            return new ResponseEntity<>(new ApiResponseDto(false, "편지 검색 안됨", null), HttpStatus.BAD_REQUEST);
-
-        letter.setIsHide(1);
         ApiResponseDto successResponse = new ApiResponseDto(true, "편지 숨기기 성공", null);
         return ResponseEntity.ok(successResponse);
     }
+
 
 
     //채팅방에 따라 내가 작성한 후기 보기

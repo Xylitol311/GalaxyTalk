@@ -12,6 +12,5 @@ public class ApiResponseDto {
     private String message;
     private Object data;
 
-
 }
 
