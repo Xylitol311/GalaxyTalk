@@ -22,17 +22,17 @@ public class LetterService {
     }
 
     //내가 쓴 편지, 채팅룸 따라
-    public Letter getChatletter(String chatRoomId, String senderId){
-       return letterRepository.findByChatRoomIdAndSenderId(chatRoomId, senderId);
+    public Letter getChatletter(String chatRoomId, String senderId) {
+        return letterRepository.findByChatRoomIdAndSenderId(chatRoomId, senderId);
     }
 
     //내가 받은 편지 목록들
-    public List<Letter> getLetters(String receiverId){
-        return letterRepository.findByReceiverIdAndIsHide(receiverId,0);
+    public List<Letter> getLetters(String receiverId) {
+        return letterRepository.findByReceiverIdAndIsHide(receiverId, 0);
     }
 
     //편지 하나씩 열람
-    public Letter getAletter(Long letterId){
+    public Letter getAletter(Long letterId) {
         return letterRepository.findById(letterId).orElse(null);
     }
 

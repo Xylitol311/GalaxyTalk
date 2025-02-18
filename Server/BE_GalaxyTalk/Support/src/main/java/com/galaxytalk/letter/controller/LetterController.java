@@ -1,7 +1,7 @@
 package com.galaxytalk.letter.controller;
 
+import com.galaxytalk.feign.AuthClient;
 import com.galaxytalk.letter.dto.*;
-import com.galaxytalk.letter.feign.AuthClient;
 import com.galaxytalk.letter.service.LetterService;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
@@ -101,9 +101,8 @@ public class LetterController {
 
         Letter letter = letterService.getAletter(letterId.getLetterId());
 
-        if(!letter.getReceiverId().equals(serialNumber))
+        if (!letter.getReceiverId().equals(serialNumber))
             return new ResponseEntity<>(new ApiResponseDto(false, "잘못된 사용자 접근", null), HttpStatus.BAD_REQUEST);
-
 
 
         if (letter == null)
@@ -113,7 +112,6 @@ public class LetterController {
         ApiResponseDto successResponse = new ApiResponseDto(true, "편지 숨기기 성공", null);
         return ResponseEntity.ok(successResponse);
     }
-
 
 
     //채팅방에 따라 내가 작성한 후기 보기

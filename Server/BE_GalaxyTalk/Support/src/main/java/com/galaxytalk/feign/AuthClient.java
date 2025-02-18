@@ -1,4 +1,4 @@
-package com.galaxytalk.letter.feign;
+package com.galaxytalk.feign;
 
 import com.galaxytalk.letter.dto.EnergyRequest;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name="auth-service")
+@FeignClient(name = "auth-service")
 // 유레카에 등록된 서비스 이름
 public interface AuthClient {
 
