@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { toast } from '@/shared/model/hooks/use-toast';
+import { PATH } from '../config/constants';
 import { BASE_URL, VERSION } from '../config/constants/path';
+
+let isRefreshing = false;
+let refreshSubscribers: (() => void)[] = [];
 
 export default function useFetcher() {
     const fetcher = axios.create({
@@ -28,8 +32,7 @@ export default function useFetcher() {
             // Todo: 에러 처리
             console.error('API 요청 실패:', error);
 
-            console.log(error.status);
-            console.log(error.message);
+            const originalRequest = error.config;
 
             switch (error.status) {
                 case 401:
@@ -37,17 +40,40 @@ export default function useFetcher() {
                         variant: 'destructive',
                         title: '인증 정보 갱신 실패',
                     });
+
+                    if (isRefreshing) {
+                        return new Promise((resolve) => {
+                            refreshSubscribers.push(() =>
+                                resolve(fetcher(originalRequest))
+                            );
+                        });
+                    }
+
+                    isRefreshing = true;
+
                     try {
-                        await refreshTokenMutation.mutateAsync();
-                        return fetcher(config); // 토큰 갱신 후 재요청
+                        await axios.post(
+                            `${BASE_URL}/${VERSION}${PATH.API_PATH.OAUTH.REFRESH}`,
+                            {},
+                            { withCredentials: true }
+                        );
+
+                        refreshSubscribers.forEach((callback) => callback());
+                        refreshSubscribers = [];
+
+                        return fetcher(originalRequest);
                     } catch (refreshError) {
                         console.log(refreshError);
                         toast({
                             variant: 'destructive',
-                            title: '인증 정보 갱신 실패',
+                            title: '인증 정보 갱신 실패, 다시 로그인해주세요.',
                         });
+
+                        localStorage.clear();
+
+                        window.location.href = '/';
+                        return Promise.reject(refreshError);
                     }
-                    break;
                 case 403:
                     toast({ variant: 'destructive', title: '권한이 없습니다' });
                     break;
@@ -68,6 +94,7 @@ export default function useFetcher() {
                         variant: 'destructive',
                         title: '세션이 만료되었습니다. 다시 로그인해주세요.',
                     });
+
                     window.location.href = '/';
                     break;
                 default:

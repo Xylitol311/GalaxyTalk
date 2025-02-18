@@ -39,7 +39,6 @@
         "embla-carousel-react": "^8.5.2",
         "livekit-client": "^2.8.1",
         "lucide-react": "^0.474.0",
-        "mitt": "^3.0.1",
         "motion": "^12.4.2",
         "react": "19.0.0",
         "react-dom": "19.0.0",

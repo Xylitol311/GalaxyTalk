@@ -49,4 +49,20 @@ export const userHandlers = [
             { status: 401, headers: { 'Content-Type': 'application/json' } }
         );
     }),
+
+    http.post(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.REFRESH}`, () => {
+        // return HttpResponse.json({
+        //     success: true,
+        //     message: '로그아웃에 성공했습니다',
+        //     data: null,
+        // });
+        return new HttpResponse(
+            JSON.stringify({
+                success: false,
+                message: '토큰 갱신 실패: 인증 정보가 유효하지 않습니다.',
+                data: null,
+            }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+    }),
 ];
