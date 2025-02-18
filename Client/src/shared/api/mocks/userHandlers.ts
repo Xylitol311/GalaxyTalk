@@ -3,27 +3,54 @@ import { API_PATH, BASE_URL, VERSION } from '@/app/config/constants/path';
 
 export const userHandlers = [
     http.get(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.INFO}`, () => {
-        return HttpResponse.json({
-            success: true,
-            message: '유저 정보 조회에 성공했습니다',
-            data: {
-                userId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
-                energy: 15,
-                mbti: 'ENFJ',
-                planetId: 1,
-                role: 'USER',
+        // return HttpResponse.json({
+        //     success: true,
+        //     message: '유저 정보 조회에 성공했습니다',
+        //     data: {
+        //         userId: 'TQLFszqK6szLPq_uuxyMLyQqzlobDJYBSwKPu53qRvs',
+        //         energy: 15,
+        //         mbti: 'ENFJ',
+        //         planetId: 1,
+        //         role: 'USER',
+        //     },
+        // });
+
+        return HttpResponse.json(
+            {
+                success: false,
+                message: '유저가 확인되지 않습니다',
+                data: null,
             },
-        });
+            { status: 400 }
+        );
+
+        return HttpResponse.json(
+            {
+                success: false,
+                message: '엑세스 토큰이 없습니다',
+                data: null,
+            },
+            { status: 401 }
+        );
     }),
 
     http.get(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.STATUS}`, () => {
-        return HttpResponse.json({
-            success: true,
-            message: '유저 접속 상태 조회에 성공했습니다',
-            data: {
-                userInteractionState: 'idle',
+        // return HttpResponse.json({
+        //     success: true,
+        //     message: '유저 접속 상태 조회에 성공했습니다',
+        //     data: {
+        //         userInteractionState: 'idle',
+        //     },
+        // });
+
+        return HttpResponse.json(
+            {
+                success: false,
+                message: '유저 접속 상태 조회 불가',
+                data: null,
             },
-        });
+            { status: 400 }
+        );
     }),
 
     http.post(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.SIGNUP}`, () => {
