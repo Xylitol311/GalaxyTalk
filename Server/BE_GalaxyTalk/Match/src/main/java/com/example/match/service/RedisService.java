@@ -54,10 +54,10 @@ public class RedisService {
      * 유저 상태를 Redis에 저장합니다.
      */
     public void saveUserStatus(UserMatchStatus user) {
-        log.info("유저 상태 저장: {}", user.getUserId());
         if (user == null || user.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
+        log.info("유저 상태 저장: {}", user.getUserId());
         redisTemplate.opsForValue().set(USER_KEY_PREFIX + user.getUserId(), user);
     }
 
@@ -91,10 +91,10 @@ public class RedisService {
      * score는 현재 시간(매칭 시작 시간)으로 설정합니다.
      */
     public void addUserToWaitingQueue(UserMatchStatus user) {
-        log.info("대기 큐에 유저 추가: {}", user.getUserId());
         if (user == null || user.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
+        log.info("대기 큐에 유저 추가: {}", user.getUserId());
         redisTemplate.opsForZSet().add(WAITING_USERS_KEY, user.getUserId(), user.getStartTime());
     }
 
