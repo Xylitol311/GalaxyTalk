@@ -237,6 +237,13 @@ public class MatchProcessor {
             if (otherUser != null) {
                 // 두 유저 상태 초기화
                 resetUsers(user, otherUser);
+                // 매칭 정보 삭제
+                redisService.deleteMatchInfo(matchId);
+                // 거절 기록 추가
+                redisService.addRejection(user.getUserId(), otherUser.getUserId());
+                redisService.addRejection(otherUser.getUserId(), user.getUserId());
+
+                webSocketService.notifyUser(user.getUserId(), "CANCEL_MATCHED", "매칭 성사 취소");
                 webSocketService.notifyUser(otherUserId, "MATCH_FAILED", "상대방이 매칭을 거절했습니다.");
             }
         }

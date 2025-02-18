@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class RedisService {
     private static final String USER_KEY_PREFIX = "user:";
     private static final String MATCH_KEY_PREFIX = "match:";
+    private static final String REJECTION_KEY_PREFIX = "rejected:";
     // Sorted Set 키: 대기 유저 관리 (score는 매칭 시작 시간)
     private static final String WAITING_USERS_KEY = "waiting_users";
     private final RedisTemplate<String, Object> redisTemplate;
@@ -82,6 +83,7 @@ public class RedisService {
     public void deleteUserStatus(String userId) {
         log.info("유저 상태 삭제: {}", userId);
         redisTemplate.delete(USER_KEY_PREFIX + userId);
+        deleteRejection(userId);
     }
 
     /**
@@ -159,5 +161,30 @@ public class RedisService {
     public void deleteMatchInfo(String matchId) {
         log.info("매칭 정보 삭제: {}", matchId);
         redisTemplate.delete(MATCH_KEY_PREFIX + matchId);
+    }
+
+    /**
+     * userId가 rejectedUserId를 거절한 기록 저장
+     */
+    public void addRejection(String userId, String rejectedUserId) {
+        String key = REJECTION_KEY_PREFIX + userId;
+        redisTemplate.opsForSet().add(key, rejectedUserId);
+    }
+
+    /**
+     * userId가 otherUserId를 과거에 거절한 적이 있는지 조회
+     */
+    public boolean hasRejected(String userId, String otherUserId) {
+        String key = REJECTION_KEY_PREFIX + userId;
+        Boolean isMember = redisTemplate.opsForSet().isMember(key, otherUserId);
+        return isMember != null && isMember;
+    }
+
+    /**
+     * userId가 rejectedUserId를 거절한 기록 삭제
+     */
+    public void deleteRejection(String userId) {
+        String key = REJECTION_KEY_PREFIX + userId;
+        redisTemplate.opsForSet().remove(key);
     }
 }

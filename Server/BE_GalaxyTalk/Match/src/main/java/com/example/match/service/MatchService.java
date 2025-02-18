@@ -191,6 +191,12 @@ public class MatchService {
             for (int j = i + 1; j < waitingUsers.size(); j++) {
                 UserMatchStatus u1 = waitingUsers.get(i);
                 UserMatchStatus u2 = waitingUsers.get(j);
+
+                // 거절했던 상대라면 매칭 후보에서 제외
+                if (redisService.hasRejected(u1.getUserId(), u2.getUserId()) ||
+                redisService.hasRejected(u2.getUserId(), u1.getUserId()))
+                    continue;
+
                 // 고민 유사도 계산 (기존 외부 API 활용)
                 double concernSim = externalApiService.calculateSimilarity(u1, u2);
                 if (isStrictCompatible(u1, u2)) {

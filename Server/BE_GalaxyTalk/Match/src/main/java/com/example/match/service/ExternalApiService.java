@@ -1,7 +1,7 @@
 package com.example.match.service;
 
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.MatchResultRequest;
+import com.example.match.dto.MatchResultRequestDto;
 import com.example.match.dto.SimilarityResponseDto;
 import com.example.match.dto.UserStatusRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -46,15 +46,15 @@ public class ExternalApiService {
      */
     public Map<String, Object> createChatRoom(UserMatchStatus user1, UserMatchStatus user2, double similarityScore) {
         log.info("채팅방 생성 요청");
-        MatchResultRequest matchResultRequest = new MatchResultRequest();
-        matchResultRequest.setConcern1(user1.getConcern());
-        matchResultRequest.setConcern2(user2.getConcern());
-        matchResultRequest.setUserId1(user1.getUserId());
-        matchResultRequest.setUserId2(user2.getUserId());
-        matchResultRequest.setSimilarityScore(similarityScore);
+        MatchResultRequestDto matchResultRequestDto = new MatchResultRequestDto();
+        matchResultRequestDto.setConcern1(user1.getConcern());
+        matchResultRequestDto.setConcern2(user2.getConcern());
+        matchResultRequestDto.setUserId1(user1.getUserId());
+        matchResultRequestDto.setUserId2(user2.getUserId());
+        matchResultRequestDto.setSimilarityScore(similarityScore);
         Map<String, Object> response = chatServiceClient.post()
                 .uri("/api/chat/match")
-                .bodyValue(matchResultRequest)
+                .bodyValue(matchResultRequestDto)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block();
