@@ -161,7 +161,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
         setIsLeaveDialogOpen(false);
 
         setTimeout(() => {
-            buttonProps.onClick();
+            disconnectButtonProps.onClick();
         }, 1000);
     };
 
