@@ -10,7 +10,7 @@ export default function Signup() {
     const navigate = useNavigate();
     const { role } = useUserStore();
 
-    const isGuest = role === 'GUEST';
+    const isGuest = role === 'ROLE_GUEST';
 
     useEffect(() => {
         if (isGuest) {

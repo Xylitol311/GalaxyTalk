@@ -2,6 +2,7 @@
 import {
     Toast,
     useConnectionState,
+    useDataChannel,
     useDisconnectButton,
     useParticipants,
     useRoomContext,
@@ -13,6 +14,16 @@ import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/shared/ui/shadcn/alert-dialog';
 import { Button } from '@/shared/ui/shadcn/button';
 import { postAIQuestions } from './api/apis';
 import { useDeleteChatRoom, useGetChatParticipants } from './api/queries';
@@ -41,6 +52,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const [myInfo, setMyInfo] = useState<Participant | null>(null);
     const [partnerInfo, setPartnerInfo] = useState<Participant | null>(null);
     const [isLetterModalOpen, setLetterModalOpen] = useState(false);
+    const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
     const { mutate: generateAIQuestions } = useMutation({
         mutationFn: () => postAIQuestions(chatRoomId),
@@ -125,16 +137,54 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     };
 
     const handleLeaveChat = () => {
-        disconnectButtonProps.onClick();
-        leaveChatRoom(chatRoomId);
+        // 나가기 메시지 데이터 준비
+        const messageData = {
+            text: `leave room`,
+            timestamp: Date.now(),
+        };
+
+        // JSON 문자열로 변환 후 Uint8Array로 인코딩
+        const payload = new TextEncoder().encode(JSON.stringify(messageData));
+
+        // DataChannel 메시지 옵션 (topic은 'leave')
+        const options = {
+            reliability: true,
+            topic: 'leave',
+        };
+
+        // 나가기 메시지 전송
+        sendLeave(payload, options);
+        console.log('send leave chat');
+
+        // leaveChatRoom(chatRoomId);
         setLetterModalOpen(true);
+        setIsLeaveDialogOpen(false);
+
+        setTimeout(() => {
+            disconnectButtonProps.onClick();
+        }, 1000);
     };
 
+    // 'leave' topic으로 메시지를 전송할 send 함수를 가져옵니다.
+    const { send: sendLeave } = useDataChannel('leave');
+
+    // 'leave' topic 메시지를 수신하여 상대방이 나갔음을 알립니다.
+    useDataChannel('leave', (msg) => {
+        try {
+            const decoded = new TextDecoder().decode(msg.payload);
+            const leaveData = JSON.parse(decoded);
+            console.log(leaveData);
+            if (leaveData.text === 'leave room') {
+                // 상대방이 채팅방을 나갔다는 메시지를 받으면 AlertDialog를 열도록 상태 변경
+                console.log('receive leave chat');
+                setIsLeaveDialogOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to process leave message', error);
+        }
+    });
+
     if (connectionState !== 'connected') {
-        // disconnected, connecting, connected, reconnecting, signalReconnecting
-        console.log(connectionState);
-        console.log(isLetterModalOpen);
-        console.log(partnerInfo);
         return (
             <>
                 <Toast className="text-white">Connecting...</Toast>
@@ -150,6 +200,29 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     return (
         <>
+            <AlertDialog
+                open={isLeaveDialogOpen}
+                onOpenChange={setIsLeaveDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            상대방이 채팅방을 나갔습니다
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            채팅이 종료되었어요.
+                            <br />
+                            채팅방을 나가시겠어요?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>아니오</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLeaveChat}>
+                            네
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             {isMobile ? (
                 <div className="flex flex-col h-screen justify-center items-end relative">
                     <div className="absolute top-0 left-0 z-50 w-full h-14 bg-black text-white flex justify-between items-center p-2">

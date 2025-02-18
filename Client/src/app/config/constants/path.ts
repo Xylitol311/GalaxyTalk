@@ -33,6 +33,7 @@ const DOMAIN = {
     ALARM: '/notification',
     INQUIRY: '/inquiry',
     REPORT: '/report',
+    FEEDBACK: '/feedback',
 };
 
 export const API_PATH = {
@@ -70,5 +71,9 @@ export const API_PATH = {
         CREATE: `${DOMAIN.LETTER}`,
         LIST: `${DOMAIN.LETTER}`,
         HIDE: `${DOMAIN.LETTER}/hide`,
+    },
+
+    FEEDBACK: {
+        CREATE: `${DOMAIN.FEEDBACK}`,
     },
 };

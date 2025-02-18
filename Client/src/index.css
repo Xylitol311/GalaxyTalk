@@ -1,13 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Grandiflora+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Grandiflora+One&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
+/* @font-face {
     font-family: 'Jua';
     src: url('./shared/assets/fonts/Jua-Regular.ttf') format('woff2');
     font-weight: 400;
     font-style: normal;
-}
+} */
 
 @layer base {
     :root {
@@ -36,7 +39,7 @@
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
-        --font-primary: 'Jua', sans-serif;
+        /* --font-primary: 'Jua', sans-serif; */
     }
     .dark {
         --background: 222.2 84% 4.9%;
@@ -77,5 +80,5 @@
 /* Memo: 임시 구현 */
 body {
     background-color: black;
-    font-family: var(--font-primary);
+    /* font-family: var(--font-primary); */
 }

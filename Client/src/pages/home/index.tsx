@@ -5,7 +5,7 @@ import MatchingForm from '@/pages/home/ui/MatchingForm';
 import { toast } from '@/shared/model/hooks/use-toast';
 import EarthSky from '@/widget/EarthSky';
 import SnowHouse from '@/widget/SnowHouse';
-import WalkieTalkie from '@/widget/WalkieTalkie';
+import FeedbackForm from './ui/FeedbackForm';
 import Login from './ui/Login';
 
 export default function Home() {
@@ -37,8 +37,8 @@ export default function Home() {
             {isLogin ? (
                 <>
                     <SnowHouse onClick={handleLogout} />
-                    <WalkieTalkie onClick={handleClick} />
                     <MatchingForm />
+                    <FeedbackForm />
                 </>
             ) : (
                 <Login />
