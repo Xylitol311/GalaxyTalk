@@ -41,6 +41,10 @@ public class MatchProcessor {
         redisService.removeUserFromWaitingQueue(user1.getUserId());
         redisService.removeUserFromWaitingQueue(user2.getUserId());
 
+        // 2-1. 매칭 대상 대기 큐 나감 전체 알림
+        webSocketService.broadcastUserExit(user1.getUserId());
+        webSocketService.broadcastUserExit(user2.getUserId());
+
         // 3. 매칭 성공 알림 전송 (3초 후)
         sendMatchNotification(user1, user2, matchId, similarity);
 
@@ -150,6 +154,7 @@ public class MatchProcessor {
         user.setAccepted(false);
         redisService.saveUserStatus(user);
         redisService.addUserToWaitingQueue(user);
+        webSocketService.broadcastNewUser(user);
     }
 
     /**
@@ -221,14 +226,24 @@ public class MatchProcessor {
         if (matchResultStatus == null || matchResultStatus.getUserIds() == null) {
             return;
         }
+        // user가 거절한 상대방 id 추출
         String otherUserId = matchResultStatus.getUserIds().stream()
                 .filter(id -> !id.equals(user.getUserId()))
                 .findFirst()
                 .orElse(null);
+
         if (otherUserId != null) {
             UserMatchStatus otherUser = redisService.getUserStatus(otherUserId);
             if (otherUser != null) {
+                // 두 유저 상태 초기화
                 resetUsers(user, otherUser);
+                // 매칭 정보 삭제
+                redisService.deleteMatchInfo(matchId);
+                // 거절 기록 추가
+                redisService.addRejection(user.getUserId(), otherUser.getUserId());
+                redisService.addRejection(otherUser.getUserId(), user.getUserId());
+
+                webSocketService.notifyUser(user.getUserId(), "CANCEL_MATCHED", "매칭 성사 취소");
                 webSocketService.notifyUser(otherUserId, "MATCH_FAILED", "상대방이 매칭을 거절했습니다.");
             }
         }
@@ -241,17 +256,27 @@ public class MatchProcessor {
      * @param user2 상대방 유저
      */
     private void resetUsers(UserMatchStatus user1, UserMatchStatus user2) {
+        // WAITING 상태로 변경
         user1.setStatus(MatchStatus.WAITING);
         user2.setStatus(MatchStatus.WAITING);
+
+        // 매칭 아이디, 수락 상태 초기화
         user1.setMatchId(null);
         user2.setMatchId(null);
         user1.setAccepted(false);
         user2.setAccepted(false);
 
+        // 유저 상태 업데이트
         redisService.saveUserStatus(user1);
         redisService.saveUserStatus(user2);
+
+        // 대기 큐에 추가
         redisService.addUserToWaitingQueue(user1);
         redisService.addUserToWaitingQueue(user2);
+
+        // 브로드 캐스팅
+        webSocketService.broadcastNewUser(user1);
+        webSocketService.broadcastNewUser(user2);
     }
 
     /**

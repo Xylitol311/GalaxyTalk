@@ -191,6 +191,12 @@ public class MatchService {
             for (int j = i + 1; j < waitingUsers.size(); j++) {
                 UserMatchStatus u1 = waitingUsers.get(i);
                 UserMatchStatus u2 = waitingUsers.get(j);
+
+                // 거절했던 상대라면 매칭 후보에서 제외
+                if (redisService.hasRejected(u1.getUserId(), u2.getUserId()) ||
+                redisService.hasRejected(u2.getUserId(), u1.getUserId()))
+                    continue;
+
                 // 고민 유사도 계산 (기존 외부 API 활용)
                 double concernSim = externalApiService.calculateSimilarity(u1, u2);
                 if (isStrictCompatible(u1, u2)) {
@@ -221,9 +227,14 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
+
                 // 매칭된 유저는 대기 큐에서 제거
                 redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
                 redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
+
+                // 브로드 캐스팅
+                webSocketService.broadcastUserExit(pair.user1.getUserId());
+                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
 
@@ -241,9 +252,14 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
+
                 // 매칭된 유저는 대기 큐에서 제거
                 redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
                 redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
+
+                // 브로드 캐스팅
+                webSocketService.broadcastUserExit(pair.user1.getUserId());
+                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
     }
@@ -280,8 +296,8 @@ public class MatchService {
     }
 
     /**
-     * 매칭 대기 중인 유저 중, 시작 후 10분이 지난 유저를 자동 취소합니다.
-     * 이 메서드는 1분마다 실행됩니다.
+     * 매칭 대기 중인 유저 중, 시작 후 5분이 지난 유저를 자동 취소
+     * 이 메서드는 1분마다 실행
      */
     @Scheduled(fixedDelay = 60000)
     public void checkWaitingTimeout() {
@@ -291,8 +307,8 @@ public class MatchService {
         for (String userId : waitingUserIds) {
             UserMatchStatus user = redisService.getUserStatus(userId);
             if (user != null && user.getStatus() == MatchStatus.WAITING) {
-                // 시작 시각으로부터 10분(600,000ms) 경과 여부 확인
-                if (now - user.getStartTime() > 600_000) {
+                // 시작 시각으로부터 5분(300,000ms) 경과 여부 확인
+                if (now - user.getStartTime() > 300_000) {
                     log.info("유저 {} 대기 시간 초과로 매칭 취소", userId);
                     // Redis에서 상태 삭제 및 대기 큐에서 제거
                     redisService.deleteUserStatus(userId);
@@ -301,6 +317,8 @@ public class MatchService {
                     externalApiService.setUserStatus(userId, "idle");
                     // WebSocket 알림 전송
                     webSocketService.notifyUser(userId, "CANCEL_WAITING", "매칭 대기 취소");
+                    // 매칭 취소 브로드캐스팅
+                    webSocketService.broadcastUserExit(userId);
                 }
             }
         }
