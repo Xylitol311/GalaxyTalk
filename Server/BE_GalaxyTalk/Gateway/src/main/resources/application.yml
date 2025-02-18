@@ -43,6 +43,10 @@ spring:
           uri: lb://SUPPORT-SERVICE
           predicates:
             - Path=/api/letter/**
+        - id: support-service
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/api/feedback/**
         - id: match-service
           uri: lb://MATCH-SERVICE
           predicates:
