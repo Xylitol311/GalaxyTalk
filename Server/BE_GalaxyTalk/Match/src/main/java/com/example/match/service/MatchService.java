@@ -109,7 +109,7 @@ public class MatchService {
      * 매칭 대기 중인 유저 목록 조회
      */
     public List<UserStatusDto> getWaitingUsers() {
-        Set<String> waitingUserIds = redisService.getAllWaitingUsers();
+        Set<String> waitingUserIds = redisService.getRandomWaitingUsers(20);
         List<UserStatusDto> list = new ArrayList<>();
         for (String id : waitingUserIds) {
             UserMatchStatus user = redisService.getUserStatus(id);

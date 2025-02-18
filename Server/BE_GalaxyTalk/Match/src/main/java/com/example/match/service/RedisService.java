@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -108,6 +109,17 @@ public class RedisService {
      */
     public Set<String> getAllWaitingUsers() {
         Set<Object> result = redisTemplate.opsForZSet().range(WAITING_USERS_KEY, 0, -1);
+        if (result == null) {
+            return Collections.emptySet();
+        }
+        return result.stream().map(Object::toString).collect(Collectors.toSet());
+    }
+
+    /**
+     * Redis 대기 큐에서 랜덤으로 count만큼의 유저 ID를 조회합니다.
+     */
+    public Set<String> getRandomWaitingUsers(int count) {
+        List<Object> result = redisTemplate.opsForZSet().randomMembers(WAITING_USERS_KEY, count);
         if (result == null) {
             return Collections.emptySet();
         }
