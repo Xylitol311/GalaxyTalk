@@ -32,7 +32,9 @@ import AudioRenderer from './ui/AudioRenderer';
 import CustomAudioControl from './ui/CustomAudioControl';
 import CustomVideoControl from './ui/CustomVideoControl';
 import LetterFormModal from './ui/LetterFormModal';
+import MbtiTag from './ui/MbtiTag';
 import ReactionPanel from './ui/ReactionPanel';
+import TemperatureTag from './ui/TemperatureTag';
 import TextChat from './ui/TextChat';
 import VideoRenderer from './ui/VideoRenderer';
 
@@ -52,7 +54,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const [myInfo, setMyInfo] = useState<Participant | null>(null);
     const [partnerInfo, setPartnerInfo] = useState<Participant | null>(null);
     const [isLetterModalOpen, setLetterModalOpen] = useState(false);
-    const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+    const [isLeaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
     const { mutate: generateAIQuestions } = useMutation({
         mutationFn: () => postAIQuestions(chatRoomId),
@@ -156,9 +158,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
         sendLeave(payload, options);
         console.log('send leave chat');
 
-        // leaveChatRoom(chatRoomId);
+        leaveChatRoom(chatRoomId);
         setLetterModalOpen(true);
-        setIsLeaveDialogOpen(false);
+        setLeaveDialogOpen(false);
 
         setTimeout(() => {
             disconnectButtonProps.onClick();
@@ -177,7 +179,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             if (leaveData.text === 'leave room') {
                 // 상대방이 채팅방을 나갔다는 메시지를 받으면 AlertDialog를 열도록 상태 변경
                 console.log('receive leave chat');
-                setIsLeaveDialogOpen(true);
+                setLeaveDialogOpen(true);
             }
         } catch (error) {
             console.error('Failed to process leave message', error);
@@ -202,7 +204,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
         <>
             <AlertDialog
                 open={isLeaveDialogOpen}
-                onOpenChange={setIsLeaveDialogOpen}>
+                onOpenChange={setLeaveDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
@@ -225,7 +227,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
             {isMobile ? (
                 <div className="flex flex-col h-screen justify-center items-end relative">
-                    <div className="absolute top-0 left-0 z-50 w-full h-14 bg-black text-white flex justify-between items-center p-2">
+                    <div className="w-full h-14 bg-black text-white flex justify-between items-center p-2">
                         <div>
                             <Button
                                 size="icon"
@@ -318,8 +320,8 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     userId={participants[1]?.identity}
                                 />
                             </div>
-                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 mt-2">
-                                <h1 className="text-2xl">
+                            <div className="bg-slate-300 w-full rounded-lg px-4 py-6  mt-2">
+                                <h1 className="text-2xl font-bold mb-4">
                                     {partnerInfo?.planetId
                                         ? getPlanetNameById(
                                               partnerInfo.planetId
@@ -327,83 +329,112 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                         : ''}
                                     &nbsp;여행자
                                 </h1>
-                                <p>
-                                    나누고 싶은 이야기: {partnerInfo?.concern}
-                                    <br /> 친구의 성향: {partnerInfo?.mbti}
-                                    <br /> 친구의 매너온도:{' '}
-                                    {partnerInfo?.energy}°C
-                                </p>
+                                <div className="mb-8">
+                                    <h2 className="font-bold mb-1">
+                                        나누고 싶은 이야기
+                                    </h2>
+                                    <p className="min-h-28 line-clamp-6 text-sm mb-2">
+                                        {partnerInfo?.concern}
+                                    </p>
+                                    <MbtiTag mbti={partnerInfo?.mbti} />
+                                    <TemperatureTag
+                                        energy={partnerInfo?.energy}
+                                    />
+                                </div>
+                                <div className="invisible">
+                                    <div className="flex justify-around flex-wrap">
+                                        <CustomAudioControl />
+                                        <CustomVideoControl />
+                                    </div>
+                                    <div className="flex justify-center ">
+                                        <Button
+                                            onClick={handleLeaveChat}
+                                            disabled={
+                                                disconnectButtonProps.disabled
+                                            }
+                                            className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
+                                            <LogOut size={28} />
+                                            나가기
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex justify-center items-end relative">
-                            {!isAiModalOpen ? (
-                                <div
-                                    className="w-full h-32 z-10 absolute top-0 left-0 p-2"
-                                    style={{
-                                        backgroundImage:
-                                            'linear-gradient(180deg, #000000 0%, #0c0c0c88 50%, #66666600 100%)',
-                                    }}>
-                                    <div className="flex gap-4 items-center">
-                                        <Button
-                                            variant="outline"
-                                            className="w-16 h-16"
-                                            onClick={handleAIQuestionButton}>
-                                            <Bot
-                                                style={{
-                                                    height: '32px',
-                                                    width: '32px',
-                                                }}
-                                            />
-                                        </Button>
-                                        <p className="text-white font-medium">
-                                            도움이 필요하신가요? <br /> AI에게
-                                            도움을 요청하세요!
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : AIQuestions.length ? (
-                                <div className="w-full h-48 z-10 absolute top-0 left-0 bg-gray-300 p-2 rounded-lg flex flex-col justify-between">
-                                    <div className="flex gap-4 items-center">
-                                        <Button
-                                            variant="outline"
-                                            className="w-16 h-16"
-                                            onClick={handleAIQuestionButton}>
-                                            <Bot
-                                                style={{
-                                                    height: '32px',
-                                                    width: '32px',
-                                                }}
-                                            />
-                                        </Button>
-                                        <p className="font-medium text-black">
-                                            의 추천 질문!
-                                        </p>
-                                    </div>
-                                    <div className="w-full h-24 bg-white rounded-bl-lg rounded-br-lg p-2 flex justify-between items-center">
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={handleClickPrevQuestion}>
-                                            <ChevronLeft size={20} />
-                                        </Button>
-                                        <div className="px-4 py-2 text-center">
-                                            {
-                                                AIQuestions[
-                                                    currentQuestionIndex
-                                                ].content
-                                            }
+                        <div className="flex flex-col justify-center items-end relative">
+                            <div
+                                className="w-full p-2 flex items-center"
+                                style={{
+                                    backgroundImage:
+                                        'linear-gradient(180deg, #000000 0%, #0c0c0c88 50%, #0000000 100%)',
+                                }}>
+                                <Button
+                                    variant="outline"
+                                    className="w-16 h-16 mr-4"
+                                    onClick={handleAIQuestionButton}>
+                                    <Bot
+                                        style={{
+                                            height: '32px',
+                                            width: '32px',
+                                        }}
+                                    />
+                                </Button>
+                                {!isAiModalOpen ? (
+                                    <p className="text-white font-medium">
+                                        도움이 필요하신가요? <br /> AI에게
+                                        도움을 요청하세요!
+                                    </p>
+                                ) : AIQuestions.length ? (
+                                    <div className="absolute top-0 left-0 z-50 w-full h-48 bg-gray-300 p-2 rounded-lg flex flex-col justify-between">
+                                        <div className="flex gap-4 flex-col">
+                                            <div className="flex items-center">
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-16 h-16 mr-2"
+                                                    onClick={
+                                                        handleAIQuestionButton
+                                                    }>
+                                                    <Bot
+                                                        style={{
+                                                            height: '32px',
+                                                            width: '32px',
+                                                        }}
+                                                    />
+                                                </Button>
+                                                <p className="font-medium text-black">
+                                                    의 추천 질문!
+                                                </p>
+                                            </div>
+                                            <div className="w-full h-24 bg-white rounded-bl-lg rounded-br-lg p-2 flex justify-between items-center">
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={
+                                                        handleClickPrevQuestion
+                                                    }>
+                                                    <ChevronLeft size={20} />
+                                                </Button>
+                                                <div className="px-4 py-2 text-center">
+                                                    {
+                                                        AIQuestions[
+                                                            currentQuestionIndex
+                                                        ].content
+                                                    }
+                                                </div>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={
+                                                        handleClickNextQuestion
+                                                    }>
+                                                    <ChevronRight size={20} />
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={handleClickNextQuestion}>
-                                            <ChevronRight size={20} />
-                                        </Button>
                                     </div>
-                                </div>
-                            ) : (
-                                ''
-                            )}
+                                ) : (
+                                    ''
+                                )}
+                            </div>
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
                         <div className="flex justify-end items-end flex-col">
@@ -414,20 +445,26 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     userId={participants[0]?.identity}
                                 />
                             </div>
-                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 flex flex-col justify-between relative">
+                            <div className="bg-slate-300 w-full rounded-lg px-4 py-6 flex flex-col justify-between relative">
                                 <div>
-                                    <h1 className="text-2xl">
+                                    <h1 className="text-2xl font-bold mb-4">
                                         {myInfo?.planetId
                                             ? getPlanetNameById(myInfo.planetId)
                                             : ''}
                                         &nbsp;여행자
                                     </h1>
-                                    <p>
-                                        나누고 싶은 이야기: {myInfo?.concern}
-                                        <br /> 나의 성향: {myInfo?.mbti}
-                                        <br /> 나의 매너온도: {myInfo?.energy}
-                                        °C
-                                    </p>
+                                    <div className="mb-8">
+                                        <h2 className="font-bold mb-1">
+                                            나누고 싶은 이야기
+                                        </h2>
+                                        <p className="min-h-28 line-clamp-6 text-sm mb-2">
+                                            {myInfo?.concern}
+                                        </p>
+                                        <MbtiTag mbti={myInfo?.mbti} />
+                                        <TemperatureTag
+                                            energy={myInfo?.energy}
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <div className="flex justify-around flex-wrap">

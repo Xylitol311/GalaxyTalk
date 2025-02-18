@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router';
+import { PATH } from '@/app/config/constants';
 import { toast } from '@/shared/model/hooks/use-toast';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
 import { Button } from '@/shared/ui/shadcn/button';
@@ -54,7 +55,7 @@ function LetterFormModal({
     };
 
     const handlePostponeLetter = () => {
-        navigate('/');
+        navigate(PATH.ROUTE.HOME);
     };
 
     return (
@@ -90,7 +91,7 @@ function LetterFormModal({
                     </div>
                 </div>
             ) : (
-                <div className="absolute p-10 w-full h-full bg-white text-black top-0 left-0 z-50 rounded-2xl shadow-lg">
+                <div className="fixed p-10 w-full h-full bg-white text-black top-0 left-0 z-50">
                     <div className="flex flex-col justify-between h-full">
                         <h1 className="font-bold text-2xl">
                             마음을 전하는 편지

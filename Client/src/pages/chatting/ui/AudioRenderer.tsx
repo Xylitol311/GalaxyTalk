@@ -5,7 +5,7 @@ import {
     useTracks,
 } from '@livekit/components-react';
 import { getEmptyAudioStreamTrack, Track } from 'livekit-client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import { throttle } from '@/shared/lib/utils';
 
@@ -37,7 +37,7 @@ function AudioRenderer({ userId }: { userId: string }) {
         setTimeout(() => {
             // 컴포넌트가 마운트될 때 한 번 실행해서 초기 크기를 설정
             updateContainerSize();
-        }, 100);
+        }, 1000);
 
         return () => {
             window.removeEventListener('resize', updateContainerSize);
