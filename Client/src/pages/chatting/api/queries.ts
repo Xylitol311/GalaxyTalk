@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import {
+    cancelChatRoom,
     deleteChatRoom,
     getChatParticipants,
     getPreviousMessages,
@@ -90,6 +91,22 @@ export const usePostLetter = () => {
         },
         onError: (error) => {
             console.error('편지 전송 실패:', error);
+        },
+    });
+};
+
+// 채팅 취소하기
+export const useCancelChatRoom = () => {
+    const navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: (chatRoomId: string) => cancelChatRoom(chatRoomId),
+        retry: true, // 필요에 따라 재시도 옵션을 설정합니다.
+        onSuccess: () => {
+            navigate(PATH.ROUTE.HOME);
+        },
+        onError: (error: any) => {
+            console.error('채팅 취소 실패:', error);
         },
     });
 };

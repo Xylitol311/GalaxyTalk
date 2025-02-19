@@ -82,6 +82,20 @@ export default function MatchingRoom() {
                     setMatchData(parsedData.data);
                 }
                 if (parsedData.type === 'CHAT_CREATED') {
+                    // 채팅 생성 시 응답 데이터에서 필요한 값을 추출합니다.
+                    const chatDataToStore = {
+                        chatRoomId: parsedData.chatRoomId, // 생성된 채팅방 ID
+                        sessionId: parsedData.sessionId, // 생성된 OpenVidu sessionId
+                        token: parsedData.token, // session 접속용 토큰
+                    };
+
+                    // 로컬스토리지에 JSON 형태로 저장합니다.
+                    localStorage.setItem(
+                        'chatdata',
+                        JSON.stringify(chatDataToStore)
+                    );
+
+                    // 채팅 페이지로 이동합니다.
                     navigate(PATH.ROUTE.CHAT);
                 }
                 if (parsedData.type === 'WAITING') {
