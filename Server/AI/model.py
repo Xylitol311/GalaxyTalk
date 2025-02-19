@@ -18,9 +18,11 @@ class SentenceSimilarity:
 
         self.model.eval()  # Set to evaluation mode
    
-    def compute_similarity(self, sent1, sent2):
+    def compute_similarity(self, sent1: str, sent2: str):
         print(f"Input sentences: '{sent1}', '{sent2}'")
-        
+        sent1 = sent1.rstrip() + '.' if sent1[-1] not in {'!', '.', '?'} else sent1
+        sent2 = sent2.rstrip() + '.' if sent2[-1] not in {'!', '.', '?'} else sent2
+
         encoded = self.tokenizer(sent1, sent2, 
                             padding=True,
                             truncation=True,

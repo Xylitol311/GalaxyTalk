@@ -7,13 +7,13 @@ class Config:
 
 class LocalConfig(Config):
     # 로컬 환경 설정
-    MODEL_PATH = "./sentence_similarity_model_klue"
+    MODEL_PATH = "./sentence_similarity_model"
     HOST = "127.0.0.1"
     PORT = 8085
 
 class ProdConfig(Config):
     # 배포 환경 설정
-    MODEL_PATH = "/home/ubuntu/sentence_similarity_model_klue"
+    MODEL_PATH = "/home/ubuntu/sentence_similarity_model"
     HOST = "0.0.0.0"
     PORT = 8080
 
