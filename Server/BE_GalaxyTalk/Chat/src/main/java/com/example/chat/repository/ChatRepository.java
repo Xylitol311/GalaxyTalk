@@ -45,8 +45,10 @@ public interface ChatRepository extends MongoRepository<ChatRoom, String> {
     @Update("{ '$set': { 'isCancelled': true } }")
     void updateIsCancelled(String chatRoomId);
 
-    // participants.userId가 ?1와 일치하고, _id가 ?0와 같지 않은 조건을 만족하는 문서의 endedAt을 현재 시각으로, isCancelled를 true로 업데이트
-    @Query(value = "{ 'participants.userId': ?1, '_id': { $ne: ?0 } }")
+    // participants.userId가 ?1와 일치하고, 
+    // _id가 ?0와 같지 않고 endedAt이 null인 조건을 만족하는 문서의 
+    // endedAt을 현재 시각으로, isCancelled를 true로 업데이트
+    @Query(value = "{ 'participants.userId': ?1, '_id': { $ne: ?0 }, 'endedAt': null }")
     @Update("{ '$currentDate': { 'endedAt': true }, '$set': { 'isCancelled': true } }")
     void updateAbnormalChatrooms(String chatRoomId, String userId);
 }

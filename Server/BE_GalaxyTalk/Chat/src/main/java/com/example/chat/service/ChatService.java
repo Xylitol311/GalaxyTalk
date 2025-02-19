@@ -234,13 +234,14 @@ public class ChatService {
 
             // 후기를 조회할 수 없는 경우
             if(response == null) {
-                throw new BusinessException(ErrorCode.LETTER_NOT_FOUND);
+                previousChatResponse.setParticipantReview(null);
             }
-
-            String letter = (String) response.get("content");
-
-            previousChatResponse.setParticipantReview(letter);
-
+            // 후기가 있는 경우
+            else {
+                String letter = (String) response.get("content");
+                previousChatResponse.setParticipantReview(letter);
+            }
+            
             responseList.add(previousChatResponse);
         }
 
