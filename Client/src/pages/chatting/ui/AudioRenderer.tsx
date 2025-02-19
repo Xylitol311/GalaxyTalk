@@ -18,7 +18,7 @@ function AudioRenderer({ userId }: { userId: string }) {
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({
-        width: 250,
+        width: 200,
         height: 150,
     });
 

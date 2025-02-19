@@ -36,7 +36,6 @@ import MbtiTag from './ui/MbtiTag';
 import ReactionPanel from './ui/ReactionPanel';
 import TemperatureTag from './ui/TemperatureTag';
 import TextChat from './ui/TextChat';
-import VideoRenderer from './ui/VideoRenderer';
 
 interface ChattingPageProps {
     chatData: ChatData;
@@ -313,14 +312,14 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                 <div className="w-full flex justify-center items-center">
                     <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
                         <div className="flex flex-col justify-end">
-                            <VideoRenderer userId={participants[1]?.identity} />
+                            {/* <VideoRenderer userId={participants[1]?.identity} /> */}
                             <AudioRenderer userId={participants[1]?.identity} />
                             <div className="mb-2">
                                 <ReactionPanel
                                     userId={participants[1]?.identity}
                                 />
                             </div>
-                            <div className="bg-slate-300 w-full rounded-lg px-4 py-6  mt-2">
+                            <div className="bg-slate-300 w-full rounded-lg p-4  mt-2">
                                 <h1 className="text-2xl font-bold mb-4">
                                     {partnerInfo?.planetId
                                         ? getPlanetNameById(
@@ -345,8 +344,6 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     <div className="flex justify-around flex-wrap">
                                         <CustomAudioControl />
                                         <CustomVideoControl />
-                                    </div>
-                                    <div className="flex justify-center ">
                                         <Button
                                             onClick={handleLeaveChat}
                                             disabled={
@@ -438,14 +435,14 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
                         <div className="flex justify-end items-end flex-col">
-                            <VideoRenderer userId={participants[0]?.identity} />
+                            {/* <VideoRenderer userId={participants[0]?.identity} /> */}
                             <AudioRenderer userId={participants[0]?.identity} />
                             <div className="mb-2">
                                 <ReactionPanel
                                     userId={participants[0]?.identity}
                                 />
                             </div>
-                            <div className="bg-slate-300 w-full rounded-lg px-4 py-6 flex flex-col justify-between relative">
+                            <div className="bg-slate-300 w-full rounded-lg p-4 flex flex-col justify-between relative">
                                 <div>
                                     <h1 className="text-2xl font-bold mb-4">
                                         {myInfo?.planetId
@@ -470,8 +467,6 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     <div className="flex justify-around flex-wrap">
                                         <CustomAudioControl />
                                         <CustomVideoControl />
-                                    </div>
-                                    <div className="flex justify-center">
                                         <Button
                                             onClick={handleLeaveChat}
                                             disabled={
