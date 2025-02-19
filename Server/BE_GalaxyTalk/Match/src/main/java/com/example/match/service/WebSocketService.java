@@ -34,12 +34,15 @@ public class WebSocketService {
     public void notifyMatch(Map<String, Object> user1Data, Map<String, Object> user2Data) {
         log.info("매칭 알림: 사용자 데이터 {}, {}", user1Data, user2Data);
         String message = "매칭이 성사되었습니다.";
+        // user1에게 전송
         messagingTemplate.convertAndSend(
-                "/topic/matching/" + user1Data.get("userId"),
+                "/topic/matching/" + user2Data.get("matchedUserId"),
                 new MessageResponseDto("MATCH_SUCCESS", message, user1Data)
         );
+
+        // user2에게 전송
         messagingTemplate.convertAndSend(
-                "/topic/matching/" + user2Data.get("userId"),
+                "/topic/matching/" + user1Data.get("matchedUserId"),
                 new MessageResponseDto("MATCH_SUCCESS", message, user2Data)
         );
     }

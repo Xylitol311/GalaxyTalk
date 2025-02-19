@@ -85,18 +85,16 @@ public class MatchProcessor {
      */
     private void sendMatchNotification(UserMatchStatus user1, UserMatchStatus user2, String matchId, double similarity) {
         Map<String, Object> user1Data = new HashMap<>();
-        user1Data.put("userId", user1.getUserId());
         user1Data.put("matchId", matchId);
-        user1Data.put("matchUserId", user2.getUserId());
+        user1Data.put("matchedUserId", user2.getUserId());
         user1Data.put("concern", user2.getConcern());
         user1Data.put("mbti", user2.getMbti());
         user1Data.put("energy", user2.getEnergy());
         user1Data.put("similarity", similarity);
 
         Map<String, Object> user2Data = new HashMap<>();
-        user2Data.put("userId", user2.getUserId());
         user2Data.put("matchId", matchId);
-        user2Data.put("matchUserId", user1.getUserId());
+        user2Data.put("matchedUserId", user1.getUserId());
         user2Data.put("concern", user1.getConcern());
         user2Data.put("mbti", user1.getMbti());
         // user1의 energy 값을 저장하도록 수정
