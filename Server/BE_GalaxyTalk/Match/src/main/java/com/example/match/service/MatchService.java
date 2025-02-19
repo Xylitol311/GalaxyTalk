@@ -50,7 +50,13 @@ public class MatchService {
         // 이미 매칭 중인 유저인지 확인
         UserMatchStatus existing = redisService.getUserStatus(user.getUserId());
         if (existing != null) {
-            throw new BusinessException(ErrorCode.MATCH_ALREADY_IN_PROGRESS);
+            // 매칭 성사된 유저인 경우
+            if (existing.getMatchId() != null) {
+                matchProcessor.processMatchingCancle(existing.getMatchId(), user.getUserId());
+            }
+            // 기존 정보 삭제
+            redisService.deleteUserStatus(user.getUserId());
+            redisService.removeUserFromWaitingQueue(user.getUserId());
         }
 
         // 외부 Auth 서버(WebClient 사용)를 통해 회원 정보 조회 및 MBTI, 에너지 등 추출
@@ -92,7 +98,12 @@ public class MatchService {
         // 매칭 중인 유저인지 확인
         UserMatchStatus userMatchStatus = redisService.getUserStatus(userId);
         if (userMatchStatus == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_MATCHED_STATUS);
+            throw new BusinessException(ErrorCode.USER_NOT_MATCHING);
+        }
+
+        // 매칭이 성사된 유저인 경우 매칭 취소 및 상대방도 취소 처리 필요
+        if (userMatchStatus.getMatchId() != null) {
+            matchProcessor.processMatchingCancle(userMatchStatus.getMatchId(), userId);
         }
 
         // Redis에서 유저 정보 삭제
@@ -197,6 +208,9 @@ public class MatchService {
                 redisService.hasRejected(u2.getUserId(), u1.getUserId()))
                     continue;
 
+                // 매칭 시작한지 5분 이상된 유저라면 매칭 취소
+
+
                 // 고민 유사도 계산 (기존 외부 API 활용)
                 double concernSim = externalApiService.calculateSimilarity(u1, u2);
                 if (isStrictCompatible(u1, u2)) {
@@ -293,6 +307,27 @@ public class MatchService {
             }
         }
         return matchCount / 4.0;
+    }
+
+    public void checkWaitingTimeout(String userId) {
+        log.info("대기 시간 초과 유저 검사");
+        long now = Instant.now().toEpochMilli();
+        UserMatchStatus user = redisService.getUserStatus(userId);
+        if (user != null && user.getStatus() == MatchStatus.WAITING) {
+            // 시작 시각으로부터 5분(300,000ms) 경과 여부 확인
+            if (now - user.getStartTime() > 300_000) {
+                log.info("유저 {} 대기 시간 초과로 매칭 취소", userId);
+                // Redis에서 상태 삭제 및 대기 큐에서 제거
+                redisService.deleteUserStatus(userId);
+                redisService.removeUserFromWaitingQueue(userId);
+                // 외부 API를 통해 세션 상태 변경 (예: idle)
+                externalApiService.setUserStatus(userId, "idle");
+                // WebSocket 알림 전송
+                webSocketService.notifyUser(userId, "CANCEL_WAITING", "매칭 대기 취소");
+                // 매칭 취소 브로드캐스팅
+                webSocketService.broadcastUserExit(userId);
+            }
+        }
     }
 
     /**

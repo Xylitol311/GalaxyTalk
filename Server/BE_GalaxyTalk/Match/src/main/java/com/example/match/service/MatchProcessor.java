@@ -310,4 +310,57 @@ public class MatchProcessor {
                 .filter(Objects::nonNull)
                 .allMatch(UserMatchStatus::isAccepted);
     }
+
+    /**
+     * 특정 유저의 매칭 취소 (비정상 종료, 일반 취소 등)
+     * - 취소된 매칭의 상대방을 찾아 상태 초기화 및 재등록
+     * - 상대방에게 매칭 실패 알림 전송
+     */
+    public void processMatchingCancle(String matchId, String userId) {
+        MatchResultStatus matchResultStatus = redisService.getMatchInfo(matchId);
+        if (matchResultStatus == null || matchResultStatus.getUserIds() == null) {
+            return;
+        }
+        // user가 거절한 상대방 id 추출
+        String otherUserId = matchResultStatus.getUserIds().stream()
+                .filter(id -> !id.equals(userId))
+                .findFirst()
+                .orElse(null);
+
+        if (otherUserId != null) {
+            UserMatchStatus otherUser = redisService.getUserStatus(otherUserId);
+            if (otherUser != null) {
+                // 상대방 상태 초기화
+                resetUser(otherUser);
+                // 매칭 정보 삭제
+                redisService.deleteMatchInfo(matchId);
+                // 거절 기록 추가
+                redisService.addRejection(otherUser.getUserId(), userId);
+                // 매칭 거절 알림
+                webSocketService.notifyUser(otherUserId, "MATCH_FAILED", "상대방이 매칭을 거절했습니다.");
+            }
+        }
+    }
+
+    /**
+     * 매칭 취소된 유저의 상태를 초기화하여 WAITING 상태로 재설정하고, 대기 큐에 재등록합니다.
+     *
+     */
+    private void resetUser(UserMatchStatus user) {
+        // WAITING 상태로 변경
+        user.setStatus(MatchStatus.WAITING);
+
+        // 매칭 아이디, 수락 상태 초기화
+        user.setMatchId(null);
+        user.setAccepted(false);
+
+        // 유저 상태 업데이트
+        redisService.saveUserStatus(user);
+
+        // 대기 큐에 추가
+        redisService.addUserToWaitingQueue(user);
+
+        // 브로드 캐스팅
+        webSocketService.broadcastNewUser(user);
+    }
 }
