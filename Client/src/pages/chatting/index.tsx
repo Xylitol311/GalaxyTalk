@@ -65,12 +65,12 @@ export default function ChattingRoom() {
             <LiveKitRoom
                 video={false}
                 audio={true}
-                // token={chatData.token}
-                token={
-                    'eyJhbGciOiJIUzI1NiJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IlRlc3QgUm9vbSJ9LCJpc3MiOiJkZXZrZXkiLCJleHAiOjE3Mzk5OTU5OTQsIm5iZiI6MCwic3ViIjoiUGFydGljaXBhbnQxMSJ9.hDU5aTSXC1hxtqTcbIabMqaP770vYSoSzphk7XatAAs'
-                }
-                // serverUrl={LIVEKIT_URL}
-                serverUrl={'ws://localhost:7880/'}
+                token={chatData.token}
+                // token={
+                //     'eyJhbGciOiJIUzI1NiJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IlRlc3QgUm9vbSJ9LCJpc3MiOiJkZXZrZXkiLCJleHAiOjE3Mzk5OTU5OTQsIm5iZiI6MCwic3ViIjoiUGFydGljaXBhbnQxMSJ9.hDU5aTSXC1hxtqTcbIabMqaP770vYSoSzphk7XatAAs'
+                // }
+                serverUrl={LIVEKIT_URL}
+                // serverUrl={'ws://localhost:7880/'}
                 data-lk-theme="default">
                 <ChattingPage chatData={chatData} />
             </LiveKitRoom>
