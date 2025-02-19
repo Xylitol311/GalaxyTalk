@@ -26,7 +26,7 @@ public class WebSocketService {
         }
         messagingTemplate.convertAndSend(
                 "/topic/matching/" + userId,
-                new MessageResponseDto(type, message, new HashMap<>())
+                new MessageResponseDto(type, message, null)
         );
     }
 
