@@ -263,6 +263,26 @@ public class ChatController {
         ));
     }
 
+    /**
+     * 매칭 성사 후 채팅방 입장 로딩 시 취소 버튼을 클릭합니다.
+     * mongodb에서 해당 채팅방을 종료(soft delete)하고 상태를 다시 idle로 변경합니다.
+     * mongodb의 isCancelled를 true로 변환
+     * @param chatRoomId, userId
+     */
+    @GetMapping("/{chatRoomId}/cancel")
+    public ResponseEntity<ApiResponseDto> cancel(@PathVariable("chatRoomId") String chatRoomId,
+                                                 @RequestHeader("X-User-Id") String userId) {
+        log.info("{} 사용자 채팅방 로딩 취소 시도", userId);
+        chatService.cancel(userId, chatRoomId);
+        log.info("{} 사용자 채팅방 로딩 취소 성공", userId);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "채팅 입장 로딩 취소 성공",
+                null
+        ));
+    }
+
 
     /**
      * 세션과 property 정보를 받아 token을 생성합니다.
