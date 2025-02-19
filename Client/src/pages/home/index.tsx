@@ -1,8 +1,8 @@
 import { Canvas } from '@react-three/fiber';
+import { useNavigate } from 'react-router';
+import { PATH } from '@/app/config/constants';
 import { useUserStore } from '@/app/model/stores/user';
-import { usePostLogout } from '@/features/user/api/queries';
 import MatchingForm from '@/pages/home/ui/MatchingForm';
-import { toast } from '@/shared/model/hooks/use-toast';
 import EarthSky from '@/widget/EarthSky';
 import SnowHouse from '@/widget/SnowHouse';
 import FeedbackForm from './ui/FeedbackForm';
@@ -10,18 +10,16 @@ import Login from './ui/Login';
 
 export default function Home() {
     const { userId } = useUserStore();
-    const { mutate } = usePostLogout();
     const isLogin = !!userId;
+    const navigate = useNavigate();
+    // const { mutate } = usePostLogout();
 
-    const handleLogout = () => {
-        mutate();
-    };
+    // const handleLogout = () => {
+    //     mutate();
+    // };
 
-    const handleClick = () => {
-        toast({
-            variant: 'destructive',
-            title: '미구현 버튼입니다.',
-        });
+    const handleToMyPage = () => {
+        navigate(PATH.ROUTE.MY_PAGE);
     };
 
     return (
@@ -36,7 +34,7 @@ export default function Home() {
             <EarthSky />
             {isLogin ? (
                 <>
-                    <SnowHouse onClick={handleLogout} />
+                    <SnowHouse onClick={handleToMyPage} />
                     <MatchingForm />
                     <FeedbackForm />
                 </>

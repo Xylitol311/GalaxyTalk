@@ -7,8 +7,8 @@ import Layout from '@/app/ui/logo/Layout';
 import ChattingRoom from '@/pages/chatting';
 import Home from '@/pages/home';
 import MatchingRoom from '@/pages/match';
+import MyPage from '@/pages/mypage';
 import Signup from '@/pages/signup';
-import WarpPage from '@/pages/warp';
 import { PATH } from '../constants';
 
 const ROUTE_PATH = PATH.ROUTE;
@@ -20,7 +20,7 @@ export const router = createBrowserRouter(
             <Route path={ROUTE_PATH.SIGN_UP} element={<Signup />} />
             <Route path={ROUTE_PATH.MATCH} element={<MatchingRoom />} />
             <Route path={ROUTE_PATH.CHAT} element={<ChattingRoom />} />
-            <Route path={ROUTE_PATH.WARP} element={<WarpPage />} />
+            <Route path={ROUTE_PATH.MY_PAGE} element={<MyPage />} />
         </Route>
     )
 );
