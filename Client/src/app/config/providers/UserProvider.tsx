@@ -1,5 +1,4 @@
 import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import { useUserStore } from '@/app/model/stores/user';
 import {
     useUserInfoQuery,
@@ -9,7 +8,6 @@ import { PATH } from '../constants';
 
 export default function UserProvider({ children }: { children: ReactNode }) {
     const { setUserBase, setUserStatus, userId } = useUserStore();
-    const navigate = useNavigate();
 
     const shouldFetch = !userId;
 
@@ -33,10 +31,10 @@ export default function UserProvider({ children }: { children: ReactNode }) {
             // UserInteractionState에 따른 네비게이션 처리
             switch (userStatus.data.UserInteractionState) {
                 case 'matching':
-                    navigate(PATH.ROUTE.MATCH);
+                    window.location.href = PATH.ROUTE.MATCH;
                     break;
                 case 'chatting':
-                    navigate(PATH.ROUTE.CHAT);
+                    window.location.href = PATH.ROUTE.CHAT;
                     break;
                 case 'idle':
                 default:
@@ -51,7 +49,6 @@ export default function UserProvider({ children }: { children: ReactNode }) {
         userStatus,
         isInfoSuccess,
         isStatusSuccess,
-        navigate,
     ]);
 
     return <>{children}</>;
