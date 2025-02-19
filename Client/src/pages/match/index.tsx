@@ -132,7 +132,6 @@ export default function MatchingRoom() {
                         });
                     }
                 }
-                console.log(`Received: ${message.body}`);
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
