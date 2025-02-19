@@ -164,7 +164,7 @@ public class ChatService {
      * @return sessionId
      */
     public ChatRoom getSessionId(String userId) {
-        return chatRepository.findActiveSessionIdByUserId(userId) // ChatRoom 객체에서 sessionId만 추출
+        return chatRepository.findFirstByParticipantsUserIdAndEndedAtNullOrderByIdDesc(userId) // ChatRoom 객체에서 sessionId만 추출
             .orElseThrow(() -> new BusinessException(ErrorCode.ACTIVE_CHAT_ROOM_NOT_FOUND));
     }
 
