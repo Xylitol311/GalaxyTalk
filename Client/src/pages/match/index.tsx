@@ -71,7 +71,6 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                console.log(message.body);
                 const parsedData = JSON.parse(message.body);
                 const safeData = sanitizeData(parsedData);
 
@@ -97,7 +96,6 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                console.log(message.body);
                 const parsedData = JSON.parse(message.body);
                 const safeData = sanitizeData(parsedData);
 
@@ -116,7 +114,6 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                console.log(message.body);
                 const parsedData = JSON.parse(message.body);
                 const safeData = sanitizeData(parsedData);
 
@@ -154,6 +151,7 @@ export default function MatchingRoom() {
                 <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
                     <Galaxy />
                     {isSuccess &&
+                        !!userList.length &&
                         userList.map((userInfo, index) => {
                             return (
                                 <Planet
