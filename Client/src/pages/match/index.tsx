@@ -73,21 +73,22 @@ export default function MatchingRoom() {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 console.log(message.body);
                 const parsedData = JSON.parse(message.body);
+                const safeData = sanitizeData(parsedData);
 
-                if (parsedData.type === 'MATCH_SUCCESS') {
-                    setMatchData(parsedData.data);
+                if (safeData.type === 'MATCH_SUCCESS') {
+                    setMatchData(safeData.data);
                 }
-                if (parsedData.type === 'CHAT_CREATED') {
+                if (safeData.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
                 }
-                if (parsedData.type === 'WAITING') {
+                if (safeData.type === 'WAITING') {
                     toast({
                         title: '다른 사람을 찾아볼게요',
                     });
                     resetMatchData();
                 }
 
-                if (parsedData.type === 'MATCH_FAILED') {
+                if (safeData.type === 'MATCH_FAILED') {
                     toast({
                         variant: 'destructive',
                         title: '매칭에 실패했어요',
@@ -98,9 +99,10 @@ export default function MatchingRoom() {
             client.subscribe('/topic/matching/users/new', (message) => {
                 console.log(message.body);
                 const parsedData = JSON.parse(message.body);
+                const safeData = sanitizeData(parsedData);
 
-                if (parsedData.type === 'NEW_USER') {
-                    const newUser = parsedData.data;
+                if (safeData.type === 'NEW_USER') {
+                    const newUser = safeData.data;
 
                     // userList가 20명 미만일 때만 유저를 추가
                     if (
@@ -116,9 +118,10 @@ export default function MatchingRoom() {
             client.subscribe('/topic/matching/users/exit', (message) => {
                 console.log(message.body);
                 const parsedData = JSON.parse(message.body);
+                const safeData = sanitizeData(parsedData);
 
-                if (parsedData.type === 'EXIT_USER') {
-                    const exitedUser = parsedData.data;
+                if (safeData.type === 'EXIT_USER') {
+                    const exitedUser = safeData.data;
 
                     // userList에서 해당 유저를 제거
                     setUserList((prevList) =>
@@ -241,3 +244,24 @@ const fixedPositions: [number, number, number][] = [
     [1, -0.5, -2],
     [-1.5, 0.5, 1],
 ];
+
+interface SanitizedData {
+    [key: string]: any;
+}
+
+const sanitizeData = (data: any): SanitizedData => {
+    const seen = new WeakSet();
+    const sanitize = (obj: any): any => {
+        if (typeof obj === 'object' && obj !== null) {
+            if (seen.has(obj)) {
+                return; // 순환 참조 제거
+            }
+            seen.add(obj);
+            for (const key in obj) {
+                obj[key] = sanitize(obj[key]);
+            }
+        }
+        return obj;
+    };
+    return sanitize(data);
+};
