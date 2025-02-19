@@ -164,8 +164,7 @@ export default function MatchingRoom() {
             ) : (
                 <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
                     <Galaxy />
-                    {isSuccess &&
-                        !!userList.length &&
+                    {!!userList.length &&
                         userList.map((userInfo, index) => {
                             return (
                                 <Planet
