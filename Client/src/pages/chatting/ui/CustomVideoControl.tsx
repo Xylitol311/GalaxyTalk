@@ -3,10 +3,12 @@ import {
     TrackToggle,
     useMediaDevices,
     usePersistentUserChoices,
+    useTracks,
 } from '@livekit/components-react';
 import clsx from 'clsx';
 import { Track } from 'livekit-client';
 import { useCallback } from 'react';
+import { useUserStore } from '@/app/model/stores/user';
 import {
     Select,
     SelectContent,
@@ -18,6 +20,15 @@ function CustomVideoControl({
     saveUserChoices = true,
     onDeviceError,
 }: ControlBarProps) {
+    const { userId } = useUserStore();
+
+    const cameraTracks = useTracks([Track.Source.Camera]);
+    const camTrackRef = cameraTracks.find(
+        (trackRef) => trackRef.participant.identity === userId
+    );
+    const isVideoEnabled =
+        camTrackRef?.publication?.track?.mediaStream?.active ?? false;
+
     const { userChoices, saveVideoInputEnabled, saveVideoInputDeviceId } =
         usePersistentUserChoices({ preventSave: !saveUserChoices });
 
@@ -49,7 +60,7 @@ function CustomVideoControl({
                         onDeviceError?.({ source: Track.Source.Camera, error })
                     }
                     className="p-0 m-0 flex items-center">
-                    {userChoices.videoDeviceId && userChoices.videoEnabled ? (
+                    {isVideoEnabled ? (
                         <span className="ml-1 font-bold text-[#00E600]">
                             ON
                         </span>
