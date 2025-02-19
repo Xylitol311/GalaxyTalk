@@ -9,7 +9,7 @@ import {
 } from '@livekit/components-react';
 import { useMutation } from '@tanstack/react-query';
 import { RemoteParticipant, RoomEvent } from 'livekit-client';
-import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
+import { Bot, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
@@ -30,7 +30,7 @@ import { useDeleteChatRoom, useGetChatParticipants } from './api/queries';
 import { AIQuestion, ChatData, Participant } from './model/interfaces';
 import AudioRenderer from './ui/AudioRenderer';
 import CustomAudioControl from './ui/CustomAudioControl';
-import CustomVideoControl from './ui/CustomVideoControl';
+import CustomControlBar from './ui/CustomControlBar';
 import LetterFormModal from './ui/LetterFormModal';
 import MbtiTag from './ui/MbtiTag';
 import ReactionPanel from './ui/ReactionPanel';
@@ -343,19 +343,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     />
                                 </div>
                                 <div className="invisible">
-                                    <div className="flex justify-around flex-wrap">
-                                        <CustomAudioControl />
-                                        <CustomVideoControl />
-                                        <Button
-                                            onClick={handleLeaveChat}
-                                            disabled={
-                                                disconnectButtonProps.disabled
-                                            }
-                                            className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
-                                            <LogOut size={28} />
-                                            나가기
-                                        </Button>
-                                    </div>
+                                    <CustomControlBar
+                                        onLeave={handleLeaveChat}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -466,19 +456,9 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="flex justify-around flex-wrap">
-                                        <CustomAudioControl />
-                                        <CustomVideoControl />
-                                        <Button
-                                            onClick={handleLeaveChat}
-                                            disabled={
-                                                disconnectButtonProps.disabled
-                                            }
-                                            className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
-                                            <LogOut size={28} />
-                                            나가기
-                                        </Button>
-                                    </div>
+                                    <CustomControlBar
+                                        onLeave={handleLeaveChat}
+                                    />
                                 </div>
                             </div>
                         </div>
