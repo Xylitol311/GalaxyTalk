@@ -114,7 +114,8 @@ export default function MatchingRoom() {
                                 newList.length < 20 &&
                                 !newList.some(
                                     (user) => user.userId === newUser.userId
-                                )
+                                ) &&
+                                newUser.userId !== userId
                             ) {
                                 newList.push({ ...newUser }); // 깊은 복사 적용
                             }
