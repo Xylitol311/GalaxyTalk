@@ -71,9 +71,8 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                const stringifiedData = JSON.stringify(message.body);
-                const stringData = JSON.parse(stringifiedData);
-                const parsedData = JSON.parse(stringData);
+                console.log(message.body);
+                const parsedData = JSON.parse(message.body);
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
                     setMatchData(parsedData.data);
@@ -97,9 +96,8 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                const stringifiedData = JSON.stringify(message.body);
-                const stringData = JSON.parse(stringifiedData);
-                const parsedData = JSON.parse(stringData);
+                console.log(message.body);
+                const parsedData = JSON.parse(message.body);
 
                 if (parsedData.type === 'NEW_USER') {
                     const newUser = parsedData.data;
@@ -116,9 +114,8 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                const stringifiedData = JSON.stringify(message.body);
-                const stringData = JSON.parse(stringifiedData);
-                const parsedData = JSON.parse(stringData);
+                console.log(message.body);
+                const parsedData = JSON.parse(message.body);
 
                 if (parsedData.type === 'EXIT_USER') {
                     const exitedUser = parsedData.data;
