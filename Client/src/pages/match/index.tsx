@@ -58,7 +58,7 @@ export default function MatchingRoom() {
             const filteredUsers = userInfos.data.filter(
                 (user) => user.userId !== userId
             );
-            setUserList({ ...filteredUsers });
+            setUserList([...filteredUsers]);
         }
     }, []);
 
@@ -133,11 +133,11 @@ export default function MatchingRoom() {
 
                     // userList에서 해당 유저를 제거
                     setUserList((prevList) => {
-                        return {
+                        return [
                             ...prevList.filter(
                                 (user) => user.userId !== exitedUser.userId
                             ),
-                        };
+                        ];
                     });
                 }
             });
