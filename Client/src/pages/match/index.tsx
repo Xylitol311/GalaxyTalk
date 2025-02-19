@@ -60,7 +60,7 @@ export default function MatchingRoom() {
             );
             setUserList(filteredUsers);
         }
-    }, [isSuccess, userInfos, userId]);
+    }, []);
 
     const resetMatchData = () => {
         setMatchData(null);
@@ -107,7 +107,20 @@ export default function MatchingRoom() {
                         userList.length < 20 &&
                         !userList.some((user) => user.userId === newUser.userId)
                     ) {
-                        setUserList((prevList) => [...prevList, newUser]);
+                        setUserList((prevList) => {
+                            const newList = [...prevList];
+
+                            if (
+                                newList.length < 20 &&
+                                !newList.some(
+                                    (user) => user.userId === newUser.userId
+                                )
+                            ) {
+                                newList.push({ ...newUser }); // 깊은 복사 적용
+                            }
+
+                            return newList;
+                        });
                     }
                 }
                 console.log(`Received: ${message.body}`);
