@@ -20,10 +20,17 @@ import {
     DialogPortal,
     DialogTitle,
 } from '@/shared/ui/shadcn/dialog';
-import { MatchUserType } from '..';
 
 type TimerProps = {
-    matchData: MatchUserType | null;
+    matchData: {
+        userId: string;
+        matchId: number;
+        matchUserId: string;
+        concern: string;
+        mbti: string;
+        energy: number;
+        similarity: number;
+    } | null;
     handleToHome: () => void;
     handleResetData: () => void;
 };
