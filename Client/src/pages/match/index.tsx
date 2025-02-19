@@ -100,7 +100,12 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                const parsedData = JSON.parse(message.body);
+                const data = JSON.stringify(message.body);
+                console.log(data);
+                const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
+                const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
                 if (parsedData.type === 'NEW_USER') {
                     const newUser = parsedData.data;
@@ -131,7 +136,12 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                const parsedData = JSON.parse(message.body);
+                const data = JSON.stringify(message.body);
+                console.log(data);
+                const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
+                const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
                 if (parsedData.type === 'EXIT_USER') {
                     const exitedUser = parsedData.data;
