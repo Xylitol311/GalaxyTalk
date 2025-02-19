@@ -56,12 +56,14 @@ export const usePostSignUp = () => {
 
 export const usePostLogout = () => {
     const { reset } = useUserStore();
+    const navigate = useNavigate();
 
     return useMutation({
         mutationFn: postLogout,
         onSuccess: (response) => {
             if (response.success) {
                 reset();
+                navigate(PATH.ROUTE.HOME);
             }
         },
         onError: (error) => {

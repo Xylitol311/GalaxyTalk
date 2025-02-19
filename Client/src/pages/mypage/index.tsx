@@ -1,30 +1,62 @@
 import { ExitIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { PATH } from '@/app/config/constants';
 import { IMAGE_PATH } from '@/app/config/constants/path';
 import { getPlanetInfoById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
+import { usePostLogout } from '@/features/user/api/queries';
 import { Button } from '@/shared/ui/shadcn/button';
+import LetterList from './ui/LetterList';
+import { MenuList } from './ui/MenuList';
 
 export default function MyPage() {
     const { userId, mbti, planetId, energy } = useUserStore();
     const [view, setView] = useState('profile');
+    const navigate = useNavigate();
+    const { mutate } = usePostLogout();
+
+    const handleToHome = () => {
+        navigate(PATH.ROUTE.HOME);
+    };
+
+    const handleLogout = () => {
+        mutate();
+    };
 
     const myPlanet = getPlanetInfoById(planetId);
     const userIdLast4 = userId.slice(-4);
 
+    const menuItems = [
+        { label: '후기 모아보기', onClick: () => setView('reviews') },
+        {
+            label: '탈퇴하기',
+            onClick: () => setView('withdraw'),
+            className: 'text-red-400 hover:text-red-600',
+        },
+        {
+            label: '로그아웃',
+            onClick: handleLogout,
+            className: 'text-yellow-400 hover:text-yellow-600',
+        },
+    ];
+
     return (
         <div className="flex flex-col items-center w-full h-full p-6 bg-black min-h-screen relative">
-            {view === 'profile' && (
+            {(view === 'profile' ||
+                view === 'reviews' ||
+                view === 'edit-profile') && (
                 <div className="w-full max-w-md bg-gray-900 shadow-xl rounded-xl p-6 pt-2 flex flex-col items-center border border-gray-700">
                     <div className="w-full flex justify-start">
                         <Button
                             variant="link"
                             className="flex items-center text-gray-300 hover:text-white pl-0"
-                            onClick={() => setView('profile')}>
+                            onClick={handleToHome}>
                             <ExitIcon />
                             홈으로 나가기
                         </Button>
                     </div>
+
                     <img
                         src={`${IMAGE_PATH}images/planets/${myPlanet?.imageUrl}`}
                         alt={myPlanet?.name}
@@ -47,34 +79,17 @@ export default function MyPage() {
                             />
                         </div>
                     </div>
-                    <div className="mt-6 w-full max-w-md bg-gray-800 shadow-md rounded-xl p-2 border border-gray-700">
-                        <ul className="text-center divide-y divide-gray-700">
-                            <li
-                                className="cursor-pointer text-gray-300 hover:text-white py-2"
-                                onClick={() => setView('reviews')}>
-                                후기 모아보기
-                            </li>
-                            <li
-                                className="cursor-pointer text-red-400 hover:text-red-600 py-2"
-                                onClick={() => setView('withdraw')}>
-                                탈퇴하기
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            )}
 
-            {view === 'reviews' && (
-                <div className="w-full max-w-md bg-gray-900 shadow-xl rounded-xl p-6 text-center border border-gray-700">
-                    <h2 className="text-xl font-semibold text-indigo-300">
-                        내가 받은 후기
-                    </h2>
-                    <p className="text-gray-400 mt-4">
-                        후기 내용이 여기에 표시됩니다.
-                    </p>
-                    <Button className="mt-6" onClick={() => setView('profile')}>
-                        돌아가기
-                    </Button>
+                    <MenuList items={menuItems} />
+
+                    {view === 'reviews' && (
+                        <div className="w-full mt-6 text-center">
+                            <h2 className="text-xl font-semibold text-indigo-300 mb-4">
+                                내가 받은 후기
+                            </h2>
+                            <LetterList />
+                        </div>
+                    )}
                 </div>
             )}
 
