@@ -1,5 +1,5 @@
 import { useChat, useParticipants } from '@livekit/components-react';
-import { ArrowUp, Plus } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import {
     FormEvent,
     KeyboardEventHandler,
@@ -149,7 +149,7 @@ function TextChat({ chatRoomId }) {
                     </div>
                 )}
                 <div className="flex gap-3">
-                    {isMobile && (
+                    {/* {isMobile && (
                         <div className="flex items-center p-1">
                             <Button
                                 size="icon"
@@ -159,7 +159,7 @@ function TextChat({ chatRoomId }) {
                                 />
                             </Button>
                         </div>
-                    )}
+                    )} */}
 
                     <ChatInput
                         placeholder="메시지를 작성해주세요"

@@ -260,7 +260,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 size="icon"
                                 variant="ghost"
                                 className="dark w-12 h-12"
-                                onClick={handleClickPrevQuestion}>
+                                onClick={() => console.log('menu click')}>
                                 <Menu
                                     style={{
                                         height: '20px',

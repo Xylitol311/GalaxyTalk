@@ -82,16 +82,14 @@ function ReactionPanel({ userId }: { userId: string }) {
                     />
                 ))}
             </div>
-
-            {isMyPanel && (
-                <Button
-                    variant="secondary"
-                    className="h-10 w-10"
-                    onClick={togglePanel}>
-                    <SmilePlus style={{ height: '20px', width: '20px' }} />
-                </Button>
-            )}
-
+            (
+            <Button
+                variant="secondary"
+                className={`h-10 w-10 ${isMyPanel ? 'visible' : 'invisible'}`}
+                onClick={togglePanel}>
+                <SmilePlus style={{ height: '20px', width: '20px' }} />
+            </Button>
+            )
             {isReactionPanelOpen ? (
                 <div className="absolute -top-60 right-0 bg-white w-10 flex flex-col rounded-full p-2 items-center">
                     {emojiList.map((emoji, index) => (
