@@ -72,8 +72,11 @@ export default function MatchingRoom() {
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
                 const data = JSON.stringify(message.body);
+                console.log(data);
                 const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
                 const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
                     setMatchData(parsedData.data);
