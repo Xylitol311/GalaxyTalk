@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import AudioVisualizer from './AudioVisualizer';
 
 function VideoRenderer({ userId }: { userId: string }) {
-    // const trackReferencesWithPlaceholders: TrackReferenceOrPlaceholder[] =
-    //     useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]);
     const cameraTracks = useTracks([Track.Source.Camera]);
     const camTrackRef = cameraTracks.find(
         (trackRef) => trackRef.participant.identity === userId

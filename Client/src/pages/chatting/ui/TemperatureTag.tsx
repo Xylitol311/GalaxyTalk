@@ -1,5 +1,5 @@
 function TemperatureTag({ energy }: { energy: number | undefined }) {
-    if (!energy) return;
+    if (energy === undefined || energy === null) return;
 
     const getBgColor = (temp: number) => {
         if (temp <= 0) return 'bg-blue-300';

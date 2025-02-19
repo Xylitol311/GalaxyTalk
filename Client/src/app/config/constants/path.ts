@@ -64,6 +64,7 @@ export const API_PATH = {
             LEAVE: `${DOMAIN.CHAT}/${chatRoomId}/leave`,
             AI: `${DOMAIN.CHAT}/${chatRoomId}/ai`,
             PARTICIPANTS: `${DOMAIN.CHAT}/${chatRoomId}/participants`,
+            CANCELCHAT: `${DOMAIN.CHAT}/${chatRoomId}/cancel`,
         }),
     },
 

@@ -68,3 +68,11 @@ export async function postLetter(formData: LetterFormValues) {
     );
     return data;
 }
+
+// 채팅방 취소 API 함수
+export async function cancelChatRoom(chatRoomId: string) {
+    const { data } = await fetcher.post<BaseResponseType>(
+        PATH.API_PATH.CHAT.room(chatRoomId).CANCELCHAT
+    );
+    return data;
+}

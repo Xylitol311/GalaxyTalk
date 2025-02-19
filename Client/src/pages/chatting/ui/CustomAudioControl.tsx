@@ -3,11 +3,13 @@ import {
     TrackToggle,
     useMediaDevices,
     usePersistentUserChoices,
+    useTracks,
 } from '@livekit/components-react';
 import clsx from 'clsx';
 import { Track } from 'livekit-client';
 import { Mic, MicOff } from 'lucide-react';
 import { useCallback } from 'react';
+import { useUserStore } from '@/app/model/stores/user';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
 import { Button } from '@/shared/ui/shadcn/button';
 import {
@@ -21,6 +23,15 @@ function CustomAudioControl({
     saveUserChoices = true,
     onDeviceError,
 }: ControlBarProps) {
+    const { userId } = useUserStore();
+    const micTracks = useTracks([Track.Source.Microphone]);
+    const micTrackRef = micTracks.find(
+        (trackRef) => trackRef.participant.identity === userId
+    );
+
+    const isAudioEnabled =
+        micTrackRef && !micTrackRef?.publication?.track?.isMuted ? true : false;
+
     const isMobile = useIsMobile();
 
     const { userChoices, saveAudioInputEnabled, saveAudioInputDeviceId } =
@@ -45,7 +56,7 @@ function CustomAudioControl({
                         true
                     )
                 }>
-                {userChoices.audioDeviceId && userChoices.audioEnabled ? (
+                {isAudioEnabled ? (
                     <Mic
                         style={{
                             height: '20px',
@@ -86,7 +97,7 @@ function CustomAudioControl({
                         })
                     }
                     className="p-0 m-0 flex items-center">
-                    {userChoices.audioEnabled ? (
+                    {isAudioEnabled ? (
                         <span className="ml-1 font-bold text-[#00E600]">
                             ON
                         </span>
@@ -98,7 +109,7 @@ function CustomAudioControl({
                 </TrackToggle>
                 <SelectTrigger className="p-0 m-0 !border-none shadow-none flex justify-end ml-2" />
                 <SelectContent>
-                    {audioDevices.map((device) => (
+                    {audioDevices.map((device: MediaDeviceInfo) => (
                         <SelectItem
                             key={device.deviceId}
                             value={device.deviceId}>
