@@ -9,7 +9,7 @@ export default function ChattingRoom() {
     const navigate = useNavigate();
     const [chatData, setChatData] = useState<ChatData | null>(null);
 
-    const LIVEKIT_URL = `wss://i12a503.p.ssafy.io/livekitws/`;
+    const LIVEKIT_URL = `wss://galaxy-6i3e0q51.livekit.cloud`;
 
     const { mutate: reconnect, isPending } = usePostChatReconnect();
 
@@ -43,6 +43,10 @@ export default function ChattingRoom() {
                 video={true}
                 audio={true}
                 token={chatData.token}
+                // token={
+                //     'eyJhbGciOiJIUzI1NiJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IlRlc3QgUm9vbSJ9LCJpc3MiOiJkZXZrZXkiLCJleHAiOjE3Mzk5NDkyNTEsIm5iZiI6MCwic3ViIjoiUGFydGljaXBhbnQzMSJ9.UKtg4ckFXrKeRIR08yhGYZVRw9709UbRNwSPNCHSINk '
+                // }
+                // serverUrl={'ws://localhost:7880/'}
                 serverUrl={LIVEKIT_URL}
                 data-lk-theme="default">
                 <ChattingPage chatData={chatData} />
