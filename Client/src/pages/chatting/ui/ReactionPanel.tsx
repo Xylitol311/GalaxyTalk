@@ -71,7 +71,7 @@ function ReactionPanel({ userId }: { userId: string }) {
     };
 
     return (
-        <div className="relative">
+        <div className="relative p-2">
             {/* 이모지 효과를 위한 span들을 패널 밖에 배치 */}
             <div className="absolute">
                 {emojiList.map((_, index) => (

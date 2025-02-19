@@ -36,6 +36,7 @@ import MbtiTag from './ui/MbtiTag';
 import ReactionPanel from './ui/ReactionPanel';
 import TemperatureTag from './ui/TemperatureTag';
 import TextChat from './ui/TextChat';
+import VideoRenderer from './ui/VideoRenderer';
 
 interface ChattingPageProps {
     chatData: ChatData;
@@ -314,12 +315,13 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                         <div className="flex flex-col justify-end">
                             {/* <VideoRenderer userId={participants[1]?.identity} /> */}
                             <AudioRenderer userId={participants[1]?.identity} />
-                            <div className="mb-2">
-                                <ReactionPanel
-                                    userId={participants[1]?.identity}
-                                />
-                            </div>
+
                             <div className="bg-slate-300 w-full rounded-lg p-4  mt-2">
+                                <div className="absolute -top-[57px] right-0">
+                                    <ReactionPanel
+                                        userId={participants[1]?.identity}
+                                    />
+                                </div>
                                 <h1 className="text-2xl font-bold mb-4">
                                     {partnerInfo?.planetId
                                         ? getPlanetNameById(
@@ -434,15 +436,15 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                             </div>
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
-                        <div className="flex justify-end items-end flex-col">
-                            {/* <VideoRenderer userId={participants[0]?.identity} /> */}
+                        <div className="flex justify-end items-end flex-col relative">
+                            <VideoRenderer userId={participants[0]?.identity} />
                             <AudioRenderer userId={participants[0]?.identity} />
-                            <div className="mb-2">
-                                <ReactionPanel
-                                    userId={participants[0]?.identity}
-                                />
-                            </div>
                             <div className="bg-slate-300 w-full rounded-lg p-4 flex flex-col justify-between relative">
+                                <div className="absolute -top-[57px] right-0">
+                                    <ReactionPanel
+                                        userId={participants[0]?.identity}
+                                    />
+                                </div>
                                 <div>
                                     <h1 className="text-2xl font-bold mb-4">
                                         {myInfo?.planetId

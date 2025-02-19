@@ -3,7 +3,6 @@ import {
     TrackToggle,
     useMediaDevices,
     usePersistentUserChoices,
-    useRoomContext,
 } from '@livekit/components-react';
 import clsx from 'clsx';
 import { Track } from 'livekit-client';
@@ -32,9 +31,6 @@ function CustomAudioControl({
             isUserInitiated ? saveAudioInputEnabled(enabled) : null,
         [saveAudioInputEnabled]
     );
-
-    const roomcontext = useRoomContext();
-    console.log(roomcontext);
 
     const audioDevices = useMediaDevices({ kind: 'audioinput' });
     if (isMobile)
