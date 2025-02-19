@@ -3,7 +3,6 @@ import { Html } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { Client } from '@stomp/stompjs';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import SockJS from 'sockjs-client';
@@ -16,7 +15,6 @@ import {
     useMatchUsersQuery,
 } from '@/features/match/api/queries';
 import { WaitingUserType } from '@/features/match/model/types';
-import { queryClient } from '@/shared/api/query/client';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
@@ -197,26 +195,24 @@ export default function MatchingRoom() {
                         center
                         zIndexRange={[0, 0]}
                         style={{ pointerEvents: 'none' }}>
-                        <QueryClientProvider client={queryClient}>
-                            <div className="relative w-screen h-screen flex flex-col justify-between">
-                                <Button
-                                    variant="link"
-                                    className="text-white self-start"
-                                    onClick={handleToHome}
-                                    style={{ pointerEvents: 'auto' }}>
-                                    <ExitIcon />
-                                    이전 페이지로 이동하기
-                                </Button>
-                                {!isMoving && (
-                                    <TimerConfirm
-                                        matchData={matchData}
-                                        handleToHome={handleToHome}
-                                        handleResetData={resetMatchData}
-                                    />
-                                )}
-                                <HealingMessage />
-                            </div>
-                        </QueryClientProvider>
+                        <div className="relative w-screen h-screen flex flex-col justify-between">
+                            <Button
+                                variant="link"
+                                className="text-white self-start"
+                                onClick={handleToHome}
+                                style={{ pointerEvents: 'auto' }}>
+                                <ExitIcon />
+                                이전 페이지로 이동하기
+                            </Button>
+                            {!isMoving && (
+                                <TimerConfirm
+                                    matchData={matchData}
+                                    handleToHome={handleToHome}
+                                    handleResetData={resetMatchData}
+                                />
+                            )}
+                            <HealingMessage />
+                        </div>
                     </Html>
                 </Canvas>
             )}
