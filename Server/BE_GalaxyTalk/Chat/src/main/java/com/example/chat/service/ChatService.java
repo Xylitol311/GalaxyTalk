@@ -6,6 +6,7 @@ import com.example.chat.entity.Participant;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.exception.BusinessException;
 import com.example.chat.exception.ErrorCode;
+import com.example.chat.feign.AuthClient;
 import com.example.chat.repository.ChatRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ChatService {
+    private final AuthClient authClient;
     @Value("${prompt}")
     private String questionsPrompt;
 
@@ -91,6 +93,11 @@ public class ChatService {
 //                    log.error("질문 생성 중 에러 발생", throwable);
 //                    return null;
 //                });
+
+        // 참가자가 포함된 방중 비정상 종료된 방이 있다면 비정상 종료 처리(isCancelled: true, endedAt: now)
+        // 재연결 logic에서 에러가 안 나게 하기 위함
+        chatRepository.updateAbnormalChatrooms(chatRoomId, matchRequest.getUserId1());
+        chatRepository.updateAbnormalChatrooms(chatRoomId, matchRequest.getUserId2());
 
         return chatRoomId;
     }
@@ -163,7 +170,7 @@ public class ChatService {
 
     /**
      * 내가 했던 채팅방 정보를 가져옵니다.
-     * 이 때 endedAt이 Null이 아닌, 종료된 대화의 채팅만 가져옵니다.
+     * 이 때 endedAt이 Null이 아니고, isCancelled가 null인 정상 종료된 대화의 채팅만 가져옵니다.
      * pagination 객체 형태로 전달합니다.
      * @param userId, page, size
      * @return Page<PreviousChatResponse>
@@ -344,6 +351,15 @@ public class ChatService {
         }
     }
 
+    /**
+     * 1. mongodb의 isCancelled를 true로
+     * 2. auth api에 user 상태 update 요청
+     */
+    public void cancel(String userId, String chatRoomId) {
+        chatRepository.updateIsCancelled(chatRoomId);
+        externalApiService.updateUserStatus(new UserStatusRequest(userId, "idle"));
+    }
+
     private String createPromptwithTwoConcerns(String concern1, String concern2) {
         return String.format(questionsPrompt, concern1, concern2);
     }
@@ -354,5 +370,4 @@ public class ChatService {
                 status
         ));
     }
-
 }
