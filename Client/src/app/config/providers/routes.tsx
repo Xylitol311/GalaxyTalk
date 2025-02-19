@@ -6,7 +6,7 @@ import {
 import Layout from '@/app/ui/logo/Layout';
 import ChattingRoom from '@/pages/chatting';
 import Home from '@/pages/home';
-import MatchingRoom from '@/pages/match';
+import MatchingPage from '@/pages/match';
 import MyPage from '@/pages/mypage';
 import Signup from '@/pages/signup';
 import { PATH } from '../constants';
@@ -18,7 +18,7 @@ export const router = createBrowserRouter(
         <Route element={<Layout />}>
             <Route path={ROUTE_PATH.HOME} element={<Home />} />
             <Route path={ROUTE_PATH.SIGN_UP} element={<Signup />} />
-            <Route path={ROUTE_PATH.MATCH} element={<MatchingRoom />} />
+            <Route path={ROUTE_PATH.MATCH} element={<MatchingPage />} />
             <Route path={ROUTE_PATH.CHAT} element={<ChattingRoom />} />
             <Route path={ROUTE_PATH.MY_PAGE} element={<MyPage />} />
         </Route>
