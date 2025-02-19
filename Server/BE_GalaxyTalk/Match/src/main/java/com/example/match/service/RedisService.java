@@ -167,6 +167,7 @@ public class RedisService {
      * userId가 rejectedUserId를 거절한 기록 저장
      */
     public void addRejection(String userId, String rejectedUserId) {
+        log.info("거절 기록 저장: {} - {}", userId, rejectedUserId);
         String key = REJECTION_KEY_PREFIX + userId;
         redisTemplate.opsForSet().add(key, rejectedUserId);
     }
@@ -175,6 +176,7 @@ public class RedisService {
      * userId가 otherUserId를 과거에 거절한 적이 있는지 조회
      */
     public boolean hasRejected(String userId, String otherUserId) {
+        log.info("거절 기록 조회: {} - {}", userId, otherUserId);
         String key = REJECTION_KEY_PREFIX + userId;
         Boolean isMember = redisTemplate.opsForSet().isMember(key, otherUserId);
         return isMember != null && isMember;
@@ -184,7 +186,8 @@ public class RedisService {
      * userId가 rejectedUserId를 거절한 기록 삭제
      */
     public void deleteRejection(String userId) {
+        log.info("거절 정보 삭제: {}", userId);
         String key = REJECTION_KEY_PREFIX + userId;
-        redisTemplate.opsForSet().remove(key);
+        redisTemplate.delete(key);
     }
 }
