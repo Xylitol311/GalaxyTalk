@@ -23,11 +23,16 @@ import {
 import { MatchUserType } from '..';
 
 type TimerProps = {
-    matchData: MatchUserType;
+    matchData: MatchUserType | null;
     handleToHome: () => void;
+    handleResetData: () => void;
 };
 
-export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
+export default function TimerConfirm({
+    matchData,
+    handleToHome,
+    handleResetData,
+}: TimerProps) {
     const [open, setOpen] = useState(false);
     const [remainingTime, setRemainingTime] = useState(60);
     const cancelRef = useRef<HTMLButtonElement | null>(null);
@@ -35,7 +40,10 @@ export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
     const { mutate: matchApproveMutate } = useMatchApprove();
 
     const handleConfirm = () => {
-        matchApproveMutate({ matchId: `${matchData.matchId}`, accepted: true });
+        matchApproveMutate({
+            matchId: `${matchData?.matchId}`,
+            accepted: true,
+        });
         toast({
             title: '상대방의 대화 수락 여부를 기다립니다',
         });
@@ -43,22 +51,24 @@ export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
 
     const handleCancel = () => {
         matchApproveMutate({
-            matchId: `${matchData.matchId}`,
+            matchId: `${matchData?.matchId}`,
             accepted: false,
         });
         matchCancelMutate();
+        handleResetData();
         handleToHome();
     };
 
     const handlePass = () => {
         matchApproveMutate({
-            matchId: `${matchData.matchId}`,
+            matchId: `${matchData?.matchId}`,
             accepted: false,
         });
         toast({
             title: '다른 대화 상대를 찾아볼게요',
         });
         setRemainingTime(60);
+        handleResetData();
     };
 
     useEffect(() => {
@@ -99,16 +109,16 @@ export default function TimerConfirm({ matchData, handleToHome }: TimerProps) {
                         <DialogDescription className="flex flex-col items-start gap-5">
                             <div className="flex flex-col items-start mt-3">
                                 <p className="text-black">
-                                    상대의 고민: {matchData.concern}
+                                    상대의 고민: {matchData?.concern}
                                 </p>
                                 <p className="text-black">
-                                    상대의 성향: {matchData.mbti}
+                                    상대의 성향: {matchData?.mbti}
                                 </p>
                                 <p className="text-black">
-                                    상대의 온도: {matchData.energy}
+                                    상대의 온도: {matchData?.energy}
                                 </p>
                                 <p className="text-black">
-                                    유사도 점수: {matchData.similarity}%
+                                    유사도 점수: {matchData?.similarity}%
                                 </p>
                             </div>
                             <p>

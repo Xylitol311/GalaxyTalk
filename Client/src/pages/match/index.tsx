@@ -207,10 +207,11 @@ export default function MatchingRoom() {
                                     <ExitIcon />
                                     이전 페이지로 이동하기
                                 </Button>
-                                {!isMoving && matchData && (
+                                {!isMoving && (
                                     <TimerConfirm
                                         matchData={matchData}
                                         handleToHome={handleToHome}
+                                        handleResetData={resetMatchData}
                                     />
                                 )}
                                 <HealingMessage />

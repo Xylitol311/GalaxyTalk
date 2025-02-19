@@ -13,7 +13,7 @@ export default function UserProvider({ children }: { children: ReactNode }) {
     const { data: userBaseInfo, isSuccess: isInfoSuccess } =
         useUserInfoQuery(shouldFetch);
     const { data: userStatus, isSuccess: isStatusSuccess } =
-        useUserStatusQuery(shouldFetch);
+        useUserStatusQuery();
 
     useEffect(() => {
         if (isInfoSuccess) {
