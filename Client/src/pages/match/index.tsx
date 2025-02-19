@@ -71,7 +71,9 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                const parsedData = JSON.parse(message.body);
+                const data = JSON.stringify(message.body);
+                const stringifiedData = JSON.parse(data);
+                const parsedData = JSON.parse(stringifiedData);
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
                     setMatchData(parsedData.data);
