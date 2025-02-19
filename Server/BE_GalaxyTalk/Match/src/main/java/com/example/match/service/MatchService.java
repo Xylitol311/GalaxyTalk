@@ -189,6 +189,7 @@ public class MatchService {
         for (String userId : waitingUserIds) {
             UserMatchStatus user = redisService.getUserStatus(userId);
             if (user != null && user.getStatus() == MatchStatus.WAITING) {
+
                 waitingUsers.add(user);
             }
         }
@@ -207,8 +208,6 @@ public class MatchService {
                 if (redisService.hasRejected(u1.getUserId(), u2.getUserId()) ||
                 redisService.hasRejected(u2.getUserId(), u1.getUserId()))
                     continue;
-
-                // 매칭 시작한지 5분 이상된 유저라면 매칭 취소
 
 
                 // 고민 유사도 계산 (기존 외부 API 활용)
@@ -309,7 +308,7 @@ public class MatchService {
         return matchCount / 4.0;
     }
 
-    public void checkWaitingTimeout(String userId) {
+    public boolean checkWaitingTimeout(String userId) {
         log.info("대기 시간 초과 유저 검사");
         long now = Instant.now().toEpochMilli();
         UserMatchStatus user = redisService.getUserStatus(userId);
@@ -326,8 +325,11 @@ public class MatchService {
                 webSocketService.notifyUser(userId, "CANCEL_WAITING", "매칭 대기 취소");
                 // 매칭 취소 브로드캐스팅
                 webSocketService.broadcastUserExit(userId);
+
+                return true;
             }
         }
+        return false;
     }
 
     /**
