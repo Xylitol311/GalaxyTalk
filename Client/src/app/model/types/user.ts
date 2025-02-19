@@ -13,5 +13,5 @@ export type UserBaseType = {
 };
 
 export type UserStatusType = {
-    UserInteractionState: 'idle' | 'matching' | 'chatting';
+    userInteractionState: 'idle' | 'matching' | 'chatting';
 };
