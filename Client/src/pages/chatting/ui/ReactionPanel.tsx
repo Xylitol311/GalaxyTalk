@@ -91,7 +91,7 @@ function ReactionPanel({ userId }: { userId: string }) {
             </Button>
 
             {isReactionPanelOpen ? (
-                <div className="absolute -top-60 right-0 bg-white w-10 flex flex-col rounded-full p-2 items-center">
+                <div className="absolute -top-[15.5rem] right-2 bg-white w-10 flex flex-col rounded-full p-[1rem] items-center">
                     {emojiList.map((emoji, index) => (
                         <React.Fragment key={`emoji-container-${index}`}>
                             <Button
