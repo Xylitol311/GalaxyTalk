@@ -5,6 +5,7 @@ import {
     useUserStatusQuery,
 } from '@/features/user/api/queries';
 import { PATH } from '../constants';
+import { BASE_URL, VERSION } from '../constants/path';
 
 export default function UserProvider({ children }: { children: ReactNode }) {
     const { setUserBase, setUserStatus, userId } = useUserStore();
@@ -31,10 +32,10 @@ export default function UserProvider({ children }: { children: ReactNode }) {
             // UserInteractionState에 따른 네비게이션 처리
             switch (userStatus.data.UserInteractionState) {
                 case 'matching':
-                    window.location.href = PATH.ROUTE.MATCH;
+                    window.location.href = `${BASE_URL}/${VERSION}${PATH.ROUTE.MATCH}`;
                     break;
                 case 'chatting':
-                    window.location.href = PATH.ROUTE.CHAT;
+                    window.location.href = `${BASE_URL}/${VERSION}${PATH.ROUTE.CHAT}`;
                     break;
                 case 'idle':
                 default:

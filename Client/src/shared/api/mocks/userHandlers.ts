@@ -39,7 +39,7 @@ export const userHandlers = [
             success: true,
             message: '유저 접속 상태 조회에 성공했습니다',
             data: {
-                userInteractionState: 'idle',
+                userInteractionState: 'matching',
             },
         });
 
