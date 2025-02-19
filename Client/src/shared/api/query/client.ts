@@ -61,6 +61,7 @@ queryClient.getQueryCache().subscribe((event) => {
                 title: '세션이 만료되었습니다. 다시 로그인해주세요.',
             });
             // 세션이 만료되면 페이지 이동
+            localStorage.clear();
             window.location.href = '/';
             break;
         default:

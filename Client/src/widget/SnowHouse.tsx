@@ -1,5 +1,5 @@
 import { Html, useGLTF } from '@react-three/drei';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import RecursiveGLTF from './RecursiveGLTF';
 
 interface SnowHouseProps {
@@ -21,6 +21,12 @@ function SnowHouse({ onClick }: SnowHouseProps) {
         setHover(false);
         document.body.style.cursor = 'default';
     };
+
+    useEffect(() => {
+        return () => {
+            document.body.style.cursor = 'default';
+        };
+    }, []);
 
     return (
         <>
