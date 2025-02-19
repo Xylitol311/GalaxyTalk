@@ -58,7 +58,7 @@ export default function MatchingRoom() {
             const filteredUsers = userInfos.data.filter(
                 (user) => user.userId !== userId
             );
-            setUserList({ ...filteredUsers });
+            setUserList([...filteredUsers]);
         }
     }, []);
 
@@ -71,23 +71,27 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                const parsedData = JSON.parse(message.body);
-                const safeData = sanitizeData(parsedData);
+                const data = JSON.stringify(message.body);
+                console.log(data);
+                const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
+                const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
-                if (safeData.type === 'MATCH_SUCCESS') {
-                    setMatchData(safeData.data);
+                if (parsedData.type === 'MATCH_SUCCESS') {
+                    setMatchData(parsedData.data);
                 }
-                if (safeData.type === 'CHAT_CREATED') {
+                if (parsedData.type === 'CHAT_CREATED') {
                     navigate(PATH.ROUTE.CHAT);
                 }
-                if (safeData.type === 'WAITING') {
+                if (parsedData.type === 'WAITING') {
                     toast({
                         title: '다른 사람을 찾아볼게요',
                     });
                     resetMatchData();
                 }
 
-                if (safeData.type === 'MATCH_FAILED') {
+                if (parsedData.type === 'MATCH_FAILED') {
                     toast({
                         variant: 'destructive',
                         title: '매칭에 실패했어요',
@@ -96,11 +100,15 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                const parsedData = JSON.parse(message.body);
-                const safeData = sanitizeData(parsedData);
+                const data = JSON.stringify(message.body);
+                console.log(data);
+                const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
+                const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
-                if (safeData.type === 'NEW_USER') {
-                    const newUser = safeData.data;
+                if (parsedData.type === 'NEW_USER') {
+                    const newUser = parsedData.data;
 
                     // userList가 20명 미만일 때만 유저를 추가
                     if (
@@ -124,23 +132,26 @@ export default function MatchingRoom() {
                         });
                     }
                 }
-                console.log(`Received: ${message.body}`);
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                const parsedData = JSON.parse(message.body);
-                const safeData = sanitizeData(parsedData);
+                const data = JSON.stringify(message.body);
+                console.log(data);
+                const stringifiedData = JSON.parse(data);
+                console.log(stringifiedData);
+                const parsedData = JSON.parse(stringifiedData);
+                console.log(parsedData);
 
-                if (safeData.type === 'EXIT_USER') {
-                    const exitedUser = safeData.data;
+                if (parsedData.type === 'EXIT_USER') {
+                    const exitedUser = parsedData.data;
 
                     // userList에서 해당 유저를 제거
                     setUserList((prevList) => {
-                        return {
+                        return [
                             ...prevList.filter(
                                 (user) => user.userId !== exitedUser.userId
                             ),
-                        };
+                        ];
                     });
                 }
             });
@@ -196,10 +207,11 @@ export default function MatchingRoom() {
                                     <ExitIcon />
                                     이전 페이지로 이동하기
                                 </Button>
-                                {!isMoving && matchData && (
+                                {!isMoving && (
                                     <TimerConfirm
                                         matchData={matchData}
                                         handleToHome={handleToHome}
+                                        handleResetData={resetMatchData}
                                     />
                                 )}
                                 <HealingMessage />
@@ -257,24 +269,3 @@ const fixedPositions: [number, number, number][] = [
     [1, -0.5, -2],
     [-1.5, 0.5, 1],
 ];
-
-interface SanitizedData {
-    [key: string]: any;
-}
-
-const sanitizeData = (data: any): SanitizedData => {
-    const seen = new WeakSet();
-    const sanitize = (obj: any): any => {
-        if (typeof obj === 'object' && obj !== null) {
-            if (seen.has(obj)) {
-                return; // 순환 참조 제거
-            }
-            seen.add(obj);
-            for (const key in obj) {
-                obj[key] = sanitize(obj[key]);
-            }
-        }
-        return obj;
-    };
-    return sanitize(data);
-};
