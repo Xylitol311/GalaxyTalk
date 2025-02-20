@@ -193,6 +193,14 @@ public class MatchService {
                 waitingUsers.add(user);
             }
         }
+
+        // 5분 이상 매칭 중인 유저 제거
+        for (UserMatchStatus user : waitingUsers) {
+            if (checkWaitingTimeout(user)){
+                waitingUsers.remove(user);
+            }
+        }
+
         log.info("대기 중인 유저 수: {}", waitingUsers.size());
 
         List<MatchPair> strictPairs = new ArrayList<>();
@@ -203,6 +211,10 @@ public class MatchService {
             for (int j = i + 1; j < waitingUsers.size(); j++) {
                 UserMatchStatus u1 = waitingUsers.get(i);
                 UserMatchStatus u2 = waitingUsers.get(j);
+
+                // 같은 사람인지 확인
+                if (u1.getUserId().equals(u2.getUserId()))
+                    continue;
 
                 // 거절했던 상대라면 매칭 후보에서 제외
                 if (redisService.hasRejected(u1.getUserId(), u2.getUserId()) ||
@@ -240,14 +252,6 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
-
-                // 매칭된 유저는 대기 큐에서 제거
-                redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
-                redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
-
-                // 브로드 캐스팅
-                webSocketService.broadcastUserExit(pair.user1.getUserId());
-                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
 
@@ -265,14 +269,6 @@ public class MatchService {
                 matchProcessor.createMatch(pair.user1, pair.user2, pair.similarity);
                 matchedUserIds.add(pair.user1.getUserId());
                 matchedUserIds.add(pair.user2.getUserId());
-
-                // 매칭된 유저는 대기 큐에서 제거
-                redisService.removeUserFromWaitingQueue(pair.user1.getUserId());
-                redisService.removeUserFromWaitingQueue(pair.user2.getUserId());
-
-                // 브로드 캐스팅
-                webSocketService.broadcastUserExit(pair.user1.getUserId());
-                webSocketService.broadcastUserExit(pair.user2.getUserId());
             }
         }
     }
@@ -308,10 +304,10 @@ public class MatchService {
         return matchCount / 4.0;
     }
 
-    public boolean checkWaitingTimeout(String userId) {
+    public boolean checkWaitingTimeout(UserMatchStatus user) {
         log.info("대기 시간 초과 유저 검사");
         long now = Instant.now().toEpochMilli();
-        UserMatchStatus user = redisService.getUserStatus(userId);
+        String userId = user.getUserId();
         if (user != null && user.getStatus() == MatchStatus.WAITING) {
             // 시작 시각으로부터 5분(300,000ms) 경과 여부 확인
             if (now - user.getStartTime() > 300_000) {
