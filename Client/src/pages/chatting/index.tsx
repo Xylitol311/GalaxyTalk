@@ -45,7 +45,7 @@ export default function ChattingRoom() {
     // 로딩 중일 때 표시할 UI
     if (isPending || !chatData) {
         return (
-            <div className="flex items-center justify-center min-h-100dvh">
+            <div className="flex items-center justify-center min-h-dvh">
                 <Button
                     variant="link"
                     className="absolute left-0 top-0 text-white p-6"

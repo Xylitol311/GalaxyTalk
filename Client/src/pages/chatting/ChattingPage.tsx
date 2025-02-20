@@ -252,7 +252,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             </AlertDialog>
 
             {isMobile ? (
-                <div className="flex flex-col h-100dvh justify-center items-end relative">
+                <div className="flex flex-col h-dvh justify-center items-end relative">
                     <div className="w-full h-14 bg-black text-white flex justify-between items-center p-2">
                         <div>
                             <Button

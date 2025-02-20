@@ -47,7 +47,7 @@ export default function MyPage() {
     ];
 
     return (
-        <div className="flex flex-col items-center w-full h-full p-6 bg-black min-h-100dvh relative">
+        <div className="flex flex-col items-center w-full h-full p-6 bg-black min-h-dvh relative">
             {(view === 'profile' ||
                 view === 'reviews' ||
                 view === 'edit-profile') && (

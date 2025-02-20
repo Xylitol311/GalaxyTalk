@@ -246,7 +246,7 @@ export default function MatchingRoom() {
                         zIndexRange={[0, 0]}
                         style={{ pointerEvents: 'none' }}>
                         <QueryClientProvider client={queryClient}>
-                            <div className="relative w-100dvw h-100dvh flex flex-col justify-between">
+                            <div className="relative w-dvw h-dvh flex flex-col justify-between">
                                 <Button
                                     variant="link"
                                     className="text-white self-start"

@@ -20,7 +20,7 @@ export default function Header() {
     };
 
     return (
-        <header className="top-0 fixed w-100dvw flex justify-end items-center gap-2 py-4 px-4 z-50">
+        <header className="top-0 fixed w-dvw flex justify-end items-center gap-2 py-4 px-4 z-50">
             <Button
                 variant="ghost"
                 size="icon"
