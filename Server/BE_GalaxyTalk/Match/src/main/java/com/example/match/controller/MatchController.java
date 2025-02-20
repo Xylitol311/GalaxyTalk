@@ -2,10 +2,7 @@ package com.example.match.controller;
 
 import com.example.match.constant.MBTI;
 import com.example.match.domain.UserMatchStatus;
-import com.example.match.dto.ApiResponseDto;
-import com.example.match.dto.MatchApproveRequestDto;
-import com.example.match.dto.MatchRequestDto;
-import com.example.match.dto.UserStatusDto;
+import com.example.match.dto.*;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
 import com.example.match.service.MatchService;
@@ -117,6 +114,24 @@ public class MatchController {
                 true,
                 response.isAccepted() ? "매칭을 수락했습니다." : "매칭을 거절했습니다.",
                 null));
+    }
+
+    /**
+     * 매칭 정보 조회
+     */
+    @GetMapping("match-info")
+    public ResponseEntity<ApiResponseDto> getMatchInfo(
+            @RequestHeader("X-User-ID") String userId,
+            @RequestParam("matchId") String matchId
+            ) {
+        log.info("getMatchInfo");
+
+        MatchResponseDto matchResponseDto = matchService.getMatchInfo(userId, matchId);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "매칭 정보 조회에 성공했습니다.",
+                matchResponseDto));
     }
 
     /**
