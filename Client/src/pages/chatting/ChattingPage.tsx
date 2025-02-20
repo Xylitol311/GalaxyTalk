@@ -141,7 +141,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             refetch();
             toast({
                 variant: 'destructive',
-                content: 'AI 질문을 생성중이에요!',
+                title: 'AI 질문을 생성중이에요!',
             });
         }
 

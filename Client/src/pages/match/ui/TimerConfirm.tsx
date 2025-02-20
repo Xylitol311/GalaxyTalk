@@ -122,7 +122,7 @@ export default function TimerConfirm({
                                     상대의 성향: {matchData?.mbti}
                                 </p>
                                 <p className="text-black">
-                                    상대의 온도: {matchData?.energy}
+                                    상대의 온도: {matchData?.energy}°C
                                 </p>
                                 <p className="text-black">
                                     유사도 점수: {matchData?.similarity}%
