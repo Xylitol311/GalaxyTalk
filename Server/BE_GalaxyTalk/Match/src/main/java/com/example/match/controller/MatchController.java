@@ -116,23 +116,6 @@ public class MatchController {
                 null));
     }
 
-    /**
-     * 매칭 정보 조회
-     */
-    @GetMapping("match-info")
-    public ResponseEntity<ApiResponseDto> getMatchInfo(
-            @RequestHeader("X-User-ID") String userId,
-            @RequestParam("matchId") String matchId
-            ) {
-        log.info("getMatchInfo");
-
-        MatchResponseDto matchResponseDto = matchService.getMatchInfo(userId, matchId);
-
-        return ResponseEntity.ok(new ApiResponseDto(
-                true,
-                "매칭 정보 조회에 성공했습니다.",
-                matchResponseDto));
-    }
 
     /**
      * MBTI 값 유효성 검증

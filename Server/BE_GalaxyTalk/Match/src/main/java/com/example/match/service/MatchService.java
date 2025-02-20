@@ -1,10 +1,8 @@
 package com.example.match.service;
 
-import com.example.match.domain.MatchResultStatus;
 import com.example.match.domain.MatchStatus;
 import com.example.match.domain.UserMatchStatus;
 import com.example.match.dto.MatchApproveRequestDto;
-import com.example.match.dto.MatchResponseDto;
 import com.example.match.dto.UserStatusDto;
 import com.example.match.exception.BusinessException;
 import com.example.match.exception.ErrorCode;
@@ -357,25 +355,6 @@ public class MatchService {
                 }
             }
         }
-    }
-
-    /**
-     * 매칭 정보 조회
-     * - 유저가 매칭된 매칭 정보와 매칭 상대방에 대한 정보 반환
-     *
-     */
-    public MatchResponseDto getMatchInfo(String userId, String matchId) {
-        MatchResponseDto matchResponseDto = new MatchResponseDto();
-        MatchResultStatus matchResultStatus = redisService.getMatchInfo(matchId);
-        // user가 거절한 상대방 id 추출
-        String otherUserId = matchResultStatus.getUserIds().stream()
-                .filter(id -> !id.equals(userId))
-                .findFirst()
-                .orElse(null);
-
-
-
-        return matchResponseDto;
     }
 
 
