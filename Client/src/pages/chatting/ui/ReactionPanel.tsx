@@ -73,7 +73,7 @@ function ReactionPanel({ userId }: { userId: string }) {
     return (
         <div className="relative p-2">
             {/* 이모지 효과를 위한 span들을 패널 밖에 배치 */}
-            <div className="absolute">
+            <div className="absolute top-0 left-0">
                 {emojiList.map((_, index) => (
                     <span
                         key={`emoji-target-${index}`}
@@ -91,7 +91,7 @@ function ReactionPanel({ userId }: { userId: string }) {
             </Button>
 
             {isReactionPanelOpen ? (
-                <div className="absolute -top-[15.5rem] right-2 bg-white w-10 flex flex-col rounded-full p-[1rem] items-center">
+                <div className="absolute -top-[13.8rem] right-2 bg-white w-10 flex flex-col rounded-full p-1 items-center">
                     {emojiList.map((emoji, index) => (
                         <React.Fragment key={`emoji-container-${index}`}>
                             <Button
