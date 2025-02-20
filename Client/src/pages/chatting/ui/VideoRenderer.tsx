@@ -10,16 +10,15 @@ function VideoRenderer({ userId }: { userId: string }) {
         (trackRef) => trackRef.participant.identity === userId
     );
     const isVideoEnabled =
-        camTrackRef?.publication?.track?.mediaStream?.active ?? false;
+        camTrackRef && !camTrackRef?.publication?.track?.isMuted ? true : false;
 
     const micTracks = useTracks([Track.Source.Microphone]);
     const micTrackRef = micTracks.find(
         (trackRef) => trackRef.participant.identity === userId
     );
-    console.log(micTrackRef);
+
     const isAudioEnabled =
         micTrackRef && !micTrackRef?.publication?.track?.isMuted ? true : false;
-    console.log(isAudioEnabled);
 
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);
@@ -58,16 +57,20 @@ function VideoRenderer({ userId }: { userId: string }) {
     // 예시: spacing은 container의 너비에 따라 계산 (최소 5)
     const newSpacing = Math.max(5, Math.floor(newWidth / 100));
 
-    console.log(camTrackRef, micTrackRef);
-
     if (!!camTrackRef && isVideoEnabled) {
+        return (
+            <>
+                <div>dfdf</div>
+                <VideoTrack trackRef={camTrackRef} />
+            </>
+        );
         return <VideoTrack trackRef={camTrackRef} />;
     }
 
     // placeholder: audio visualizer
-    else if (micTrackRef && !micTrackRef.publication.track?.isMuted) {
+    else if (isAudioEnabled) {
         return (
-            <div ref={containerRef} className="bg-black w-full">
+            <div ref={containerRef} className="bg-black w-full text-white">
                 <AudioVisualizer
                     micTrackRef={micTrackRef}
                     groupCount={newGroupCount}
