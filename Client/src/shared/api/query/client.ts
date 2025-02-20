@@ -43,12 +43,12 @@ queryClient.getQueryCache().subscribe((event) => {
                 title: '잘못된 요청입니다',
             });
             break;
-        case 498:
-            toast({
-                variant: 'destructive',
-                title: 'AI 질문이 아직 생성되지 않았습니다',
-            });
-            break;
+        // case 498:
+        //     toast({
+        //         variant: 'destructive',
+        //         title: 'AI 질문이 아직 생성되지 않았습니다',
+        //     });
+        //     break;
         case 499:
             toast({
                 variant: 'destructive',
