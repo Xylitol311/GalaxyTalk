@@ -20,6 +20,7 @@ import { queryClient } from '@/shared/api/query/client';
 import { toast } from '@/shared/model/hooks/use-toast';
 import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
+import Planet from '@/widget/Planet';
 import WarpPage from '../../warp';
 import HealingMessage from './HealingMessage';
 import TimerConfirm from './TimerConfirm';
@@ -70,6 +71,10 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
+                console.log(message);
+                if (!message.body) {
+                    return;
+                }
                 const data = JSON.stringify(message.body);
                 console.log(data);
                 const stringifiedData = JSON.parse(data);
@@ -99,6 +104,9 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
+                if (!message.body) {
+                    return;
+                }
                 const data = JSON.stringify(message.body);
                 console.log(data);
                 const stringifiedData = JSON.parse(data);
@@ -134,6 +142,9 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
+                if (!message.body) {
+                    return;
+                }
                 const data = JSON.stringify(message.body);
                 console.log(data);
                 const stringifiedData = JSON.parse(data);
@@ -176,8 +187,7 @@ export default function MatchingRoom() {
             ) : (
                 <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
                     <Galaxy />
-                    {/* {userList &&
-                        !!userList.length &&
+                    {!!userList.length &&
                         userList.map((userInfo, index) => {
                             return (
                                 <Planet
@@ -187,7 +197,7 @@ export default function MatchingRoom() {
                                     userInfo={userInfo}
                                 />
                             );
-                        })} */}
+                        })}
                     <EffectComposer>
                         <Bloom intensity={0.3} radius={0.4} threshold={0.1} />
                     </EffectComposer>
