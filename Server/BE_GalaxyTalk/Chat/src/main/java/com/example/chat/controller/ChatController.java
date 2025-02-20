@@ -269,7 +269,7 @@ public class ChatController {
      * mongodb의 isCancelled를 true로 변환
      * @param chatRoomId, userId
      */
-    @GetMapping("/{chatRoomId}/cancel")
+    @PutMapping("/{chatRoomId}/cancel")
     public ResponseEntity<ApiResponseDto> cancel(@PathVariable("chatRoomId") String chatRoomId,
                                                  @RequestHeader("X-User-Id") String userId) {
         log.info("{} 사용자 채팅방 로딩 취소 시도", userId);
