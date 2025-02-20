@@ -24,12 +24,12 @@ class SentenceSimilarity:
 
         print(f"Input sentences: '{sent1}', '{sent2}'")
 
-        encoded = self.tokenizer(sent1, sent2, 
+        inputs = self.tokenizer(sent1, sent2, 
                             padding=True,
                             truncation=True,
                             max_length=128,
                             return_tensors='pt')
-        print(f"Tokenized IDs: {encoded['input_ids']}")
+        print(f"Tokenized IDs: {inputs['input_ids']}")
         
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
