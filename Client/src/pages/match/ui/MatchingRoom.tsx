@@ -21,7 +21,6 @@ import { Button } from '@/shared/ui/shadcn/button';
 import Galaxy from '@/widget/Galaxy';
 import Planet from '@/widget/Planet';
 import WarpPage from '../../warp';
-import Bloomer from './Bloomer';
 import HealingMessage from './HealingMessage';
 import TimerConfirm from './TimerConfirm';
 
@@ -200,8 +199,8 @@ export default function MatchingRoom() {
             ) : (
                 <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
                     <Galaxy />
-                    {!!userInfos?.data.length &&
-                        userInfos?.data.map((userInfo, index) => {
+                    {!!userList.length &&
+                        userList.map((userInfo, index) => {
                             return (
                                 <Planet
                                     key={userInfo.userId}
@@ -211,7 +210,7 @@ export default function MatchingRoom() {
                                 />
                             );
                         })}
-                    <Bloomer />
+                    {/* <Bloomer /> */}
 
                     <Html
                         position={[0, 0, 0]}
