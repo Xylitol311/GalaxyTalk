@@ -24,10 +24,6 @@ fetcher.interceptors.response.use(
     (response) => response,
     (error) => {
         // Todo: 에러 처리
-        // const { status, config } = error.response || {};
-
-        // eventBus.emit('apiError', { status, config, error });
-
         console.error('API 요청 실패:', error);
 
         return Promise.reject(error);
