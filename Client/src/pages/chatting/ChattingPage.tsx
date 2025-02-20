@@ -313,9 +313,8 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                 <div className="w-full flex justify-center items-center">
                     <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
                         <div className="flex flex-col justify-end">
-                            {/* <VideoRenderer userId={participants[1]?.identity} /> */}
+                            <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
-
                             <div className="bg-slate-300 w-full rounded-lg p-4  mt-2">
                                 <div className="absolute -top-[57px] right-0">
                                     <ReactionPanel
