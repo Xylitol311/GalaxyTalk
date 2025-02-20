@@ -16,6 +16,10 @@ function VideoRenderer({ userId }: { userId: string }) {
     const micTrackRef = micTracks.find(
         (trackRef) => trackRef.participant.identity === userId
     );
+    console.log(micTrackRef);
+    const isAudioEnabled =
+        micTrackRef && !micTrackRef?.publication?.track?.isMuted ? true : false;
+    console.log(isAudioEnabled);
 
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);

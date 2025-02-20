@@ -164,7 +164,7 @@ export const chatHandlers = [
     ),
 
     // AI 질문 생성
-    http.post(
+    http.get(
         `${BASE_URL}/${VERSION}${API_PATH.CHAT.room(':chatRoomId').AI}`,
         () => {
             return HttpResponse.json({
@@ -276,4 +276,16 @@ export const chatHandlers = [
             data: null,
         });
     }),
+
+    // 채팅 취소 API mocking: PUT 메서드 사용
+    http.put(
+        `${BASE_URL}/${VERSION}${API_PATH.CHAT.room(':chatRoomId').CANCELCHAT}`,
+        () => {
+            // 정상적인 경우 200 OK 응답 반환
+            return HttpResponse.json({
+                statusCode: 200,
+                data: { message: '채팅 취소 성공' },
+            });
+        }
+    ),
 ];

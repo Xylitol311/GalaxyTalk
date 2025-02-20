@@ -92,7 +92,7 @@ function Ground() {
     useFrame((state, delta) => {
         if (highResTextures && blendRef.current < 1 && highResMatRef.current) {
             // delta 값에 비례해서 blend 값을 올립니다.
-            blendRef.current += delta * 0.3; // 이 값을 조정해서 전환 속도를 변경할 수 있습니다.
+            blendRef.current += delta * 0.1; // 이 값을 조정해서 전환 속도를 변경할 수 있습니다.
             if (blendRef.current > 1) blendRef.current = 1;
             highResMatRef.current.opacity = blendRef.current;
         }
