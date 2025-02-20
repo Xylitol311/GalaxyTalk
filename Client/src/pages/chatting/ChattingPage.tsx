@@ -328,7 +328,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                         <div className="flex flex-col justify-end">
                             <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
-                            <div className="bg-slate-300 w-full rounded-lg p-4">
+                            <div className="bg-slate-300 w-full rounded-lg p-4 relative">
                                 <div className="absolute -top-[57px] right-0">
                                     <ReactionPanel
                                         userId={participants[1]?.identity}
