@@ -71,16 +71,8 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                // console.log(message);
-                // if (!message.body) {
-                //     return;
-                // }
-                // const data = JSON.stringify(message.body);
-                // console.log(data);
-                // const stringifiedData = JSON.parse(data);
-                // console.log(stringifiedData);
-                // const parsedData = JSON.parse(stringifiedData);
-                // console.log(parsedData);
+                console.log('🟢 메시지 수신 시도!'); // 가장 먼저 찍어야 하는 로그
+                console.log('message:', message);
                 console.log('message.body:', message.body);
                 let parsedData;
                 try {
@@ -117,15 +109,6 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                // if (!message.body) {
-                //     return;
-                // }
-                // const data = JSON.stringify(message.body);
-                // console.log(data);
-                // const stringifiedData = JSON.parse(data);
-                // console.log(stringifiedData);
-                // const parsedData = JSON.parse(stringifiedData);
-                // console.log(parsedData);
                 console.log('message.body:', message.body);
                 let parsedData;
                 try {
@@ -168,15 +151,6 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                // if (!message.body) {
-                //     return;
-                // }
-                // const data = JSON.stringify(message.body);
-                // console.log(data);
-                // const stringifiedData = JSON.parse(data);
-                // console.log(stringifiedData);
-                // const parsedData = JSON.parse(stringifiedData);
-                // console.log(parsedData);
                 console.log('message.body:', message.body);
                 let parsedData;
                 try {
