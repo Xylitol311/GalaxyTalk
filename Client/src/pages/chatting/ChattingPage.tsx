@@ -74,7 +74,11 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     //     setAiModalOpen
     // );
 
-    const { data: aiQuestionsData, refetch } = useAIQuestionsQuery(chatRoomId);
+    const {
+        data: aiQuestionsData,
+        refetch,
+        isRefetchError,
+    } = useAIQuestionsQuery(chatRoomId);
 
     const { mutate: leaveChatRoom } = useDeleteChatRoom();
     const { data: response } = useGetChatParticipants(chatRoomId);
@@ -139,10 +143,13 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                 queryKey: ['ai-questions', chatRoomId],
             });
             refetch();
-            toast({
-                variant: 'destructive',
-                title: 'AI 질문을 생성중이에요!',
-            });
+
+            if (isRefetchError) {
+                toast({
+                    variant: 'destructive',
+                    title: 'AI 질문을 생성중이에요!',
+                });
+            }
         }
 
         setAiModalOpen(!isAiModalOpen);
