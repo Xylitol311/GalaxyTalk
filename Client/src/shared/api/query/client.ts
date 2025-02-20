@@ -20,9 +20,10 @@ queryClient.getQueryCache().subscribe((event) => {
     const error = queryState.error;
     // 예시에서는 error 객체 안에 response가 있고, 그 안에 status 코드가 있다고 가정
     const status = error?.response?.status;
+    if (!status || alreadyLogged) return;
+
     const msg = error?.response?.data?.message;
     console.log(msg);
-    if (!status || alreadyLogged) return;
 
     switch (status) {
         case 401:
@@ -46,10 +47,10 @@ queryClient.getQueryCache().subscribe((event) => {
             });
             break;
         case 498:
-            toast({
-                variant: 'destructive',
-                title: 'AI 질문이 아직 생성되지 않았습니다',
-            });
+            // toast({
+            //     variant: 'destructive',
+            //     title: 'AI 질문이 아직 생성되지 않았습니다',
+            // });
             alreadyLogged = true;
             break;
         case 499:

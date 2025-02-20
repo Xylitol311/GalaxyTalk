@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
 import { queryClient } from '@/shared/api/query/client';
+import { toast } from '@/shared/model/hooks/use-toast';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
 import {
     AlertDialog,
@@ -138,6 +139,10 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                 queryKey: ['ai-questions', chatRoomId],
             });
             refetch();
+            toast({
+                variant: 'destructive',
+                content: 'AI 질문을 생성중이에요!',
+            });
         }
 
         setAiModalOpen(!isAiModalOpen);
