@@ -1,9 +1,24 @@
-import { MBTI_TYPES } from '@/app/config/constants/mbti';
-
 export type WaitingUserType = {
     userId: string;
     concern: string;
-    mbti: typeof MBTI_TYPES | null;
+    mbti:
+        | 'ENFJ'
+        | 'ENFP'
+        | 'ENTJ'
+        | 'ENTP'
+        | 'ESFJ'
+        | 'ESFP'
+        | 'ESTJ'
+        | 'ESTP'
+        | 'INFJ'
+        | 'INFP'
+        | 'INTJ'
+        | 'INTP'
+        | 'ISFJ'
+        | 'ISFP'
+        | 'ISTJ'
+        | 'ISTP'
+        | null;
     status: 'WAITING' | 'MATCH_SUCCESS' | 'MATCH_FAILED' | 'CHAT_CREATED';
     startTime: string;
 };

@@ -102,7 +102,7 @@ export default function Planet({ userInfo }: PlanetProps) {
                             <div className="text-sm font-semibold text-gray-900 mb-2">
                                 상대방의 고민
                             </div>
-                            <div className="text-xs text-gray-700 mb-1">
+                            <div className="text-xs text-gray-700 mb-2">
                                 {userInfo.concern}
                             </div>
                             <div className="text-xs text-gray-500">
