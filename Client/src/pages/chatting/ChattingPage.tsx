@@ -330,34 +330,36 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             ) : (
                 <div className="w-full flex justify-center items-center">
                     <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
-                        <div className="flex flex-col justify-end">
+                        <div className="flex justify-end items-end flex-col relative">
                             <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
-                            <div className="bg-slate-300 w-full rounded-lg p-4 relative">
+                            <div className="bg-slate-300 w-full rounded-lg p-4 flex flex-col justify-between relative">
                                 <div className="absolute -top-[57px] right-0">
                                     <ReactionPanel
                                         userId={participants[1]?.identity}
                                     />
                                 </div>
-                                <h1 className="text-2xl font-bold mb-4">
-                                    {partnerInfo?.planetId
-                                        ? getPlanetNameById(
-                                              partnerInfo.planetId
-                                          )
-                                        : ''}
-                                    &nbsp;여행자
-                                </h1>
-                                <div className="mb-8">
-                                    <h2 className="font-bold mb-1">
-                                        나누고 싶은 이야기
-                                    </h2>
-                                    <p className="min-h-28 line-clamp-6 text-sm mb-2">
-                                        {partnerInfo?.concern}
-                                    </p>
-                                    <MbtiTag mbti={partnerInfo?.mbti} />
-                                    <TemperatureTag
-                                        energy={partnerInfo?.energy}
-                                    />
+                                <div>
+                                    <h1 className="text-2xl font-bold mb-4">
+                                        {partnerInfo?.planetId
+                                            ? getPlanetNameById(
+                                                  partnerInfo.planetId
+                                              )
+                                            : ''}
+                                        &nbsp;여행자
+                                    </h1>
+                                    <div className="mb-8">
+                                        <h2 className="font-bold mb-1">
+                                            나누고 싶은 이야기
+                                        </h2>
+                                        <p className="min-h-28 line-clamp-6 text-sm mb-2">
+                                            {partnerInfo?.concern}
+                                        </p>
+                                        <MbtiTag mbti={partnerInfo?.mbti} />
+                                        <TemperatureTag
+                                            energy={partnerInfo?.energy}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="invisible">
                                     <CustomControlBar
