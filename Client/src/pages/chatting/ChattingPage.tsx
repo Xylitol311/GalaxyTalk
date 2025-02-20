@@ -7,7 +7,6 @@ import {
     useParticipants,
     useRoomContext,
 } from '@livekit/components-react';
-import { useMutation } from '@tanstack/react-query';
 import { RemoteParticipant, RoomEvent } from 'livekit-client';
 import { Bot, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -25,8 +24,11 @@ import {
     AlertDialogTitle,
 } from '@/shared/ui/shadcn/alert-dialog';
 import { Button } from '@/shared/ui/shadcn/button';
-import { postAIQuestions } from './api/apis';
-import { useDeleteChatRoom, useGetChatParticipants } from './api/queries';
+import {
+    useAIQuestionsQuery,
+    useDeleteChatRoom,
+    useGetChatParticipants,
+} from './api/queries';
 import { AIQuestion, ChatData, Participant } from './model/interfaces';
 import AudioRenderer from './ui/AudioRenderer';
 import CustomAudioControl from './ui/CustomAudioControl';
@@ -56,13 +58,21 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     const [isLetterModalOpen, setLetterModalOpen] = useState(false);
     const [isLeaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
-    const { mutate: generateAIQuestions } = useMutation({
-        mutationFn: () => postAIQuestions(chatRoomId),
-        onSuccess: (response) => {
-            setAIQuestions(response.data);
-            setAiModalOpen(true);
-        },
-    });
+    // const { mutate: generateAIQuestions } = useMutation({
+    //     mutationFn: () => postAIQuestions(chatRoomId),
+    //     onSuccess: (response) => {
+    //         setAIQuestions(response.data);
+    //         setAiModalOpen(true);
+    //     },
+    // });
+    // useQuery 훅에서 리턴된 refetch 함수를 generateAIQuestions라 명명
+    // const { refetch: generateAIQuestions } = useAIQuestionsQuery(
+    //     chatRoomId,
+    //     setAIQuestions,
+    //     setAiModalOpen
+    // );
+
+    const { data: aiQuestionsData } = useAIQuestionsQuery(chatRoomId);
 
     const { mutate: leaveChatRoom } = useDeleteChatRoom();
     const { data: response } = useGetChatParticipants(chatRoomId);
@@ -88,6 +98,12 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             if (partner) setPartnerInfo(partner);
         }
     }, [response, myUserId]);
+
+    useEffect(() => {
+        if (aiQuestionsData) {
+            setAIQuestions(aiQuestionsData.data);
+        }
+    }, [aiQuestionsData]);
 
     const room = useRoomContext();
 
@@ -117,9 +133,11 @@ function ChattingPage({ chatData }: ChattingPageProps) {
 
     const handleAIQuestionButton = () => {
         if (!AIQuestions.length) {
+            console.log(generateAIQuestions());
             generateAIQuestions();
+        } else {
+            setAiModalOpen(!isAiModalOpen);
         }
-        setAiModalOpen(!isAiModalOpen);
     };
 
     const handleClickPrevQuestion = () => {
@@ -315,7 +333,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                         <div className="flex flex-col justify-end">
                             <VideoRenderer userId={participants[1]?.identity} />
                             <AudioRenderer userId={participants[1]?.identity} />
-                            <div className="bg-slate-300 w-full rounded-lg p-4  mt-2">
+                            <div className="bg-slate-300 w-full rounded-lg p-4">
                                 <div className="absolute -top-[57px] right-0">
                                     <ReactionPanel
                                         userId={participants[1]?.identity}

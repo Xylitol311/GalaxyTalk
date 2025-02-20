@@ -5,9 +5,9 @@ import { PATH } from '@/app/config/constants';
 import {
     cancelChatRoom,
     deleteChatRoom,
+    getAIQuestions,
     getChatParticipants,
     getPreviousMessages,
-    postAIQuestions,
     postChatMessage,
     postChatReconnect,
     postLetter,
@@ -46,13 +46,12 @@ export const useChatMessagesQuery = (chatRoomId: string) => {
     });
 };
 
-// AI 질문 생성
-export const usePostAIQuestions = () => {
-    return useMutation({
-        mutationFn: (chatRoomId: string) => postAIQuestions(chatRoomId),
-        onError: (error) => {
-            console.error('AI 질문 생성 실패:', error);
-        },
+// AI 질문 조회
+export const useAIQuestionsQuery = (chatRoomId: string) => {
+    return useQuery({
+        queryKey: ['ai-questions', chatRoomId],
+        queryFn: () => getAIQuestions(chatRoomId),
+        retry: false,
     });
 };
 

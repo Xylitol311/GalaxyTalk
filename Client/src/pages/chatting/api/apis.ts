@@ -37,8 +37,8 @@ export async function getPreviousMessages(chatRoomId: string) {
 }
 
 // AI 질문 생성
-export async function postAIQuestions(chatRoomId: string) {
-    const { data } = await fetcher.post<AIQuestionsResponse>(
+export async function getAIQuestions(chatRoomId: string) {
+    const { data } = await fetcher.get<AIQuestionsResponse>(
         PATH.API_PATH.CHAT.room(chatRoomId).AI
     );
     return data;
@@ -71,7 +71,7 @@ export async function postLetter(formData: LetterFormValues) {
 
 // 채팅방 취소 API 함수
 export async function cancelChatRoom(chatRoomId: string) {
-    const { data } = await fetcher.post<BaseResponseType>(
+    const { data } = await fetcher.put<BaseResponseType>(
         PATH.API_PATH.CHAT.room(chatRoomId).CANCELCHAT
     );
     return data;
