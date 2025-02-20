@@ -61,7 +61,7 @@ function LetterFormModal({
     return (
         <>
             {isMobile ? (
-                <div className="fixed p-10 w-screen h-screen bg-white text-black top-0 left-0 z-50">
+                <div className="fixed p-10 w-100dvw h-100dvh bg-white text-black top-0 left-0 z-50">
                     <div className="flex flex-col justify-between h-full">
                         <h1 className="font-bold text-2xl mb-2">
                             마음을 전하는 편지

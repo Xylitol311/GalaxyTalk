@@ -125,7 +125,7 @@ export default function Planet({ userInfo }: PlanetProps) {
                     position={[0, 0, 0]}
                     center
                     zIndexRange={[100, 0]}
-                    className="w-screen h-screen">
+                    className="w-100dvw h-100dvh">
                     <div
                         className="fixed top-0 left-0 w-full h-full z-100"
                         onClick={() => setClicked(false)}

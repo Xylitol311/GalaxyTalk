@@ -13,7 +13,7 @@ export default function Layout() {
     const location = useLocation();
 
     return (
-        <div className="relative w-full h-screen">
+        <div className="relative w-full h-100dvh">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={location.pathname}

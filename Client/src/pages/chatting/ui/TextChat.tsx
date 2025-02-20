@@ -108,7 +108,7 @@ function TextChat({ chatRoomId }) {
     };
 
     return (
-        <div className="flex flex-col justify-between w-screen md:w-full h-screen md:h-full relative">
+        <div className="flex flex-col justify-between w-100dvw md:w-full h-100dvh md:h-full relative">
             {/* // Wrap with ChatMessageList */}
             <ChatMessageList className="pt-2">
                 {initialMessages.map((msg) => {
