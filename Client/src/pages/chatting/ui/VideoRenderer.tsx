@@ -1,6 +1,7 @@
 import { useTracks, VideoTrack } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { useEffect, useRef, useState } from 'react';
+import { IMAGE_PATH } from '@/app/config/constants/path';
 import AudioVisualizer from './AudioVisualizer';
 
 function VideoRenderer({ userId }: { userId: string }) {
@@ -78,7 +79,7 @@ function VideoRenderer({ userId }: { userId: string }) {
     return (
         <div className="flex text-white bg-gray-500/60 w-full h-full justify-center items-end rounded-xl">
             <img
-                src="./public/chat-profile.png"
+                src={`${IMAGE_PATH}chat-profile.png`}
                 alt="Chat Profile"
                 className="w-[45%] object-contain"
             />

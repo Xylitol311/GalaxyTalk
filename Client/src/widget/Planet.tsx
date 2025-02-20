@@ -1,23 +1,35 @@
-import { Html } from '@react-three/drei';
+import { Html, useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';
+import { IMAGE_PATH } from '@/app/config/constants/path';
 import { WaitingUserType } from '@/features/match/model/types';
 import { formatTimeDifference } from '@/shared/lib/utils';
 import { Card, CardContent } from '@/shared/ui/shadcn/card';
+import RecursiveGLTF from './RecursiveGLTF';
 
 type PlanetProps = {
     userInfo: WaitingUserType;
-    position: [number, number, number];
-    color: THREE.Color;
 };
 
-export default function Planet({ userInfo, position, color }: PlanetProps) {
+export default function Planet({ userInfo }: PlanetProps) {
+    const star = useGLTF(`${IMAGE_PATH}star.glb`);
+
     const meshRef = useRef<THREE.Mesh>(null);
     const [hovered, setHovered] = useState(false);
 
-    // 각 행성에 고유한 움직임을 주기 위한 변수
-    const oscillationSpeed = Math.random() * 0.5 + 0.2; // 고유한 주기 속도
+    // 랜덤한 초기 위치 생성 (x, y, z 모두 -1.5 ~ 1.5 사이)
+    const [randomPosition] = useState<[number, number, number]>(() => [
+        Math.random() * 3 - 1.5, // -1.5 ~ 1.5
+        Math.random() * 3 - 1.5, // -1.5 ~ 1.5
+        Math.random() * 3 - 1.5, // -1.5 ~ 1.5
+    ]);
+
+    // 랜덤한 회전 속도 생성
+    const rotationSpeed = Math.random() * 0.005 + 0.005; // 0.005 ~ 0.015 사이
+
+    // 랜덤한 움직임 속도 생성
+    const oscillationSpeed = Math.random() * 0.005 + 0.002;
 
     // 주기적으로 이동하는 위치 값 생성
     const oscillation = (time: number, speed: number) => {
@@ -34,11 +46,14 @@ export default function Planet({ userInfo, position, color }: PlanetProps) {
         if (!hovered) {
             // 원래 애니메이션 좌표 계산
             const targetX =
-                position[0] + oscillation(clock.elapsedTime, oscillationSpeed);
+                randomPosition[0] +
+                oscillation(clock.elapsedTime, oscillationSpeed);
             const targetY =
-                position[1] + oscillation(clock.elapsedTime, oscillationSpeed);
+                randomPosition[1] +
+                oscillation(clock.elapsedTime, oscillationSpeed);
             const targetZ =
-                position[2] + oscillation(clock.elapsedTime, oscillationSpeed);
+                randomPosition[2] +
+                oscillation(clock.elapsedTime, oscillationSpeed);
 
             // `lerp`를 사용하여 부드럽게 보간
             meshRef.current.position.lerp(
@@ -47,12 +62,12 @@ export default function Planet({ userInfo, position, color }: PlanetProps) {
             );
 
             // 회전 애니메이션
-            meshRef.current.rotation.y += 0.005;
-            meshRef.current.rotation.x += 0.005;
+            meshRef.current.rotation.y += rotationSpeed;
+            meshRef.current.rotation.x += rotationSpeed;
         }
     });
 
-    const handlePointOver = () => {
+    const handlePointerOver = () => {
         setHovered(true);
         document.body.style.cursor = 'pointer';
     };
@@ -65,16 +80,11 @@ export default function Planet({ userInfo, position, color }: PlanetProps) {
     return (
         <>
             <mesh
-                ref={meshRef}
-                position={position}
-                onPointerOver={handlePointOver}
-                onPointerOut={handlePointerOut}>
-                <icosahedronGeometry args={[0.1, 1]} />
-                <meshStandardMaterial
-                    color={color}
-                    emissive={color}
-                    emissiveIntensity={hovered ? 100 : 50}
-                />
+                onPointerOver={handlePointerOver}
+                onPointerOut={handlePointerOut}
+                position={randomPosition} // 랜덤한 위치 적용
+                ref={meshRef}>
+                <RecursiveGLTF object={star.scene} scale={1} />
             </mesh>
 
             {hovered && (
