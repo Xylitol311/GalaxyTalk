@@ -1,15 +1,10 @@
 import { OrbitControls } from '@react-three/drei';
-import {
-    Bloom,
-    EffectComposer,
-    ToneMapping,
-} from '@react-three/postprocessing';
 import Ground from './Ground';
 import RotatingStars from './RotatingStars';
 
 function EarthSky() {
-    const levels = 8,
-        intensity = 0.4;
+    // const levels = 8,
+    //     intensity = 0.4;
 
     return (
         <>
@@ -41,7 +36,7 @@ function EarthSky() {
             />
             <Ground />
 
-            <EffectComposer enableNormalPass={false}>
+            {/* <EffectComposer enableNormalPass={false}>
                 <Bloom
                     mipmapBlur
                     luminanceThreshold={1}
@@ -49,7 +44,7 @@ function EarthSky() {
                     intensity={intensity * 1}
                 />
                 <ToneMapping />
-            </EffectComposer>
+            </EffectComposer> */}
         </>
     );
 }

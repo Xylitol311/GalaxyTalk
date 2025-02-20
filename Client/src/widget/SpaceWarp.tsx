@@ -1,11 +1,6 @@
 // https://github.com/o2bomb/space-warp
 import { useFrame } from '@react-three/fiber';
-import {
-    Bloom,
-    ChromaticAberration,
-    EffectComposer,
-} from '@react-three/postprocessing';
-import { BlendFunction, ChromaticAberrationEffect } from 'postprocessing';
+import { ChromaticAberrationEffect } from 'postprocessing';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -100,7 +95,7 @@ function SpaceWarp() {
                 <sphereGeometry args={[0.02]} />
                 <meshBasicMaterial color={[1.5, 1.5, 1.5]} toneMapped={false} />
             </instancedMesh>
-            <EffectComposer>
+            {/* <EffectComposer>
                 <Bloom luminanceThreshold={1} intensity={0.2} />
                 <ChromaticAberration
                     ref={effectsRef}
@@ -112,7 +107,7 @@ function SpaceWarp() {
                         )
                     }
                 />
-            </EffectComposer>
+            </EffectComposer> */}
         </>
         // </Canvas>
     );
