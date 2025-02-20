@@ -68,4 +68,12 @@ export const userHandlers = [
             data: null,
         });
     }),
+
+    http.put(`${BASE_URL}/${VERSION}${API_PATH.OAUTH.WITHDRAW}`, () => {
+        return HttpResponse.json({
+            success: true,
+            message: '회원 탈퇴에 성공했습니다',
+            data: null,
+        });
+    }),
 ];

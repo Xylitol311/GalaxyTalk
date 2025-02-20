@@ -44,6 +44,7 @@ export const API_PATH = {
         INFO: DOMAIN.OAUTH,
         STATUS: `${DOMAIN.OAUTH}/status`,
         REFRESH: `${DOMAIN.OAUTH}/refresh`,
+        WITHDRAW: `${DOMAIN.OAUTH}/withdraw`,
     },
     MATCH: {
         START: DOMAIN.MATCH,

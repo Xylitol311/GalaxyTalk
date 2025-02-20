@@ -5,7 +5,7 @@ import { PATH } from '@/app/config/constants';
 import { IMAGE_PATH } from '@/app/config/constants/path';
 import { getPlanetInfoById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
-import { usePostLogout } from '@/features/user/api/queries';
+import { usePostLogout, usePutWithdraw } from '@/features/user/api/queries';
 import { Button } from '@/shared/ui/shadcn/button';
 import LetterList from './ui/LetterList';
 import { MenuList } from './ui/MenuList';
@@ -14,14 +14,19 @@ export default function MyPage() {
     const { userId, mbti, planetId, energy } = useUserStore();
     const [view, setView] = useState('profile');
     const navigate = useNavigate();
-    const { mutate } = usePostLogout();
+    const { mutate: logoutMutate } = usePostLogout();
+    const { mutate: withdrawMutate } = usePutWithdraw();
 
     const handleToHome = () => {
         navigate(PATH.ROUTE.HOME);
     };
 
     const handleLogout = () => {
-        mutate();
+        logoutMutate();
+    };
+
+    const handleWithdraw = () => {
+        withdrawMutate();
     };
 
     const myPlanet = getPlanetInfoById(planetId);
@@ -107,11 +112,7 @@ export default function MyPage() {
                             onClick={() => setView('profile')}>
                             취소
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() =>
-                                alert('탈퇴 기능은 아직 구현되지 않았습니다.')
-                            }>
+                        <Button variant="destructive" onClick={handleWithdraw}>
                             탈퇴하기
                         </Button>
                     </div>

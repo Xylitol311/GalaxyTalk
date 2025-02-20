@@ -13,10 +13,9 @@ export default function LetterList() {
                     <Card
                         key={letter.id}
                         className="p-4 bg-gray-800 shadow-md rounded-lg">
-                        {/* <h3 className="text-lg font-semibold text-indigo-300">
-                            {letter.senderId}
-                        </h3> */}
-                        <p className="text-gray-300 mt-2">{letter.content}</p>
+                        <p className="text-gray-300 mt-2 break-words">
+                            {letter.content}
+                        </p>
                         <p className="text-gray-500 text-sm mt-2 text-right">
                             {new Date(letter.createdAt).toLocaleDateString()}
                         </p>

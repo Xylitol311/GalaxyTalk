@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router';
 import { PATH } from '@/app/config/constants';
 import { useUserStore } from '@/app/model/stores/user';
 import { SignupFormValues } from '../model/schema';
-import { getUserInfo, getUserStatus, postLogout, postSignup } from './apis';
+import {
+    getUserInfo,
+    getUserStatus,
+    postLogout,
+    postSignup,
+    putWithdraw,
+} from './apis';
 
 export const useUserInfoQuery = (enabled = true) => {
     return useQuery({
@@ -99,6 +105,24 @@ export const usePostRefresh = () => {
         },
         onError: (error) => {
             console.error('refresh 요청 실패:', error);
+        },
+    });
+};
+
+export const usePutWithdraw = () => {
+    const { reset } = useUserStore();
+    const navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: putWithdraw,
+        onSuccess: (response) => {
+            if (response.success) {
+                reset();
+                navigate(PATH.ROUTE.HOME);
+            }
+        },
+        onError: (error) => {
+            console.error('회원가입 실패:', error);
         },
     });
 };

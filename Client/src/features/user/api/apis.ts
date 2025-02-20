@@ -44,3 +44,11 @@ export async function postRefresh() {
 
     return data;
 }
+
+export async function putWithdraw() {
+    const { data } = await fetcher.put<BaseResponseType>(
+        PATH.API_PATH.OAUTH.WITHDRAW
+    );
+
+    return data;
+}
