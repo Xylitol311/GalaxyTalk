@@ -88,11 +88,11 @@ public class ChatService {
         String chatRoomId = savedRoom.getId();
 
         // AI 질문을 방 생성 시점에 생성합니다.
-//        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
-//                .exceptionally(throwable -> {
-//                    log.error("질문 생성 중 에러 발생", throwable);
-//                    return null;
-//                });
+        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
+                .exceptionally(throwable -> {
+                    log.error("질문 생성 중 에러 발생", throwable);
+                    return null;
+                });
 
         // 참가자가 포함된 방중 비정상 종료된 방이 있다면 비정상 종료 처리(isCancelled: true, endedAt: now)
         // 재연결 logic에서 에러가 안 나게 하기 위함
