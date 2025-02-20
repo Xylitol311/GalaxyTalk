@@ -16,9 +16,7 @@ function AudioRenderer({ userId }: { userId: string }) {
                     <AudioTrack trackRef={micTrackRef} />
                     <AudioModulator />
                 </div>
-            ) : (
-                <div>audio is offline</div>
-            )}
+            ) : null}
         </>
     );
 }
