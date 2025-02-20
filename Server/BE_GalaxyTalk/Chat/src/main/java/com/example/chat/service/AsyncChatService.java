@@ -6,6 +6,7 @@ import com.example.chat.repository.ChatRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AsyncChatService {
 
     @Value("${prompt}")
@@ -48,6 +50,7 @@ public class AsyncChatService {
                     .path("content")
                     .asText();
 
+            log.info("chatgpt 생성 질문: {}", content);
             List<Question> questions = objectMapper.readValue(content, new TypeReference<List<Question>>() {});
 
             // 질문을 mongodb에 저장합니다.

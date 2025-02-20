@@ -88,11 +88,11 @@ public class ChatService {
         String chatRoomId = savedRoom.getId();
 
         // AI 질문을 방 생성 시점에 생성합니다.
-//        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
-//                .exceptionally(throwable -> {
-//                    log.error("질문 생성 중 에러 발생", throwable);
-//                    return null;
-//                });
+        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
+                .exceptionally(throwable -> {
+                    log.error("질문 생성 중 에러 발생", throwable);
+                    return null;
+                });
 
         // 참가자가 포함된 방중 비정상 종료된 방이 있다면 비정상 종료 처리(isCancelled: true, endedAt: now)
         // 재연결 logic에서 에러가 안 나게 하기 위함
@@ -306,50 +306,6 @@ public class ChatService {
 
         log.info("참가자 정보 조회 성공: chatRoomId={}", chatRoomId);
         return participantsResponse;
-    }
-
-    /**
-     * 방에 입력된 고민 두 개를 가지고 공통 질문 10개를 생성하고 mongodb에 저장합니다.
-     * 이는 방 생성 시 호출됩니다.
-     * @param concern1, concern2
-     */
-    @Async
-    public CompletableFuture<Void> createQuestions(String chatRoomId, String concern1, String concern2) {
-        try {
-            // 두 질문을 Prompt로 변환합니다.
-            String prompt = createPromptwithTwoConcerns(concern1, concern2);
-
-            // Prompt를 gpt api에 입력하고 질문 열 개를 Json 형태로 받아옵니다.
-            String jsonString = externalApiService.createQuestions(prompt);
-
-            // jsonString이 비어있으면 에러 처리
-            if (jsonString == null || jsonString.isEmpty()) {
-                log.error("질문 생성 실패: GPT API 응답 없음, chatRoomId={}", chatRoomId);
-                throw new BusinessException(ErrorCode.GPT_API_FAILED);
-            }
-
-            // 1. OpenAI API 응답 전체를 JSON 노드로 변환
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonString);
-
-            // 2. "choices" 배열에서 첫 번째 요소의 "message.content" 추출
-            String content = rootNode
-                    .path("choices")
-                    .get(0)
-                    .path("message")
-                    .path("content")
-                    .asText();
-
-            List<Question> questions = objectMapper.readValue(content, new TypeReference<List<Question>>() {});
-
-            // 질문을 mongodb에 저장합니다.
-            chatRepository.updateQuestions(chatRoomId, questions);
-
-            log.info("질문 생성 완료: chatRoomId={}", chatRoomId);
-            return CompletableFuture.completedFuture(null);
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
-        }
     }
 
     /**
