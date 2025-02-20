@@ -143,7 +143,7 @@ function TextChat({ chatRoomId }) {
                 className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-2 "
                 onSubmit={handleMessageSubmit}>
                 {isMobile && (
-                    <div className="w-full flex justify-between absolute -top-14 right-0 px-4">
+                    <div className="w-full flex justify-between absolute -top-14 right-0">
                         <ReactionPanel userId={participants[1]?.identity} />
                         <ReactionPanel userId={myUserId} />
                     </div>
