@@ -11,6 +11,7 @@ import { BASE_URL } from '@/app/config/constants/path';
 import { useUserStore } from '@/app/model/stores/user';
 import {
     useDeleteMatchCancel,
+    useMatchApprove,
     useMatchUsersQuery,
 } from '@/features/match/api/queries';
 import { WaitingUserType } from '@/features/match/model/types';
@@ -35,7 +36,8 @@ export type MatchUserType = {
 
 export default function MatchingRoom() {
     const navigate = useNavigate();
-    const { mutate } = useDeleteMatchCancel();
+    const { mutate: matchDeleteMutate } = useDeleteMatchCancel();
+    const { mutate: matchApproveMutate } = useMatchApprove();
     const { userId } = useUserStore();
     const [matchData, setMatchData] = useState<MatchUserType | null>(null);
     const [isMoving, setIsMoving] = useState(true);
@@ -59,6 +61,28 @@ export default function MatchingRoom() {
             setUserList([...filteredUsers]);
         }
     }, []);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (matchData?.matchId) {
+                matchApproveMutate({
+                    matchId: `${matchData?.matchId}`,
+                    accepted: false,
+                });
+                console.log('매치 거절');
+            }
+            matchDeleteMutate();
+            console.log('매치 정보 삭제');
+
+            event.preventDefault();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [matchDeleteMutate, matchApproveMutate, matchData?.matchId]);
 
     const resetMatchData = () => {
         setMatchData(null);
@@ -187,7 +211,13 @@ export default function MatchingRoom() {
     }, []);
 
     const handleToHome = () => {
-        mutate();
+        if (matchData?.matchId) {
+            matchApproveMutate({
+                matchId: `${matchData?.matchId}`,
+                accepted: false,
+            });
+        }
+        matchDeleteMutate();
         navigate(PATH.ROUTE.HOME);
     };
 
