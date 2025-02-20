@@ -23,12 +23,6 @@ queryClient.getQueryCache().subscribe((event) => {
     if (!status) return;
 
     switch (status) {
-        case 400:
-            toast({
-                variant: 'destructive',
-                title: '잘못된 요청입니다',
-            });
-            break;
         case 401:
             // 개별 쿼리에서 토큰 갱신 등 추가 작업이 있다면,
             // 여기서는 단순히 toast만 전달합니다.
