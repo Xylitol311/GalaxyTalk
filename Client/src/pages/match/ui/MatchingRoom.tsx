@@ -197,6 +197,8 @@ export default function MatchingRoom() {
                 <WarpPage />
             ) : (
                 <Canvas camera={{ position: [4, 2, 5], fov: 40 }}>
+                    <ambientLight intensity={2.5} />
+
                     <Galaxy />
                     {!!userList.length &&
                         userList.map((userInfo) => {
