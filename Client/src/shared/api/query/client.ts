@@ -10,6 +10,8 @@ export const queryClient = new QueryClient({
     },
 });
 
+let alreadyLogged = false;
+
 // 전역 에러 핸들링 구독
 queryClient.getQueryCache().subscribe((event) => {
     // 쿼리의 상태가 error인 경우
@@ -18,9 +20,10 @@ queryClient.getQueryCache().subscribe((event) => {
     const error = queryState.error;
     // 예시에서는 error 객체 안에 response가 있고, 그 안에 status 코드가 있다고 가정
     const status = error?.response?.status;
+    if (!status || alreadyLogged) return;
+
     const msg = error?.response?.data?.message;
     console.log(msg);
-    if (!status) return;
 
     switch (status) {
         case 401:
@@ -43,12 +46,13 @@ queryClient.getQueryCache().subscribe((event) => {
                 title: '잘못된 요청입니다',
             });
             break;
-        // case 498:
-        //     toast({
-        //         variant: 'destructive',
-        //         title: 'AI 질문이 아직 생성되지 않았습니다',
-        //     });
-        //     break;
+        case 498:
+            // toast({
+            //     variant: 'destructive',
+            //     title: 'AI 질문이 아직 생성되지 않았습니다',
+            // });
+            alreadyLogged = true;
+            break;
         case 499:
             toast({
                 variant: 'destructive',

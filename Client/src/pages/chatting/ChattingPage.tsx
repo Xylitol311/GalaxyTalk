@@ -12,6 +12,8 @@ import { Bot, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
+import { queryClient } from '@/shared/api/query/client';
+import { toast } from '@/shared/model/hooks/use-toast';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
 import {
     AlertDialog,
@@ -72,7 +74,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     //     setAiModalOpen
     // );
 
-    const { data: aiQuestionsData } = useAIQuestionsQuery(chatRoomId);
+    const { data: aiQuestionsData, refetch } = useAIQuestionsQuery(chatRoomId);
 
     const { mutate: leaveChatRoom } = useDeleteChatRoom();
     const { data: response } = useGetChatParticipants(chatRoomId);
@@ -132,6 +134,17 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     }, [room]);
 
     const handleAIQuestionButton = () => {
+        if (!AIQuestions.length) {
+            queryClient.invalidateQueries({
+                queryKey: ['ai-questions', chatRoomId],
+            });
+            refetch();
+            toast({
+                variant: 'destructive',
+                content: 'AI 질문을 생성중이에요!',
+            });
+        }
+
         setAiModalOpen(!isAiModalOpen);
     };
 
