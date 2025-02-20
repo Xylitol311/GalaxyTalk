@@ -71,16 +71,29 @@ export default function MatchingRoom() {
         webSocketFactory: () => new SockJS(`${BASE_URL}/match/ws`),
         onConnect: () => {
             client.subscribe(`/topic/matching/${userId}`, (message) => {
-                console.log(message);
-                if (!message.body) {
-                    return;
+                // console.log(message);
+                // if (!message.body) {
+                //     return;
+                // }
+                // const data = JSON.stringify(message.body);
+                // console.log(data);
+                // const stringifiedData = JSON.parse(data);
+                // console.log(stringifiedData);
+                // const parsedData = JSON.parse(stringifiedData);
+                // console.log(parsedData);
+                console.log('message.body:', message.body);
+                let parsedData;
+                try {
+                    // message.body가 문자열이라면 파싱, 객체라면 그대로 사용
+                    parsedData =
+                        typeof message.body === 'string'
+                            ? JSON.parse(message.body)
+                            : message.body;
+                } catch (error) {
+                    console.error('Error parsing message.body:', error);
                 }
-                const data = JSON.stringify(message.body);
-                console.log(data);
-                const stringifiedData = JSON.parse(data);
-                console.log(stringifiedData);
-                const parsedData = JSON.parse(stringifiedData);
-                console.log(parsedData);
+                console.log('parsedData:', parsedData);
+                // 이후 parsedData의 type에 따라 처리
 
                 if (parsedData.type === 'MATCH_SUCCESS') {
                     setMatchData(parsedData.data);
@@ -104,15 +117,28 @@ export default function MatchingRoom() {
                 }
             });
             client.subscribe('/topic/matching/users/new', (message) => {
-                if (!message.body) {
-                    return;
+                // if (!message.body) {
+                //     return;
+                // }
+                // const data = JSON.stringify(message.body);
+                // console.log(data);
+                // const stringifiedData = JSON.parse(data);
+                // console.log(stringifiedData);
+                // const parsedData = JSON.parse(stringifiedData);
+                // console.log(parsedData);
+                console.log('message.body:', message.body);
+                let parsedData;
+                try {
+                    // message.body가 문자열이라면 파싱, 객체라면 그대로 사용
+                    parsedData =
+                        typeof message.body === 'string'
+                            ? JSON.parse(message.body)
+                            : message.body;
+                } catch (error) {
+                    console.error('Error parsing message.body:', error);
                 }
-                const data = JSON.stringify(message.body);
-                console.log(data);
-                const stringifiedData = JSON.parse(data);
-                console.log(stringifiedData);
-                const parsedData = JSON.parse(stringifiedData);
-                console.log(parsedData);
+                console.log('parsedData:', parsedData);
+                // 이후 parsedData의 type에 따라 처리
 
                 if (parsedData.type === 'NEW_USER') {
                     const newUser = parsedData.data;
@@ -142,15 +168,28 @@ export default function MatchingRoom() {
             });
 
             client.subscribe('/topic/matching/users/exit', (message) => {
-                if (!message.body) {
-                    return;
+                // if (!message.body) {
+                //     return;
+                // }
+                // const data = JSON.stringify(message.body);
+                // console.log(data);
+                // const stringifiedData = JSON.parse(data);
+                // console.log(stringifiedData);
+                // const parsedData = JSON.parse(stringifiedData);
+                // console.log(parsedData);
+                console.log('message.body:', message.body);
+                let parsedData;
+                try {
+                    // message.body가 문자열이라면 파싱, 객체라면 그대로 사용
+                    parsedData =
+                        typeof message.body === 'string'
+                            ? JSON.parse(message.body)
+                            : message.body;
+                } catch (error) {
+                    console.error('Error parsing message.body:', error);
                 }
-                const data = JSON.stringify(message.body);
-                console.log(data);
-                const stringifiedData = JSON.parse(data);
-                console.log(stringifiedData);
-                const parsedData = JSON.parse(stringifiedData);
-                console.log(parsedData);
+                console.log('parsedData:', parsedData);
+                // 이후 parsedData의 type에 따라 처리
 
                 if (parsedData.type === 'EXIT_USER') {
                     const exitedUser = parsedData.data;
