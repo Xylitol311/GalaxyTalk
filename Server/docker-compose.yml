@@ -1,4 +1,4 @@
-version: '3.8'  # 도커 컴포즈 버전 (최신 버전 권장)
+version: '3.8'  # 도커 컴포즈 버전
 
 services:
   mysql:
@@ -13,6 +13,16 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
+    # MySQL이 정상적으로 동작하는지 확인하기 위한 헬스체크 추가
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 30s      # 30초마다 체크
+      timeout: 10s       # 10초 이내 응답 없으면 실패 처리
+      retries: 3         # 3회 연속 실패시 unhealthy 상태로 간주
+      start_period: 30s  # 초기 30초 동안은 체크 결과 무시 (초기 부팅 지연 고려)
+    networks:
+      - my-network
+
 
   redis:
     image: redis:latest
@@ -20,9 +30,19 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD}
+    # Redis 서버의 정상 동작 여부를 확인하기 위한 헬스체크 추가
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - my-network
+
 
   mongodb:
-    image: mongo:latest
+    image: mongo:6.0.9
     container_name: my-mongodb
     ports:
       - "27017:27017"
@@ -32,7 +52,237 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - mongodb_data:/data/db
+    # MongoDB가 제대로 기동했는지 확인하기 위한 헬스체크 추가
+    healthcheck:
+      # mongo 클라이언트를 통해 db.adminCommand('ping') 명령어 실행
+      test: [
+        "CMD", "mongosh",
+        "--username", "${MONGO_INITDB_ROOT_USERNAME}",
+        "--password", "${MONGO_INITDB_ROOT_PASSWORD}",
+        "--authenticationDatabase", "admin",
+        "--eval", "db.adminCommand('ping').ok === 1 ? quit(0) : quit(1)"
+      ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - my-network
+
+  eureka:
+    build: ./BE_GalaxyTalk/Eureka  # Eureka 서버 Dockerfile 경로
+    container_name: eureka
+    ports:
+      - "30000:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - my-network
+
+
+  galaxy-auth:
+    build: ./BE_GalaxyTalk/Auth
+    restart: always
+    ports:
+      - "30001:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONT_URL=${FRONT_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - OAUTH_LOGIN_URL=${OAUTH_LOGIN_URL}
+
+    # galaxy-auth가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
+
+
+  galaxy-support:
+    build: ./BE_GalaxyTalk/Support
+    restart: always
+    ports:
+      - "30002:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+
+    depends_on:
+      - mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
+
+
+  galaxy-match:
+    build: ./BE_GalaxyTalk/Match
+    restart: always
+    ports:
+      - "30003:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - AI_SERVICE_URL=${AI_SERVICE_URL}
+      - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+      - MATCH_SERVICE_URL=${MATCH_SERVICE_URL}
+      - MATCH_TO_AI_URL=${MATCH_TO_AI_URL}
+      - CHAT_SERVICE_NAME=${CHAT_SERVICE_NAME}
+      - AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
+
+    # galaxy-Match가 실행되기 전에 MySQL, Redis, MongoDB가 먼저 시작되도록 의존성 지정
+    depends_on:
+      - redis
+    # Spring Boot 애플리케이션의 /actuator/health 엔드포인트를 통해 헬스체크 수행
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
+
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
+    ports:
+      - "8880:8880"                         # HTTP/WebSocket 포트 (필요시 외부 노출)
+      - "8881:8881"                         # 관리용 혹은 추가 기능 포트
+      - "8882:8882/udp"                     # RTC 미디어 통신 UDP 포트
+      - "50000-50020:50000-50020/udp"        # 추가 UDP 포트 (미디어용)
+    environment:
+      # API 키와 시크릿 사이의 공백 제거
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+      LIVEKIT_PORT: 8880
+      LIVEKIT_BIND_ADDRESSES: "0.0.0.0"
+      LIVEKIT_EXTERNAL_IP: "13.124.213.63"
+      rtc.tcp_port: 8881
+      LIVEKIT_RTC_PORT: 8882
+      LIVEKIT_NODE_IP: "13.124.213.63"
+      # 외부 프록시(Nginx)를 통한 WSS 연결을 위해 LIVEKIT_WS_URL 수정
+      LIVEKIT_WS_URL: "wss://i12a503.p.ssafy.io/livekitws"
+      LIVEKIT_RTC_USE_EXTERNAL_IP: "true"
+      LIVEKIT_LOG_LEVEL: "debug"
+
+      # CORS 설정 추가
+      LIVEKIT_CORS_ALLOWED_ORIGINS: "https://meet.livekit.io,https://localhost:5173,https://i12a503.p.ssafy.io"
+      LIVEKIT_CORS_ALLOW_CREDENTIALS: "true"
+    restart: always
+    networks:
+      - my-network
+
+
+
+  gateway:
+    build: ./BE_GalaxyTalk/Gateway
+    container_name: gateway
+    ports:
+      - "30006:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      # Docker 네트워크 내부에서는 컨테이너 이름으로 접근
+      - AUTH_SERVICE_URL=http://galaxy-auth:8080
+      - MATCH_SERVICE_URL=http://galaxy-match:8080
+      - CHAT_SERVICE_URL=http://galaxy-chat:8080
+      - SUPPORT_SERVICE_URL=http://galaxy-support:8080
+      - EUREKA_SERVICE_URL=http://eureka:8080
+      - FRONT_URL=${FRONT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+
+    depends_on:
+      - eureka
+      - galaxy-auth
+      - galaxy-match
+    networks:
+      - my-network
+
+  galaxy-ai:
+    build: ./AI
+    container_name: galaxy-ai
+    ports:
+      - "30005:8080"
+    environment:
+      - PYTHON_ENV=prod
+    volumes:
+      - /home/ubuntu/sentence_similarity_model:/home/ubuntu/sentence_similarity_model
+    networks:
+      - my-network
+
+  galaxy-chat:
+    build: ./BE_GalaxyTalk/Chat
+    restart: always
+    ports:
+      - "30004:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - MONGO_INITDB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - CHAT_SERVICE_URL=${CHAT_SERVICE_URL}
+      - COMMENT_SERVICE_URL=${COMMENT_SERVICE_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - EUREKA_SERVICE_URL=${EUREKA_SERVICE_URL}
+      - GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL}
+    depends_on:
+      - mongodb
+      - galaxy-auth
+      - galaxy-support
+      - livekit
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - my-network
 
 volumes:
   mysql_data:
   mongodb_data:
+
+networks:
+  my-network:
+    external: true

@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: chat-service
+  config:
+    import: classpath:prompt.yml  # 기존 spring.config.import=classpath:prompt.yml
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+server:
+  port: 8084
+
+
+
+# Swagger 관련 설정
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+livekit:
+  api:
+    key: ${LIVEKIT_API_KEY}
+    secret: ${LIVEKIT_API_SECRET}
+  url: ${LIVEKIT_URL}
+
+mongo:
+  initdb:
+    uri: ${MONGO_INITDB_URI}
+    database: ${MONGO_INITDB_DATABASE}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+
+# Actuator 설정 (Spring Boot 3.4.1 기준)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"  # 필요한 엔드포인트들을 쉼표로 구분하여 문자열로 지정합니다.
+  endpoint:
+    health:
+      show-components: always         # 헬스 체크 시 상세 정보를 항상 노출합니다.

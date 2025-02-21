@@ -28,11 +28,35 @@ ext {
 }
 
 dependencies {
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
+    // Spring Cloud Gateway
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
-    implementation 'org.springframework.cloud:spring-cloud-starter-gateway-mvc'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Lombok (중복 제거)
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // JWT (기존 유지)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+
+//    // Config Client (Config Server 연동 시)
+//    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+    // Service Discovery (Eureka Client 사용 시)
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // MacOS 환경에서 Netty의 DNS 해석 관련 네이티브 라이브러리
+    implementation 'io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64'
+
+    // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

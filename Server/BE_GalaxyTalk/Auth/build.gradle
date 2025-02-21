@@ -13,25 +13,62 @@ java {
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2024.0.0")
+}
+
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    // Spring Boot Starter dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-web'       // Web + Servlet 컨테이너
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2 클라이언트
+    implementation 'org.springframework.boot:spring-boot-starter-security'  // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // Spring Data JPA
+
+    // Database drivers (필요한 DB 드라이버만 유지)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Lombok
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // MacOS 환경에서 Netty의 DNS 해석 관련 네이티브 라이브러리
+    implementation 'io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64'
+
+    // 개발 편의성 도구
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'         // DevTools for Hot Reload
+
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'  // Spring Boot Test
+    testImplementation 'org.springframework.security:spring-security-test' // Spring Security Test
+
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //eureka
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {

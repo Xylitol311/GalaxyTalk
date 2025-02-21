@@ -1,12 +1,34 @@
 spring:
   application:
-    name: Match
-  config:
-    import: optional:classpath:/application-secret.yml
-  data:
-    redis:
-      host: localhost
-      port: 6379
+    name: match-service
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+          chat-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
 
-server:
-  port: 8083
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+
+# External API url
+ai:
+  service:
+    url: ${AI_SERVICE_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-components: always

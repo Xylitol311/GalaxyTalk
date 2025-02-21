@@ -1,15 +1,98 @@
+
+#Server Setting
 server:
   port: 8080
 
+#FOR TOEKN
+jwt:
+  secret: ${JWT_SECRET}
+
+# Spring WebFlux - WebApplication environement setting
 spring:
+  main:
+    web-application-type: reactive
+
+
+  #Application name
   application:
     name: Gateway
+
+#Setting profile
+  profiles:
+    include:
+
+
+#Gateway Setting
   cloud:
     gateway:
+      forwarded:
+        enabled: false
+        # 기존 헤더를 유지하지 않고 덮어쓰기
+        append: false
+      httpclient:
+        connect-timeout: 2000 #try connecting for 2sec
+        response-timeout: 60s #wating max 10sec until getting response from server
+      # route setting
       routes:
-        - id: matching-service
-          uri: lb://match
+        # 기존 API 라우트
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/matching-service/**
+            - Path=/api/oauth/**
+        - id: support-service
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/api/letter/**
+        - id: support-service
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/api/feedback/**
+        - id: match-service
+          uri: lb://MATCH-SERVICE
+          predicates:
+            - Path=/api/match/**
+        - id: chat-service
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/api/chat/**
+        - id: letter-service
+          uri: lb://LETTER-SERVICE
+          predicates:
+            - Path=/api/letter/**
+      # 추가: Swagger API 문서를 위한 라우트 (서비스 이름에 맞게 설정)
+        - id: auth-service-swagger
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
           filters:
-            - RewritePath=/matching-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/auth-service/(?<remaining>.*), /${remaining}
+        - id: support-service-swagger
+          uri: lb://SUPPORT-SERVICE
+          predicates:
+            - Path=/support-service/v3/api-docs/**
+          filters:
+            - RewritePath=/support-service/(?<remaining>.*), /${remaining}
+        - id: match-service-swagger
+          uri: lb://MATCH-SERVICE
+          predicates:
+            - Path=/match-service/v3/api-docs/**
+          filters:
+            - RewritePath=/match-service/(?<remaining>.*), /${remaining}
+        - id: chat-service-swagger
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/chat-service/v3/api-docs/**
+          filters:
+            - RewritePath=/chat-service/(?<remaining>.*), /${remaining}
+
+
+
+
+#Swagger setting
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+
+# urls
+front:
+  url: ${FRONT_URL}

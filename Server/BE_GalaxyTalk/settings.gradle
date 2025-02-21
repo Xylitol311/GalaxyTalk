@@ -1,2 +1,2 @@
 rootProject.name = 'BE_GalaxyTalk'
-include 'Auth', 'Chat', 'Match', 'Support', 'Gateway'
+include 'Auth', 'Chat', 'Eureka', 'Match', 'Support', 'Gateway'
