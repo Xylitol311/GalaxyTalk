@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+    stages {
+        stage('Print Environment') {
+            steps {
+                sh 'printenv'
+            }
+        }        
+        stage('GitLab Project Download') {
+            steps {
+                deleteDir()
+                git url: 'https://lab.ssafy.com/s12-webmobile1-sub1/S12P11A503.git',
+                branch: 'dev/be',
+                credentialsId: 'gitlab-galaxy-token'
+            }
+        }
+        stage('Build service'){
+            parallel{ //병령 처리 추가
+                stage('Build Auth') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Auth') { // 프로젝트 루트 디렉토리로 작업 디렉토리 변경
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('Build Match') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Match') { // 프로젝트 루트 디렉토리로 작업 디렉토리 변경
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('Build Support') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Support') { // 프로젝트 루트 디렉토리로 작업 디렉토리 변경
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('Build Eureka') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Eureka') { // 프로젝트 루트 디렉토리로 작업 디렉토리 변경
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('Build Gateway') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Gateway') {
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('Build AI') {
+                    steps {
+                        dir('Server/AI') {
+                            sh 'ls -la'
+                        }
+                    }
+                }
+                stage('Build Chat') {
+                    steps {
+                        dir('Server/BE_GalaxyTalk/Chat') {
+                            sh 'chmod +x gradlew && ./gradlew clean build -x test'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build verification') { //필드 됐는지 검증
+            steps {
+                sh 'ls Server/BE_GalaxyTalk/Auth/build/libs/*.jar'
+                sh 'ls Server/BE_GalaxyTalk/Match/build/libs/*.jar'
+                sh 'ls Server/BE_GalaxyTalk/Support/build/libs/*.jar'
+                sh 'ls Server/BE_GalaxyTalk/Eureka/build/libs/*.jar'
+                sh 'ls Server/BE_GalaxyTalk/Gateway/build/libs/*.jar'                
+            }
+        }
+
+        stage('Deploy'){
+            steps{
+                dir('Server') {  // 프로젝트 루트 디렉토리로 이동
+                    sh 'docker-compose down'
+                    sh 'docker-compose up -d --build'
+                }
+            }
+        }
+        
+        stage('Nginx Reload') {
+            steps {
+                sh 'docker exec server-nginx nginx -s reload'
+            }
+        }
+    }
+}

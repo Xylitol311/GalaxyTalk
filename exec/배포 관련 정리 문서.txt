@@ -1,0 +1,36 @@
+=====================================
+# 사용한 JVM, 웹서버, WAS 등의 종류와 설정 값, 버전 기재
+- JVM: Amazon Corretto 17
+- 웹서버 및 WAS:  Spring Boot 내장 Tomcat
+- 사용 IDE: IntelliJ IDEA 2024.3.1.1
+
+=====================================
+# 프로젝트에서 사용하는 외부 서비스 정보
+- 소셜 인증: KAKAO Oauth2 인증 사용
+- webRTC: LiveKit Cloud 사용. 필요한 정보는 .env에 첨부
+
+=====================================
+# 배포 시 특이사항
+## EC2 구성
+- Docker
+
+(모든 서비스는 같은 네트워크 안에 위치)
+(모든 서비스를 도커 컨테이너를 이용하여 빌드)
+- Nginx
+- Jenkins: 도커 명령어 사용을 위해 도커와 같은 GID 설정 필요
+- React: Docker파일을 통해 Jenkins로 빌드
+
+(아래부터 docker-compose.yml을 이용 jenkins를 통해 자동 빌드)
+- Gateway
+- Eureka
+- 각 API 서버
+- MongoDB
+- MySQL
+- Redis
+
+======================================
+# Nginx
+
+- Certbot Docker 컨테이너를 사용하여 SSL/TLS 인증서 발급 받음
+- 리버스 프록시 설정으로 외부에서 직접 서버에 접근하지 못하도록 설정
+- HTTP 요청을 HTTPS로 리다이렉트 되도록 설정

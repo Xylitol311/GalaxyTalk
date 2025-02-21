@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+     tools {
+        // Global Tool Configuration에 등록한 이름("NodeJS_22")을 사용합니다.
+        nodejs 'NodeJS_22'
+    }
+    stages {
+        stage('Print Environment') {
+            steps {
+                sh 'printenv'
+            }
+        }
+        stage('Check Node.js version') {
+            steps {
+                sh 'node --version'
+                sh 'npm --version'
+            }
+        }
+        stage('GitLab Project Download') {
+            steps {
+                deleteDir()
+                git url: 'https://lab.ssafy.com/s12-webmobile1-sub1/S12P11A503.git',
+                branch: 'dev/fe',
+                credentialsId: 'gitlab-galaxy-token'
+            }
+        }
+        stage('Build service'){
+            steps {
+                dir('Client') { // 프로젝트 루트 디렉토리로 작업 디렉토리 변경
+                    sh 'rm -rf node_modules'
+                    sh 'rm -rf package-lock.json'
+                    
+                    
+                    // 배포 환경에 맞는 .env 파일 생성
+                    sh '''
+                        cat <<EOF > .env
+                        VITE_API_BASE_URL=https://galaxytalk.life
+                        VITE_API_VERSION=gateway/api
+                        EOF
+                    '''
+                    
+                    
+                    // 의존성 설치
+                    sh 'npm install --legacy-peer-deps'
+                    // 빌드 실행: package.json의 build 스크립트 실행
+                    sh 'npm run build'
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir('Client') {
+                    // 빌드된 정적 파일들이 Client/dist 폴더에 있어야 합니다.
+                    sh 'docker build -t my-frontend-image .'
+                }
+            }
+        }
+        stage('Docker Run') {
+            steps {
+                script {
+                    def containerName = "my-frontend-${env.BUILD_ID}"
+                    // 이전 빌드 컨테이너(현재 컨테이너 제외)를 삭제하는 루프
+                    sh """
+                      for container in \$(docker ps -a --filter "name=my-frontend-" --format "{{.Names}}"); do
+                        if [ "\$container" != "${containerName}" ]; then
+                          echo "Removing container: \$container"
+                          docker rm -f \$container;
+                        fi;
+                      done
+                       sleep 5
+                    """
+                    // 현재 빌드 컨테이너 실행
+                    // 컨테이너 실행 시 네트워크 별칭 지정
+                    sh "docker run -d -p 8081:3000 --name ${containerName} --network my-network --network-alias my-frontend my-frontend-image"
+                }
+            }
+        }
+
+    }
+}    
