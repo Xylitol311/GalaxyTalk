@@ -7,6 +7,7 @@ import com.example.match.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -18,107 +19,120 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RedisService {
-    private final RedisTemplate<String, Object> redisTemplate;
     private static final String USER_KEY_PREFIX = "user:";
     private static final String MATCH_KEY_PREFIX = "match:";
+    private static final String REJECTION_KEY_PREFIX = "rejected:";
+    // Sorted Set 키: 대기 유저 관리 (score는 매칭 시작 시간)
+    private static final String WAITING_USERS_KEY = "waiting_users";
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
-     * 유저 상태를 Redis에 저장.
-     *
-     * @param user 저장할 유저 정보
+     * WAITING 상태인 유저를 원자적으로 IN_PROGRESS 상태로 전환하는 메서드
+     * Lua 스크립트를 사용하여 원자적 연산을 보장합니다.
+     */
+    public boolean atomicTransitionToInProgress(String userId) {
+        String key = USER_KEY_PREFIX + userId;
+        String script =
+                "if redis.call('EXISTS', KEYS[1]) == 1 then " +
+                        "  local user = cjson.decode(redis.call('GET', KEYS[1])); " +
+                        "  if user.status == 'WAITING' then " +
+                        "    user.status = 'IN_PROGRESS'; " +
+                        "    redis.call('SET', KEYS[1], cjson.encode(user)); " +
+                        "    return 1; " +
+                        "  else " +
+                        "    return 0; " +
+                        "  end " +
+                        "else " +
+                        "  return 0; " +
+                        "end";
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
+        Long result = redisTemplate.execute(redisScript, Collections.singletonList(key));
+        return result != null && result == 1;
+    }
+
+    /**
+     * 유저 상태를 Redis에 저장합니다.
      */
     public void saveUserStatus(UserMatchStatus user) {
-        log.info("save user status");
         if (user == null || user.getUserId() == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
+        log.info("유저 상태 저장: {}", user.getUserId());
         redisTemplate.opsForValue().set(USER_KEY_PREFIX + user.getUserId(), user);
     }
 
     /**
-     * Redis에서 유저 상태를 조회.
-     *
-     * @param userId 조회할 유저의 ID
-     * @return 유저 상태 (없으면 null)
+     * Redis에서 유저 상태를 조회합니다.
      */
     public UserMatchStatus getUserStatus(String userId) {
-        log.info("Getting user match status...");
+        log.info("유저 상태 조회: {}", userId);
         Object data = redisTemplate.opsForValue().get(USER_KEY_PREFIX + userId);
         if (data == null) {
             return null;
         }
         if (!(data instanceof UserMatchStatus userMatchStatus)) {
             throw new BusinessException(ErrorCode.REDIS_DATA_MISMATCH,
-                    "Redis에서 가져온 데이터가 UserMatchStatus 타입이 아닙니다. userId=" + userId);
+                    "Redis 데이터 타입 불일치: userId=" + userId);
         }
         return userMatchStatus;
     }
 
     /**
-     * Redis에서 유저 상태를 삭제.
-     *
-     * @param userId 삭제할 유저의 ID
+     * Redis에서 유저 상태를 삭제합니다.
      */
     public void deleteUserStatus(String userId) {
-        log.info("Deleting user match status...");
+        log.info("유저 상태 삭제: {}", userId);
         redisTemplate.delete(USER_KEY_PREFIX + userId);
+        deleteRejection(userId);
     }
 
     /**
-     * 유저의 매칭 큐 목록(셋)에 특정 MBTI 큐를 추가.
-     *
-     * @param userId   유저 ID
-     * @param mbtiName 추가할 MBTI 큐 이름
+     * 대기 큐(Waiting Pool)에 유저를 추가합니다.
+     * score는 현재 시간(매칭 시작 시간)으로 설정합니다.
      */
-    public void addUserToQueue(String userId, String mbtiName) {
-        redisTemplate.opsForSet().add("user_matching_queues:" + userId, mbtiName);
-    }
-
-    /**
-     * 유저의 매칭 큐 목록(셋)에서 특정 MBTI 큐를 제거.
-     *
-     * @param userId   유저 ID
-     * @param mbtiName 제거할 MBTI 큐 이름
-     */
-    public void removeUserFromQueue(String userId, String mbtiName) {
-        redisTemplate.opsForSet().remove("user_matching_queues:" + userId, mbtiName);
-    }
-
-    /**
-     * 유저가 특정 MBTI 큐에 속해있는지 확인.
-     *
-     * @param userId   유저 ID
-     * @param mbtiName 확인할 MBTI 큐 이름
-     * @return 속해있으면 true, 아니면 false
-     */
-    public boolean isUserInQueue(String userId, String mbtiName) {
-        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember("user_matching_queues:" + userId, mbtiName));
-    }
-
-    /**
-     * 유저의 매칭 큐 목록(셋)을 조회.
-     *
-     * @param userId 대상 유저 ID
-     * @return 매칭 큐 목록
-     */
-    public Set<String> getUserMatchingQueues(String userId) {
-        Set<Object> resultSet = redisTemplate.opsForSet().members("user_matching_queues:" + userId);
-        if (resultSet == null) {
-            return Collections.emptySet(); // null 방지를 위해 빈 Set 반환
+    public void addUserToWaitingQueue(UserMatchStatus user) {
+        if (user == null || user.getUserId() == null) {
+            throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
         }
-        return resultSet.stream()
-                .map(Object::toString) // Object → String 변환
-                .collect(Collectors.toSet());
+        log.info("대기 큐에 유저 추가: {}", user.getUserId());
+        redisTemplate.opsForZSet().add(WAITING_USERS_KEY, user.getUserId(), user.getStartTime());
     }
 
     /**
-     * 매칭 정보를 Redis에 저장.
-     *
-     * @param matchId     매칭 ID
-     * @param matchResult 매칭 결과 상태
+     * 대기 큐에서 유저를 제거합니다.
+     */
+    public void removeUserFromWaitingQueue(String userId) {
+        log.info("대기 큐에서 유저 제거: {}", userId);
+        redisTemplate.opsForZSet().remove(WAITING_USERS_KEY, userId);
+    }
+
+    /**
+     * Redis 대기 큐에서 모든 유저 ID를 조회합니다.
+     */
+    public Set<String> getAllWaitingUsers() {
+        Set<Object> result = redisTemplate.opsForZSet().range(WAITING_USERS_KEY, 0, -1);
+        if (result == null) {
+            return Collections.emptySet();
+        }
+        return result.stream().map(Object::toString).collect(Collectors.toSet());
+    }
+
+    /**
+     * Redis 대기 큐에서 랜덤으로 count만큼의 유저 ID를 조회합니다.
+     */
+    public Set<String> getRandomWaitingUsers(int count) {
+        List<Object> result = redisTemplate.opsForZSet().randomMembers(WAITING_USERS_KEY, count);
+        if (result == null) {
+            return Collections.emptySet();
+        }
+        return result.stream().map(Object::toString).collect(Collectors.toSet());
+    }
+
+    /**
+     * 매칭 정보를 Redis에 저장합니다.
      */
     public void saveMatchInfo(String matchId, MatchResultStatus matchResult) {
-        log.info("Setting match info to " + matchResult);
+        log.info("매칭 정보 저장: {}", matchId);
         if (matchId == null || matchResult == null) {
             throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "matchId 혹은 matchResult가 null입니다.");
         }
@@ -126,71 +140,54 @@ public class RedisService {
     }
 
     /**
-     * Redis에서 매칭 정보를 조회.
-     *
-     * @param matchId 조회할 매칭 ID
-     * @return 매칭 결과 상태 (없으면 null)
+     * Redis에서 매칭 정보를 조회합니다.
      */
     public MatchResultStatus getMatchInfo(String matchId) {
-        log.info("Getting match info...");
+        log.info("매칭 정보 조회: {}", matchId);
         Object data = redisTemplate.opsForValue().get(MATCH_KEY_PREFIX + matchId);
         if (data == null) {
             return null;
         }
         if (!(data instanceof MatchResultStatus matchResult)) {
             throw new BusinessException(ErrorCode.REDIS_DATA_MISMATCH,
-                    "Redis에서 가져온 데이터가 MatchResultStatus 타입이 아닙니다. matchId=" + matchId);
+                    "Redis 데이터 타입 불일치: matchId=" + matchId);
         }
         return matchResult;
     }
 
     /**
-     * Redis에서 매칭 정보를 삭제.
-     *
-     * @param matchId 삭제할 매칭 ID
+     * Redis에서 매칭 정보를 삭제합니다.
      */
     public void deleteMatchInfo(String matchId) {
-        log.info("Deleting match info...");
+        log.info("매칭 정보 삭제: {}", matchId);
         redisTemplate.delete(MATCH_KEY_PREFIX + matchId);
     }
 
     /**
-     * 실시간 매칭 대기 유저를 관리하기 위해 Sorted Set에 유저를 추가.
-     *
-     * @param userMatchStatus 추가할 유저 상태
+     * userId가 rejectedUserId를 거절한 기록 저장
      */
-    public void addUserToWaitingQueue(UserMatchStatus userMatchStatus) {
-        log.info("Adding user to waiting queue from Redis...");
-        if (userMatchStatus == null || userMatchStatus.getUserId() == null) {
-            throw new BusinessException(ErrorCode.ILLEGAL_ARGUMENT, "UserMatchStatus 혹은 userId가 null입니다.");
-        }
-        redisTemplate.opsForZSet().add("waiting_users", userMatchStatus.getUserId(), System.currentTimeMillis());
+    public void addRejection(String userId, String rejectedUserId) {
+        log.info("거절 기록 저장: {} - {}", userId, rejectedUserId);
+        String key = REJECTION_KEY_PREFIX + userId;
+        redisTemplate.opsForSet().add(key, rejectedUserId);
     }
 
     /**
-     * Sorted Set에서 매칭 대기 유저를 제거.
-     *
-     * @param userId 제거할 유저 ID
+     * userId가 otherUserId를 과거에 거절한 적이 있는지 조회
      */
-    public void removeUserFromWaitingQueue(String userId) {
-        log.info("Removing user from waiting queue from Redis...");
-        redisTemplate.opsForZSet().remove("waiting_users", userId);
+    public boolean hasRejected(String userId, String otherUserId) {
+        log.info("거절 기록 조회: {} - {}", userId, otherUserId);
+        String key = REJECTION_KEY_PREFIX + userId;
+        Boolean isMember = redisTemplate.opsForSet().isMember(key, otherUserId);
+        return isMember != null && isMember;
     }
 
     /**
-     * Sorted Set에서 랜덤으로 대기 유저 목록을 조회.
-     *
-     * @param count 조회할 유저 수
-     * @return 랜덤 대기 유저 ID 목록
+     * userId가 rejectedUserId를 거절한 기록 삭제
      */
-    public List<String> getRandomWaitingUsers(int count) {
-        log.info("Getting random waiting users...");
-        List<Object> randomObjects = redisTemplate.opsForZSet().randomMembers("waiting_users", count);
-        if (randomObjects == null) {
-            return List.of();
-        }
-        return randomObjects.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+    public void deleteRejection(String userId) {
+        log.info("거절 정보 삭제: {}", userId);
+        String key = REJECTION_KEY_PREFIX + userId;
+        redisTemplate.delete(key);
     }
 }

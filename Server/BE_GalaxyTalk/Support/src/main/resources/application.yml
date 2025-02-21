@@ -3,51 +3,31 @@
 spring:
   application:
     name: support-service
-
-  profiles:
-    include: redis
-    active: local  # 기본 환경을 local로 설정 (운영 환경에서는 prod로 변경)
-
-  #GATEWAY : HELPING USING DISCOVERY LOCATOR LIKE EUREKA
   cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
     openfeign:
       client:
         config:
           auth-service:
-            url: http://localhost:8081 #auth
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+
+  #MVC : HELPING FIND PATH LIKE /** OR /*
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  #JPA
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
 #Swagger settings : DOCS PATH SETTING
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
-
-#Eureka settings
-eureka:
-  client:
-    register-with-eureka: true #REGISTER IN EUREKA T/F
-    fetch-registry: true #GET OTHER SERVICE FROM EUREKA AND COMMUNICATE
-    service-url:
-      defaultZone: ${EUREKA_SERVICE_URL}/eureka/ #EUREKA SERVER URL
-  instance:
-    prefer-ip-address: true # FALSE : REGIST SERVICE BY HOSTNAME EX) LOCALHOST(might cause error in docker) / TRUE : REGIST SERVICE BY IP
-    leaseRenewalIntervalInSeconds: 5 #GATEWAY CONNECT TO EUREKA SERVER PER 5SEC, REFRESH SERVICE INSTANCE
-    leaseExpirationDurationInSeconds: 10 #EUREKA DELETE SERVICE INSTANCE IF DOES NOT REFRESH UNTIL 10 SEC
-    #    hostname: localhost
-    ip-address: 127.0.0.1
-    instance-id: ${spring.application.name}:${server.port} #MAKE Instance unique ID
-
-
-#service url
-support:
-  service:
-    url: ${SUPPORT_SERVICE_URL}
-
-gateway:
-  service:
-    url: ${GATEWAY_SERVICE_URL}
+    enabled: true

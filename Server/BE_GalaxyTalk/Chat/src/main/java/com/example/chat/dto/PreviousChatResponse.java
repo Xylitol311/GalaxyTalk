@@ -6,6 +6,7 @@ import lombok.Data;
 public class PreviousChatResponse {
     String chatRoomId;
     String myConcern;
+    String participantId;
     String participantConcern;
     Integer participantPlanet;
     String chatRoomCreatedAt;

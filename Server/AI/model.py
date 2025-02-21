@@ -18,21 +18,23 @@ class SentenceSimilarity:
 
         self.model.eval()  # Set to evaluation mode
    
-    def compute_similarity(self, sent1, sent2):
+    def compute_similarity(self, sent1: str, sent2: str):
+        sent1 = sent1.rstrip() + '.' if sent1[-1] not in {'!', '.', '?'} else sent1
+        sent2 = sent2.rstrip() + '.' if sent2[-1] not in {'!', '.', '?'} else sent2
+
         print(f"Input sentences: '{sent1}', '{sent2}'")
-        
-        encoded = self.tokenizer(sent1, sent2, 
+
+        inputs = self.tokenizer(sent1, sent2, 
                             padding=True,
                             truncation=True,
                             max_length=128,
                             return_tensors='pt')
-        print(f"Tokenized IDs: {encoded['input_ids']}")
+        print(f"Tokenized IDs: {inputs['input_ids']}")
         
-        input_ids = encoded['input_ids'].to(self.device)
-        attention_mask = encoded['attention_mask'].to(self.device)
-         
-        with torch.amp.autocast(device_type='cuda'):
-            outputs = self.model(input_ids, attention_mask=attention_mask)
-            similarity = torch.sigmoid(outputs.logits)
-    
-        return similarity.item()
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            prediction = outputs.logits.squeeze().item()
+
+        return prediction

@@ -1,8 +1,9 @@
 package com.galaxytalk.auth.controller;
 
 import com.galaxytalk.auth.dto.ApiResponseDto;
+import com.galaxytalk.auth.dto.EnergyRequest;
 import com.galaxytalk.auth.dto.UserSendDTO;
-import com.galaxytalk.auth.entity.Planets;
+import com.galaxytalk.auth.dto.UserSignup;
 import com.galaxytalk.auth.entity.Role;
 import com.galaxytalk.auth.entity.Users;
 import com.galaxytalk.auth.jwt.JWTUtil;
@@ -10,16 +11,12 @@ import com.galaxytalk.auth.service.PlanetService;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import com.galaxytalk.auth.service.UserService;
 import com.galaxytalk.auth.service.UserStatusService;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -47,12 +44,10 @@ public class AuthController {
     //# 로그인 : localhost:8080/oauth2/authorization/naver 로 리다이렉트 시키면 됨
     //# 회원가입
     @PostMapping("/signup")
-    @Transactional
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용, HTTP req -> 쿠키까기용(리프레시 갱신 - role 변경), HTTP res -> 쿠키 담아주기 용
     public ResponseEntity<?> signUp(@RequestHeader("X-User-ID") String serialNumber, HttpServletRequest request, HttpServletResponse response,
-                                    @RequestParam("mbti") String mbti, @RequestParam("planetId") int planetId) {
+                                    @RequestBody UserSignup userSignup) {
 
-        System.out.println(serialNumber);
         // 1. 쿠키 받아오기 & 없을 경우 에러처리( 리프레시 토큰 가져오기 용 )
         Cookie[] cookies = request.getCookies();
 
@@ -69,30 +64,18 @@ public class AuthController {
         if(!refreshTokenService.removeRefreshToken(accessToken))
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
-        // 2. 받은 시리얼 번호로 유저 검색
-        Users user = userService.getUserBySerialNumber(serialNumber);
-        if (user == null) {
+        //2. user DB에 저장
+        if(!userService.signup(serialNumber,userSignup.getMbti(),userSignup.getPlanetId()))
             return new ResponseEntity<>(ApiResponseDto.
                     badRequestUser, HttpStatus.BAD_REQUEST);
-        }
 
-        // 3. 사용자 정보 수정(mbti & 행성 & ROLE_USER로 승격)
-        user.setMbti(mbti);
-        user.setRole(Role.ROLE_USER);
 
-        // 3-1. 행성 정보 조회 및 설정
-        Planets planet = planetService.getPlanetById(planetId);
-        if (planet == null) {
-            return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
-        }
-        user.setPlanets(planet);
+        // 3. 토큰 수정하기
+        //3-1) 다시 넣어줄 토큰 생성(ROLE이 변경되었기 때문에)
+        String newAccessToken = jwtUtil.token(serialNumber, Role.ROLE_USER.toString(), 1000 * 60 * 60 *24 *7); //7일
+        String newRefreshToken = jwtUtil.token(serialNumber, Role.ROLE_USER.toString(), 1000 * 60 * 60 * 24 * 3); //3일
 
-        // 4. 토큰 수정하기
-        //4-1) 다시 넣어줄 토큰 생성(ROLE이 변경되었기 때문에)
-        String newAccessToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 1); //1시간
-        String newRefreshToken = jwtUtil.token(serialNumber, user.getRole().toString(), 1000 * 60 * 60 * 24 * 3); //3일
-
-        //4-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
+        //3-2) 만들어진 토큰은 클라이언트에 쿠키에 담아서 주기 & 리프레스 토큰 레디스에 추가
         response.addCookie(createCookie("AccessToken", newAccessToken));
         refreshTokenService.saveTokenInfo(newAccessToken,newRefreshToken);
 
@@ -122,26 +105,14 @@ public class AuthController {
 
     //# 회원정보 수정
     @PutMapping("/update")
-    @Transactional
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용
     public ResponseEntity<?> update(@RequestHeader("X-User-ID") String serialNumber,
-                                    @RequestParam("mbti") String mbti, @RequestParam("planetId") int planetId) {
+                                    @RequestBody UserSignup userSignup) {
 
-        //1. 유저 정보 조회 및 예외처리
-        Users user = userService.getUserBySerialNumber(serialNumber);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
-        }
-
-        //2. 사용자 정보 수정
-        user.setMbti(mbti);
-
-        //3. 행성 정보 조회 및 설정
-        Planets planet = planetService.getPlanetById(planetId);
-        if (planet == null) {
-            return new ResponseEntity<>(ApiResponseDto.badRequestPlanet, HttpStatus.BAD_REQUEST);
-        }
-        user.setPlanets(planet);
+        //1. 유저 정보 조회,수정 및 예외처리
+        if(!userService.signup(serialNumber,userSignup.getMbti(),userSignup.getPlanetId()))
+            return new ResponseEntity<>(ApiResponseDto.
+                    badRequestUser, HttpStatus.BAD_REQUEST);
 
         ApiResponseDto goodResponse = new ApiResponseDto("회원가입이 수정이 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
@@ -150,18 +121,11 @@ public class AuthController {
 
     //# 회원탈퇴 (SOFT DELETE)
     @PutMapping("/withdraw")
-    @Transactional
     //# serialNumber -> 게이트웨이에서 받아서 user 가져오고 수정시 사용, HTTP req -> 쿠키까기용(리프레시 가져오는 용) , HTTP res -> 삭제용 쿠키 담아주기 용
     public ResponseEntity<?> withdraw(@RequestHeader("X-User-ID") String serialNumber, HttpServletRequest request, HttpServletResponse response) {
 
-        // 1. 사용자 조회
-        Users user = userService.getUserBySerialNumber(serialNumber);
-        if (user == null) {
-            return new ResponseEntity<>(ApiResponseDto.badRequestUser, HttpStatus.BAD_REQUEST);
-        }
-
-        // 2. 쿠키 조회 및 삭제
-        //2-1) 토큰 조회 및 예외처리
+        // 1. 쿠키 조회 및 삭제
+        //1-1) 토큰 조회 및 예외처리
         Cookie[] cookies = request.getCookies();
 
         String accessToken = Arrays.stream(cookies)
@@ -174,20 +138,23 @@ public class AuthController {
         if (accessToken.isEmpty())
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
-        //3) 토큰들 다 삭제처리
+        //2) 토큰들 다 삭제처리
         if(!refreshTokenService.removeRefreshToken(accessToken))
             return ResponseEntity.status(499).body(ApiResponseDto.noRefreshToken);
 
         Cookie accessTokenCookie = new Cookie("AccessToken", null);
         accessTokenCookie.setMaxAge(0);
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setAttribute("SameSite","None");
         response.addCookie(accessTokenCookie);
 
-        // 4) 사용자 withdrawn 정보 수정
-        user.setWithdrawnAt(LocalDateTime.now());
+        //3.유저 정보 조회 및 DB SOFTDELETE
+        if(!userService.withDraw(serialNumber))
+            return new ResponseEntity<>(ApiResponseDto.
+                    badRequestUser, HttpStatus.BAD_REQUEST);
 
-        // 5) 사용자 role 수정
-        user.setRole(Role.ROLE_WITHDRAW);
 
         ApiResponseDto goodResponse = new ApiResponseDto("회원탈퇴가 완료 되었습니다.", null);
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
@@ -230,7 +197,7 @@ public class AuthController {
         }
 
         //4. 새로운 토큰 생성
-        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 1); //1시간
+        String newAccessToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 1); //1분 60 *24 => 하루
         String newRefreshToken = jwtUtil.token(jwtUtil.getSerialNumber(refreshToken), jwtUtil.getRole(refreshToken), 1000 * 60 * 60 * 24*3); //3일
 
 
@@ -270,7 +237,7 @@ public class AuthController {
     // 'matching' : 매칭 큐 진입
     // 'chatting' : 채팅 중
     @PostMapping("status")
-    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestParam("userInteractionState") String userInteractionState) {
+    public ResponseEntity<?> changeUserStatus(@RequestHeader("X-User-ID") String serialNumber, @RequestBody String userInteractionState) {
 
         //1. 회원 상태 저장
         if(!userStatusService.saveUserStatus(serialNumber, userInteractionState)){
@@ -283,6 +250,24 @@ public class AuthController {
         return new ResponseEntity<>(goodResponse, HttpStatus.OK);
     }
 
+    //energy 1도 상승
+    @PostMapping("energy")
+    public ResponseEntity<?> increaseEnergy(@RequestBody EnergyRequest energyRequest) {
+
+        //1. 유저 이름으로 검색
+        Users user1 = userService.getUserBySerialNumber(energyRequest.getReceiverId());
+        Users user2 = userService.getUserBySerialNumber(energyRequest.getSenderId());
+
+
+        //2. 유저 energy 온도 하나 올려주기
+        user1.setEnergy(user1.getEnergy() +1);
+        user2.setEnergy(user2.getEnergy()+1);
+
+
+        ApiResponseDto goodResponse = new ApiResponseDto("유저 에너지 상승에 성공했습니다", null);
+        return new ResponseEntity<>(goodResponse, HttpStatus.OK);
+    }
+
 
     // 쿠키 생성용 메서드
     private Cookie createCookie(String key, String value) {
@@ -290,16 +275,18 @@ public class AuthController {
         Cookie cookie = new Cookie(key, value);
 
         //쿠키의 유효기간 설정
-        cookie.setMaxAge(60 * 60); //1시간간
+        cookie.setMaxAge(60*60 * 24 *7 ); //1분 *60 해야 1시간
 
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
         cookie.setSecure(true);
 
         //브라우저가 쿠키값을 전송할 URL 지정
         cookie.setPath("/");
+//        cookie.setDomain("i12a503.p.ssafy.io");
 
         //브라우저에서(javascript를 통해) 쿠키에 접근할 수 없도록 제한
         cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "None");
 
 
         return cookie;

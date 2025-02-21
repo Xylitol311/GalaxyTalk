@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galaxytalk.gateway.dto.ApiResponseDto;
 import com.galaxytalk.gateway.jwt.JWTUtil;
-
-
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -19,7 +18,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
-import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -44,35 +43,32 @@ public class JwtAuthenticationFilter implements WebFilter {
         System.out.println("Request Headers: " + request.getHeaders());
         System.out.println("Request Cookies: " + request.getCookies());
 
-        // OPTIONS 요청은 바로 필터 체인을 실행하고 종료
-
-        String path = exchange.getRequest().getURI().getPath();
-
-        if (path.startsWith("/oauth2/authorization/")) {
-            return chain.filter(exchange);  // 필터 통과
-        }
-
-
+        // ✅ OPTIONS 요청은 바로 필터 체인을 실행하고 종료
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
 
+        String path = request.getURI().getPath();
+        System.out.println("들어오고 있는 경로 : " + path);
 
-        // 1. 쿠키에서 AccessToken 추출
-        String token = request.getCookies().getFirst("AccessToken") != null ?
-                request.getCookies().getFirst("AccessToken").getValue() : null;
+        // ✅ 특정 경로 제외
+        if (path.contains("/v3/api-docs") || path.contains("/api-docs")
+                || path.contains("/swagger-ui") || path.contains("/docs")
+                || path.startsWith("/oauth2/authorization/")) {
+            return chain.filter(exchange);
+        }
 
-        // 에러처리) token이 존재하지 않을 때
-        if (token == null) {
+        // ✅ AccessToken 쿠키 추출
+        MultiValueMap<String, HttpCookie> cookies = request.getCookies();
+        HttpCookie accessTokenCookie = cookies.getFirst("AccessToken");
+
+        if (accessTokenCookie == null) {
             return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
 
-        // 에러처리) token의 유효기간이 지났을 때
-        try {
-            if (jwtUtil.isExpired(token)) {
-                return onError(exchange, HttpStatus.UNAUTHORIZED);
-            }
-        } catch (ExpiredJwtException e){
+        String token = accessTokenCookie.getValue();
+
+        if (isTokenExpired(token)) {
             return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
 
@@ -85,6 +81,8 @@ public class JwtAuthenticationFilter implements WebFilter {
                 .header("X-User-ID", userId)
                 .build();
 
+        System.out.println("줄 request" + modifiedRequest);
+
         System.out.println("User ID: " + userId);
         System.out.println("Role: " + role);
 
@@ -94,15 +92,16 @@ public class JwtAuthenticationFilter implements WebFilter {
         );
         SecurityContext securityContext = new SecurityContextImpl(authentication);
 
-        if(CorsUtils.isPreFlightRequest(request)){
-            return chain.filter(exchange);
-        }
-
-
-        // 5. Spring Security가 감지할 수 있도록 SecurityContext 설정
         return chain.filter(exchange.mutate().request(modifiedRequest).build())
                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+    }
 
+    private boolean isTokenExpired(String token) {
+        try {
+            return jwtUtil.isExpired(token);
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, HttpStatus status) {
@@ -110,19 +109,13 @@ public class JwtAuthenticationFilter implements WebFilter {
         response.setStatusCode(status);
         response.getHeaders().add("Content-Type", "application/json");
 
-        // ApiResponseDto를 JSON 문자열로 변환
         try {
             String errorResponse = new ObjectMapper().writeValueAsString(ApiResponseDto.noAccessTokenResponse());
-
-            // 에러 응답을 작성
             DataBuffer buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));
         } catch (JsonProcessingException e) {
-            // 예외 처리: JSON 변환 오류 발생 시
             e.printStackTrace();
             return response.setComplete();
         }
     }
-
 }
-

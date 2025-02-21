@@ -4,8 +4,10 @@ import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.Participant;
 import com.example.chat.entity.ChatRoom;
+import com.example.chat.exception.BusinessException;
+import com.example.chat.exception.ErrorCode;
+import com.example.chat.feign.AuthClient;
 import com.example.chat.repository.ChatRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,31 +20,35 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ChatService {
+    private final AuthClient authClient;
     @Value("${prompt}")
     private String questionsPrompt;
 
     private final MongoTemplate mongoTemplate;
     private final ChatRepository chatRepository;
     private final ExternalApiService externalApiService;
+    private final AsyncChatService asyncChatService;
 
     /**
      * 매칭된 두 유저 정보를 mongodb에 저장해 새로운 방을 생성합니다.
      * @param matchRequest
      * @return chatRoomId
      */
-    @Transactional
-    public String createChatRoom(MatchResultRequest matchRequest, String sessionId) throws JsonProcessingException {
+    public String createChatRoom(MatchResultRequest matchRequest, String sessionId) {
         ChatRoom chatRoom = new ChatRoom();
 
         // participants 설정
@@ -73,11 +79,25 @@ public class ChatService {
         updateUserStatus(participant1.getUserId(), "chatting");
         updateUserStatus(participant2.getUserId(), "chatting");
 
-        // 방을 생성하고 방의 Id를 가져옵니다.
-        String chatRoomId = chatRepository.save(chatRoom).getId();
+        // 채팅방 저장 후 채팅방 ID가 없으면 에러 처리
+        ChatRoom savedRoom = chatRepository.save(chatRoom);
+        if (savedRoom.getId() == null) {
+            log.error("채팅방 저장 실패: sessionId={}", sessionId);
+            throw new BusinessException(ErrorCode.CHAT_ROOM_SAVE_FAILED);
+        }
+        String chatRoomId = savedRoom.getId();
 
         // AI 질문을 방 생성 시점에 생성합니다.
-        // createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2());
+        asyncChatService.createQuestions(chatRoomId, matchRequest.getConcern1(), matchRequest.getConcern2())
+                .exceptionally(throwable -> {
+                    log.error("질문 생성 중 에러 발생", throwable);
+                    return null;
+                });
+
+        // 참가자가 포함된 방중 비정상 종료된 방이 있다면 비정상 종료 처리(isCancelled: true, endedAt: now)
+        // 재연결 logic에서 에러가 안 나게 하기 위함
+        chatRepository.updateAbnormalChatrooms(chatRoomId, matchRequest.getUserId1());
+        chatRepository.updateAbnormalChatrooms(chatRoomId, matchRequest.getUserId2());
 
         return chatRoomId;
     }
@@ -118,7 +138,7 @@ public class ChatService {
                 .map(chatRoom -> chatRoom.getMessages().stream()
                         .sorted(Comparator.comparing(ChatMessage::getCreatedAt))
                         .collect(Collectors.toList()))
-                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다: " + chatRoomId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHAT_ROOM_NOT_FOUND));
     }
 
     public ChatRoom getChatRoomWithParticipants(String chatRoomId) {
@@ -144,13 +164,13 @@ public class ChatService {
      * @return sessionId
      */
     public ChatRoom getSessionId(String userId) {
-        return chatRepository.findActiveSessionIdByUserId(userId) // ChatRoom 객체에서 sessionId만 추출
-            .orElse(null);
+        return chatRepository.findFirstByParticipantsUserIdAndEndedAtNullOrderByIdDesc(userId) // ChatRoom 객체에서 sessionId만 추출
+            .orElseThrow(() -> new BusinessException(ErrorCode.ACTIVE_CHAT_ROOM_NOT_FOUND));
     }
 
     /**
      * 내가 했던 채팅방 정보를 가져옵니다.
-     * 이 때 endedAt이 Null이 아닌, 종료된 대화의 채팅만 가져옵니다.
+     * 이 때 endedAt이 Null이 아니고, isCancelled가 null인 정상 종료된 대화의 채팅만 가져옵니다.
      * pagination 객체 형태로 전달합니다.
      * @param userId, page, size
      * @return Page<PreviousChatResponse>
@@ -168,6 +188,11 @@ public class ChatService {
                 pageRequest
         );
 
+        // 이전 대화가 하나도 없는 경우
+        if(chatRooms == null) {
+            throw new BusinessException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
         List<PreviousChatResponse> responseList = new ArrayList<>();
 
         for (ChatRoom chatRoom : chatRooms) {
@@ -177,28 +202,50 @@ public class ChatService {
 
             List<Participant> participants = chatRoom.getParticipants();
 
+            // 내 id가 채팅방에 없다면 예외 발생
             Participant me = participants.stream()
                     .filter(p -> p.getUserId().equals(userId))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
+            // 상대방 id가 채팅방에 없다면 예외 발생
             Participant other = participants.stream()
                     .filter(p -> !p.getUserId().equals(userId))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
             String otherUserId = other.getUserId();
+
+            // 상대방 ID set
+            previousChatResponse.setParticipantId(otherUserId);
+
+            // 내 고민 set
             previousChatResponse.setMyConcern(me.getConcern());
+
+            // 상대방 고민 set
             previousChatResponse.setParticipantConcern(other.getConcern());
+
+            // 상대방 행성 set
             int planetId = (Integer) externalApiService.getUserInfo(otherUserId).get("planetId");
             previousChatResponse.setParticipantPlanet(planetId);
 
-            // TODO: Comment Server 구현 후 연동
-            // previousChatResponse.setParticipantReview(externalApiService.getCommentByUserId(otherUserId));
+            // support api에서 후기 가져와 상대방에 대한 내 후기 set
+            Map<String, Object> response = externalApiService.getLetter(userId, chatRoom.getId());
 
+            // 후기를 조회할 수 없는 경우
+            if(response == null) {
+                previousChatResponse.setParticipantReview(null);
+            }
+            // 후기가 있는 경우
+            else {
+                String letter = (String) response.get("content");
+                previousChatResponse.setParticipantReview(letter);
+            }
+            
             responseList.add(previousChatResponse);
         }
 
+        log.info("이전 채팅 목록 조회 완료: userId={}", userId);
         return new SliceImpl<>(responseList, pageRequest, chatRooms.hasNext());
     }
 
@@ -210,39 +257,8 @@ public class ChatService {
     public List<Question> getQuestions(String chatRoomId) {
         return chatRepository.findQuestionsByRoomId(chatRoomId)
                 .map(ChatRoom::getQuestions)  // ChatRoom에서 questions 리스트를 가져옴
-                .orElse(null);
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHAT_ROOM_QUESTION_NOT_FOUND));
     }
-
-    /**
-     * 방에 입력된 고민 두 개를 가지고 공통 질문 10개를 생성하고 mongodb에 저장합니다.
-     * 이는 방 생성 시 호출됩니다.
-     * @param concern1, concern2
-     */
-    public void createQuestions(String chatRoomId, String concern1, String concern2) throws JsonProcessingException {
-        // 두 질문을 Prompt로 변환합니다.
-        String prompt = createPromptwithTwoConcerns(concern1, concern2);
-
-        // Prompt를 gpt api에 입력하고 질문 열 개를 Json 형태로 받아옵니다.
-        String jsonString = externalApiService.createQuestions(prompt);
-
-        // 1. OpenAI API 응답 전체를 JSON 노드로 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(jsonString);
-
-        // 2. "choices" 배열에서 첫 번째 요소의 "message.content" 추출
-        String content = rootNode
-                .path("choices")
-                .get(0)
-                .path("message")
-                .path("content")
-                .asText();
-
-        List<Question> questions = objectMapper.readValue(content, new TypeReference<List<Question>>() {});
-
-        // 질문을 mongodb에 저장합니다.
-        chatRepository.updateQuestions(chatRoomId, questions);
-    }
-
 
     /**
      * 방 Id를 가지고 참여자들을 추출하고, 각 참여자들에 대한 정보를 Auth api에서 가져옵니다.
@@ -253,6 +269,13 @@ public class ChatService {
 
         // 방 정보에서 유사도 점수와 참가자 정보 추출
         ChatRoom chatRoom = chatRepository.findChatRoomById(chatRoomId);
+
+        // 일치하는 채팅방이 없는 경우
+        if (chatRoom == null) {
+            log.error("참가자 정보 조회 실패: 채팅방 {}이 없음", chatRoomId);
+            throw new BusinessException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
         List<Participant> participants = chatRoom.getParticipants();
 
         // 반환 형식에 일치하는 DTO 리스트 형태
@@ -281,7 +304,17 @@ public class ChatService {
         participantsResponse.setParticipants(participantsList);
         participantsResponse.setSimilarity(chatRoom.getSimilarityScore());
 
+        log.info("참가자 정보 조회 성공: chatRoomId={}", chatRoomId);
         return participantsResponse;
+    }
+
+    /**
+     * 1. mongodb의 isCancelled를 true로
+     * 2. auth api에 user 상태 update 요청
+     */
+    public void cancel(String userId, String chatRoomId) {
+        chatRepository.updateIsCancelled(chatRoomId);
+        externalApiService.updateUserStatus(new UserStatusRequest(userId, "idle"));
     }
 
     private String createPromptwithTwoConcerns(String concern1, String concern2) {
@@ -294,5 +327,4 @@ public class ChatService {
                 status
         ));
     }
-
 }

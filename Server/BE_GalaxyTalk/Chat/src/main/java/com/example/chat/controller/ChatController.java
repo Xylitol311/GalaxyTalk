@@ -4,8 +4,9 @@ import com.example.chat.dto.*;
 import com.example.chat.entity.ChatMessage;
 import com.example.chat.entity.ChatRoom;
 import com.example.chat.entity.Participant;
+import com.example.chat.exception.BusinessException;
 import com.example.chat.service.ChatService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.chat.exception.ErrorCode;
 import io.livekit.server.AccessToken;
 import io.livekit.server.RoomJoin;
 import io.livekit.server.RoomName;
@@ -52,24 +53,30 @@ public class ChatController {
     public ResponseEntity<ApiResponseDto> createSessionWithTwoTokens(@RequestBody MatchResultRequest matchResultRequest) throws IOException {
         // LiveKit room 생성
         String roomName = UUID.randomUUID().toString();
+        log.info("LiveKit room 생성 요청: roomName={}", roomName);
 
         // Room 생성 및 응답 처리
         Call<Room> roomCall = roomService.createRoom(roomName);
         Response<Room> response = roomCall.execute();
         Room room = response.body();
 
+        // 에러 처리: LiveKit 방 생성 실패 시
         if (room == null) {
-            throw new RuntimeException("Failed to create LiveKit room");
+            log.error("LiveKit 방 생성 실패: room is null, roomName={}", roomName);
+            throw new BusinessException(ErrorCode.LIVEKIT_ROOM_CREATION_FAILED);
         }
 
         // 채팅방 생성
         String chatRoomId = chatService.createChatRoom(matchResultRequest, roomName);
+        log.info("채팅방 생성 성공: chatRoomId={}, sessionId={}", chatRoomId, roomName);
 
         // 첫 번째 사용자 토큰 생성
         String tokenA = generateToken(roomName, matchResultRequest.getUserId1());
 
         // 두 번째 사용자 토큰 생성
         String tokenB = generateToken(roomName, matchResultRequest.getUserId2());
+
+        log.info("토큰 생성 완료: user1, user2 토큰 생성");
 
         ChatResponse chatResponse = new ChatResponse(
                 roomName,
@@ -96,6 +103,8 @@ public class ChatController {
         chatRequest.setSenderId(userId);
 
         ChatMessage savedMessage = chatService.saveMessage(chatRequest);
+        log.info("메시지 저장 성공: chatRoomId={}, senderId={}", chatRoomId, userId);
+
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "메세지 전송 성공",
@@ -111,6 +120,7 @@ public class ChatController {
     @GetMapping("/{chatRoomId}/messages")
     public ResponseEntity<ApiResponseDto> getPreviousMessages(@PathVariable String chatRoomId) {
         List<ChatMessage> messages = chatService.getPreviousMessages(chatRoomId);
+        log.info("이전 메시지 조회 성공: chatRoomId={}", chatRoomId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "이전 대화 조회 성공",
@@ -128,16 +138,24 @@ public class ChatController {
         // 1. 채팅방의 세션 ID와 참여자 목록 조회
         ChatRoom chatRoom = chatService.getChatRoomWithParticipants(chatRoomId);
 
+        if (chatRoom == null) {
+            log.error("채팅방 나가기 실패: 채팅방 {} 존재하지 않음", chatRoomId);
+            throw new BusinessException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
         // 2. 먼저 모든 참가자 강제 퇴장
         for (Participant participant : chatRoom.getParticipants()) {
+            log.info("참가자 {} 강제 퇴장 시도: sessionId={}", participant.getUserId(), chatRoom.getSessionId());
             roomService.removeParticipant(chatRoom.getSessionId(), participant.getUserId());
         }
 
         // 3. LiveKit room 삭제
+        log.info("LiveKit room 삭제 시도: sessionId={}", chatRoom.getSessionId());
         roomService.deleteRoom(chatRoom.getSessionId());
 
         // 4. 채팅방 종료 처리
         chatService.endChatRoom(chatRoom);
+        log.info("채팅방 종료 처리 완료: chatRoomId={}", chatRoomId);
 
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
@@ -156,11 +174,18 @@ public class ChatController {
     public ResponseEntity<ApiResponseDto> reconnect(@RequestHeader("X-User-Id") String userId) {
         // 1. user가 속한 active room 찾기
         ChatRoom chatRoom = chatService.getSessionId(userId);
+
+        if (chatRoom == null) {
+            log.error("재연결 실패: 활성 채팅방 없음 for userId={}", userId);
+            throw new BusinessException(ErrorCode.ACTIVE_CHAT_ROOM_NOT_FOUND);
+        }
+
         String chatRoomId = chatRoom.getId();
         String sessionId = chatRoom.getSessionId();
 
         // 2. 새로운 토큰 생성
         String token = generateToken(sessionId, userId);
+        log.info("재연결 토큰 생성 성공: userId={}, sessionId={}", userId, sessionId);
 
         ReconnectResponse reconnectResponse = new ReconnectResponse(
                 chatRoomId,
@@ -180,13 +205,14 @@ public class ChatController {
      * @param userId
      * @return chatRoomId, myConcern, participantConcern, participantPlanet, roomCreatedAt, participantReview
      */
-    @GetMapping("/messages")
+    @GetMapping("/rooms")
     public ResponseEntity<ApiResponseDto> getPreviousChats(@RequestHeader("X-User-Id") String userId,
                                                            @RequestParam(value = "cursor", required = false) String cursor,
                                                            @RequestParam(value = "limit", defaultValue = "10") int limit) {
 
         Slice<PreviousChatResponse> sliceResult = chatService.getPreviousChat(userId, cursor, limit);
 
+        log.info("이전 채팅 목록 조회 성공: userId={}", userId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "이전 대화 정보 요청 성공",
@@ -200,9 +226,15 @@ public class ChatController {
      * @return questions
      */
     @GetMapping("/{chatRoomId}/ai")
-    public ResponseEntity<ApiResponseDto> getQuestions(@PathVariable("chatRoomId") String chatRoomId) throws JsonProcessingException {
+    public ResponseEntity<ApiResponseDto> getQuestions(@PathVariable("chatRoomId") String chatRoomId) {
         List<Question> questions = chatService.getQuestions(chatRoomId);
 
+        if (questions == null || questions.isEmpty()) {
+            log.error("AI 질문 생성 실패: 채팅방 {}의 질문이 존재하지 않음", chatRoomId);
+            throw new BusinessException(ErrorCode.CHAT_ROOM_QUESTION_NOT_FOUND);
+        }
+
+        log.info("AI 질문 조회 성공: chatRoomId={}", chatRoomId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "AI 질문 생성 성공",
@@ -218,10 +250,36 @@ public class ChatController {
     public ResponseEntity<ApiResponseDto> getParticipants(@PathVariable("chatRoomId") String chatRoomId) {
         ParticipantsResponse participants = chatService.getParticipantsInfo(chatRoomId);
 
+        if (participants == null) {
+            log.error("참가자 정보 조회 실패: 채팅방 {}의 참가자 정보 없음", chatRoomId);
+            throw new BusinessException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
+        log.info("참가자 정보 조회 성공: chatRoomId={}", chatRoomId);
         return ResponseEntity.ok(new ApiResponseDto(
                 true,
                 "참가자 정보 조회 성공",
                 participants
+        ));
+    }
+
+    /**
+     * 매칭 성사 후 채팅방 입장 로딩 시 취소 버튼을 클릭합니다.
+     * mongodb에서 해당 채팅방을 종료(soft delete)하고 상태를 다시 idle로 변경합니다.
+     * mongodb의 isCancelled를 true로 변환
+     * @param chatRoomId, userId
+     */
+    @PutMapping("/{chatRoomId}/cancel")
+    public ResponseEntity<ApiResponseDto> cancel(@PathVariable("chatRoomId") String chatRoomId,
+                                                 @RequestHeader("X-User-Id") String userId) {
+        log.info("{} 사용자 채팅방 로딩 취소 시도", userId);
+        chatService.cancel(userId, chatRoomId);
+        log.info("{} 사용자 채팅방 로딩 취소 성공", userId);
+
+        return ResponseEntity.ok(new ApiResponseDto(
+                true,
+                "채팅 입장 로딩 취소 성공",
+                null
         ));
     }
 

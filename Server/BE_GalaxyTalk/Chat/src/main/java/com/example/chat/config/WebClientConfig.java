@@ -13,35 +13,8 @@ import reactor.core.publisher.Mono;
 @Configuration
 @Slf4j
 public class WebClientConfig {
-
-    @Value("${auth.service.url}")
-    private String authServiceUrl;
-
-    @Value("${comment.service.url}")
-    private String commentServiceUrl;
-
     @Value("${openai.api.key}")
     private String apiKey;
-
-    @Bean
-    public WebClient authServiceClient() {
-        return WebClient.builder()
-                .baseUrl(authServiceUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
-                .build();
-    }
-
-    @Bean
-    public WebClient commentServiceClient() {
-        return WebClient.builder()
-                .baseUrl(commentServiceUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .filter(logRequest())
-                .filter(logResponse())
-                .build();
-    }
 
     @Bean
     public WebClient gptClient() {

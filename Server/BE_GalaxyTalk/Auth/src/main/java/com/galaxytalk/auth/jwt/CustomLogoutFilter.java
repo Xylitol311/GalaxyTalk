@@ -44,11 +44,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //path and method verify
         String requestUri = request.getRequestURI();
         if (!requestUri.matches("^\\/api/oauth/logout$")) {
-
             filterChain.doFilter(request, response);
             return;
         }
-
 
 
         // 쿠키 가져오기
@@ -84,6 +82,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
         cookie.setPath("/");
         cookie.setHttpOnly(true); // 기존 쿠키 속성과 동일하게 유지
         cookie.setSecure(true);
+        cookie.setAttribute("SameSite","None");
+//        cookie.setDomain("i12a503.p.ssafy.io");
         response.addCookie(cookie);
     }
 

@@ -1,3 +1,34 @@
 server:
   address: 0.0.0.0
   port: 8080
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # Jenkins에서 EUREKA_SERVICE_URL을 주입받습니다.
+      defaultZone: ${EUREKA_SERVICE_URL}/eureka/
+  instance:
+    prefer-ip-address: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
+    instance-id: ${spring.application.name}:${server.port}
+
+#Swagger setting
+springdoc:
+  swagger-ui:
+    # 외부 클라이언트가 접속할 Swagger UI 경로 (예: Nginx를 통해 https로 노출됨)
+    path: /docs/swagger-ui.html
+    webjars:
+      prefix: /webjars
+    urls:
+      - name: auth service
+        url: /gateway/auth-service/v3/api-docs
+      - name: support service
+        url: /gateway/support-service/v3/api-docs
+      - name: chat service
+        url: /gateway/chat-service/v3/api-docs
+      - name: match service
+        url: /gateway/match-service/v3/api-docs

@@ -4,5 +4,14 @@ server:
   port: 8080
 
 eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # Jenkins에서 EUREKA_SERVICE_URL을 주입받습니다.
+      defaultZone: ${EUREKA_SERVICE_URL}/eureka/
   instance:
-    ip-address: ${SERVER_IP:0.0.0.0}  # 운영 환경에서 별도 IP 주입 가능 (환경 변수 SERVER_IP가 없으면 0.0.0.0)
+    prefer-ip-address: true
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
+    instance-id: ${spring.application.name}:${server.port}  # 운영 환경에서 별도 IP 주입 가능 (환경 변수 SERVER_IP가 없으면 0.0.0.0)

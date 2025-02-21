@@ -1,31 +1,28 @@
 spring:
   application:
     name: match-service
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+          chat-service:
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
+
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
-
-# Swagger URL은 환경변수(GATEWAY_SERVICE_URL, MATCH_SERVICE_URL)를 통해 주입받습니다.
-swagger:
-  gateway:
-    url: ${GATEWAY_SERVICE_URL}
-  match:
-    url: ${MATCH_SERVICE_URL}
+    enabled: true
 
 # External API url
-# application.yml에서
-chat:
-  service:
-    name: ${CHAT_SERVICE_NAME:chat-service}    # 기본값은 chat-service
-auth:
-  service:
-    name: ${AUTH_SERVICE_NAME:auth-service}    # 기본값은 auth-service
 ai:
   service:
-    url: ${MATCH_TO_AI_URL}
+    url: ${AI_SERVICE_URL}
 
 management:
   endpoints:

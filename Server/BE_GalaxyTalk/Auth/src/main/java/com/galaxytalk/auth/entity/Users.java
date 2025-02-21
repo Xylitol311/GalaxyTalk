@@ -38,7 +38,7 @@ public class Users {
     private Planets planets;
 
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("36")
     private int energy;
 
     @Column(nullable = false)

@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * @Validated 검사(@NotNull, @Size 등)에서 발생하는 ConstraintViolationException 처리
+     * @Validated 검사(@ NotNull, @ Size 등)에서 발생하는 ConstraintViolationException 처리
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponseDto> handleConstraintViolationException(ConstraintViolationException ex) {

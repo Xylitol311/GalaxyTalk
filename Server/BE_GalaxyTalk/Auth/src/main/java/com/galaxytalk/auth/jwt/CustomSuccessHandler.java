@@ -1,14 +1,12 @@
 package com.galaxytalk.auth.jwt;
 
 import com.galaxytalk.auth.dto.CustomOAuth2User;
-
-import com.galaxytalk.auth.entity.RefreshToken;
 import com.galaxytalk.auth.service.RefreshTokenService;
 import com.galaxytalk.auth.service.UserStatusService;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -22,6 +20,7 @@ import java.util.Iterator;
 
 // 로그인 성공시 부가 작업
 @Component
+@Slf4j
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Value("${front.url}")
@@ -40,42 +39,50 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException, IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        try {
+            log.info("onAuthenticationSuccess 메서드에 들어옴");
+            // 성공 시 받은 사용자 정보 처리
+            CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        //성공할 경우 받은 데이터 처리
-        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+            log.info("customUserDetails에 값 들어옴");
 
+            // provider로부터 받은 serialNumber
+            String serialNumber = customUserDetails.getName();
+            log.info("네이버/카카오로부터 받은 serialNumber: {}", serialNumber);
 
-        //데이터 1) provider(네이버)로 부터 받은 serialNumber
-        String serialNumber = customUserDetails.getName();
+            // 권한 정보 읽기
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+            String role = iterator.next().getAuthority();
+            log.info("권한 읽어옴: {}", role);
 
-        //데이터 2) 권한 읽어오기
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-        String role = auth.getAuthority();
+            // 토큰 생성
+            String accessToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 *24 *7); // 7일
+            String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); // 3일
+            log.info("토큰 생성 완료, accessToken: {}", accessToken);
 
-        //토큰 생성
-        String accessToken = jwtUtil.token(serialNumber, role, 1000*60*60*1); //1시간
-        String refreshToken = jwtUtil.token(serialNumber, role, 1000 * 60 * 60 * 24 * 3); //3일
+            // 생성된 토큰을 쿠키에 담아서 전달
+            response.addCookie(createCookie("AccessToken", accessToken));
+            response.setStatus(HttpStatus.OK.value());
+            log.info("쿠키에 토큰 담아 전달");
 
+            // 리프레시 토큰 저장 및 사용자 상태 업데이트
+            refreshTokenService.saveTokenInfo(accessToken, refreshToken);
+            userStatusService.saveUserStatus(serialNumber, "idle");
+            log.info("토큰과 유저 상태 저장 완료");
 
-        //만들어진 토큰은 클라이언트데 쿠키에 담아서 주기
-        response.addCookie(createCookie("AccessToken", accessToken));
-        response.setStatus(HttpStatus.OK.value());
-
-        //리프레시 토큰 레디스에 넣기, 유저 상태 관리 시작
-        refreshTokenService.saveTokenInfo(accessToken,refreshToken);
-        userStatusService.saveUserStatus(serialNumber, "idle");
-
-
-        // 권한에 따른 로그인 후 로직 분기
-        if(role.equals("ROLE_GUEST")) {
-            response.sendRedirect(frontUrl+"/signup");
-        }else if(role.equals("ROLE_USER")){
-            response.sendRedirect(frontUrl);
-        }else{
-            response.sendRedirect(frontUrl+"/signup");
+            // 권한에 따른 리다이렉트 처리
+            if ("ROLE_GUEST".equals(role)) {
+                response.sendRedirect(frontUrl + "signup");
+            } else if ("ROLE_USER".equals(role)) {
+                response.sendRedirect(frontUrl);
+            } else {
+                response.sendRedirect(frontUrl + "signup");
+            }
+        } catch (Exception e) {
+            log.error("토큰 생성 및 저장 과정 중 오류 발생: ", e);
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "토큰 처리 중 오류 발생");
         }
     }
 
@@ -85,12 +92,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Cookie cookie = new Cookie(key, value) ;
 
         //쿠키의 유효기간 설정
-        cookie.setMaxAge(60*60); //1시간간
+        cookie.setMaxAge(60*60 * 24 *7 ); //7일
         //SSL 통신채널 연결 시에만 쿠키를 전송하도록 설정
         cookie.setSecure(true);
 
         //브라우저가 쿠키값을 전송할 URL 지정
         cookie.setPath("/");
+        cookie.setAttribute("SameSite", "None");
+//        cookie.setDomain("i12a503.p.ssafy.io");
 
         //브라우저에서(javascript를 통해) 쿠키에 접근할 수 없도록 제한
         cookie.setHttpOnly(true);

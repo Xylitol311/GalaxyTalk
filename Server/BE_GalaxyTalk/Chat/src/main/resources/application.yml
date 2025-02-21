@@ -8,30 +8,19 @@ spring:
       client:
         config:
           auth-service:
-            url: ${AUTH_SERVICE_URL} #auth
+            connectTimeout: 5000  # 최소한 하나의 설정이 필요
+            readTimeout: 5000
 server:
   port: 8084
 
-# Eureka 설정
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: ${EUREKA_SERVICE_URL}/eureka/
-  instance:
-    prefer-ip-address: true
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 10
-    ip-address: 127.0.0.1
-    instance-id: ${spring.application.name}:${server.port}
+
 
 # Swagger 관련 설정
-swagger:
-  gateway:
-    url: ${GATEWAY_SERVICE_URL}
-  chat:
-    url: ${CHAT_SERVICE_URL}
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
 
 livekit:
   api:
@@ -43,14 +32,6 @@ mongo:
   initdb:
     uri: ${MONGO_INITDB_URI}
     database: ${MONGO_INITDB_DATABASE}
-
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL}
-
-comment:
-  service:
-    url: ${COMMENT_SERVICE_URL}
 
 openai:
   api:

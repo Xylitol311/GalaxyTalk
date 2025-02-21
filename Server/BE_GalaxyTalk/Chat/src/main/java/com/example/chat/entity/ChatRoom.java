@@ -21,4 +21,5 @@ public class ChatRoom {
     private LocalDateTime createdAt;
     private LocalDateTime endedAt;
     private List<Question> questions;
+    private Boolean isCancelled;
 }
