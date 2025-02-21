@@ -3,6 +3,17 @@ export default {
     darkMode: ['class'],
     content: ['./index.html', './src/**/*.{ts,tsx,js,jsx}'],
     theme: {
+        fontFamily: {
+            sans: [
+                'Gowun Batang',
+                'ui-sans-serif',
+                'system-ui',
+                '-apple-system',
+                'sans-serif',
+            ],
+            serif: ['Gowun Batang', 'ui-serif', 'Georgia', 'serif'],
+        },
+
         extend: {
             borderRadius: {
                 lg: 'var(--radius)',
@@ -50,6 +61,9 @@ export default {
                     4: 'hsl(var(--chart-4))',
                     5: 'hsl(var(--chart-5))',
                 },
+            },
+            fontFamily: {
+                grandiflora: ['"Grandiflora One"', 'serif'], // 추가 폰트
             },
         },
     },

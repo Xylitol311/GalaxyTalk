@@ -1,63 +1,92 @@
 // import '@livekit/components-styles';
-import { LiveKitRoom } from '@livekit/components-react';
-import { useMutation } from '@tanstack/react-query';
-import { Bot, ChevronLeft, ChevronRight, LogOut, Menu } from 'lucide-react';
+import {
+    Toast,
+    useConnectionState,
+    useDataChannel,
+    useDisconnectButton,
+    useParticipants,
+    useRoomContext,
+} from '@livekit/components-react';
+import { RemoteParticipant, RoomEvent } from 'livekit-client';
+import { Bot, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getPlanetNameById } from '@/app/config/constants/planet';
 import { useUserStore } from '@/app/model/stores/user';
+import { queryClient } from '@/shared/api/query/client';
+import { toast } from '@/shared/model/hooks/use-toast';
 import useIsMobile from '@/shared/model/hooks/useIsMobile';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/shared/ui/shadcn/alert-dialog';
 import { Button } from '@/shared/ui/shadcn/button';
-import { postAIQuestions } from './api/apis';
-import { useDeleteChatRoom, useGetChatParticipants } from './api/queries';
-import { ChatData } from './model/interfaces';
+import {
+    useAIQuestionsQuery,
+    useDeleteChatRoom,
+    useGetChatParticipants,
+} from './api/queries';
+import { AIQuestion, ChatData, Participant } from './model/interfaces';
+import AudioRenderer from './ui/AudioRenderer';
+import CustomAudioControl from './ui/CustomAudioControl';
+import CustomControlBar from './ui/CustomControlBar';
+import LetterFormModal from './ui/LetterFormModal';
+import MbtiTag from './ui/MbtiTag';
 import ReactionPanel from './ui/ReactionPanel';
+import TemperatureTag from './ui/TemperatureTag';
 import TextChat from './ui/TextChat';
+import VideoRenderer from './ui/VideoRenderer';
 
 interface ChattingPageProps {
     chatData: ChatData;
 }
 
-interface Question {
-    questionId: string;
-    content: string;
-}
-
-interface Participant {
-    userId: string;
-    mbti: string;
-    concern: string;
-    planetId: number;
-    energy: number;
-}
-
 function ChattingPage({ chatData }: ChattingPageProps) {
-    // const { sessionId, token, chatRoomId } = chatData;
-    const LIVEKIT_URL = 'wss://i12a503.p.ssafy.io/livekitws/';
-    const token =
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzNDUiLCJpc3MiOiJnYWxheHkiLCJuYW1lIjoidXNlcjEyMzQ1IiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiIyZWViYjI0OC1jMGM2LTQ4Y2EtYTc2NC1hNmQ4Zjg3OTg1YTcifSwic2lwIjp7fSwiZXhwIjoxNzM5Mjc4Njk3LCJqdGkiOiJ1c2VyMTIzNDUifQ.lV8Ei3Pt_poX8aVY4F-pR8ULkvEhAGjfVZnMS2P6ivk';
-    const chatRoomId = 'xxyy';
+    const { sessionId, token, chatRoomId } = chatData;
+
     const isMobile = useIsMobile();
-    const disconnectButtonProps = {};
-    // const { buttonProps: disconnectButtonProps } = useDisconnectButton({});
+    const { buttonProps: disconnectButtonProps } = useDisconnectButton({});
 
     const [isAiModalOpen, setAiModalOpen] = useState(false);
-    const [AIQuestions, setAIQuestions] = useState<Question[]>([]);
+    const [AIQuestions, setAIQuestions] = useState<AIQuestion[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [myInfo, setMyInfo] = useState<Participant | null>(null);
     const [partnerInfo, setPartnerInfo] = useState<Participant | null>(null);
+    const [isLetterModalOpen, setLetterModalOpen] = useState(false);
+    const [isLeaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
-    const { mutate: generateAIQuestions } = useMutation({
-        mutationFn: () => postAIQuestions(chatRoomId),
-        onSuccess: (response) => {
-            setAIQuestions(response.data);
-            setAiModalOpen(true);
-        },
-    });
+    // const { mutate: generateAIQuestions } = useMutation({
+    //     mutationFn: () => postAIQuestions(chatRoomId),
+    //     onSuccess: (response) => {
+    //         setAIQuestions(response.data);
+    //         setAiModalOpen(true);
+    //     },
+    // });
+    // useQuery 훅에서 리턴된 refetch 함수를 generateAIQuestions라 명명
+    // const { refetch: generateAIQuestions } = useAIQuestionsQuery(
+    //     chatRoomId,
+    //     setAIQuestions,
+    //     setAiModalOpen
+    // );
+
+    const {
+        data: aiQuestionsData,
+        refetch,
+        isRefetchError,
+    } = useAIQuestionsQuery(chatRoomId);
 
     const { mutate: leaveChatRoom } = useDeleteChatRoom();
     const { data: response } = useGetChatParticipants(chatRoomId);
 
     const { userId: myUserId } = useUserStore();
+
+    const participants = useParticipants();
+    const connectionState = useConnectionState();
 
     useEffect(() => {
         if (response?.success && response.data) {
@@ -74,12 +103,55 @@ function ChattingPage({ chatData }: ChattingPageProps) {
             if (me) setMyInfo(me);
             if (partner) setPartnerInfo(partner);
         }
-    }, [response]);
+    }, [response, myUserId]);
+
+    useEffect(() => {
+        if (aiQuestionsData) {
+            setAIQuestions(aiQuestionsData.data);
+        }
+    }, [aiQuestionsData]);
+
+    const room = useRoomContext();
+
+    useEffect(() => {
+        if (!room) return;
+
+        const handleParticipantDisconnected = (
+            participant: RemoteParticipant
+        ) => {
+            console.log('상대방이 나갔습니다.', participant);
+        };
+
+        // RoomEvent를 이용해 이벤트 리스너 등록
+        room.on(
+            RoomEvent.ParticipantDisconnected,
+            handleParticipantDisconnected
+        );
+
+        return () => {
+            // 컴포넌트 언마운트 또는 room 변경 시 리스너 해제
+            room.off(
+                RoomEvent.ParticipantDisconnected,
+                handleParticipantDisconnected
+            );
+        };
+    }, [room]);
 
     const handleAIQuestionButton = () => {
         if (!AIQuestions.length) {
-            generateAIQuestions();
+            queryClient.invalidateQueries({
+                queryKey: ['ai-questions', chatRoomId],
+            });
+            refetch();
+
+            if (isRefetchError) {
+                toast({
+                    variant: 'destructive',
+                    title: 'AI 질문을 생성중이에요!',
+                });
+            }
         }
+
         setAiModalOpen(!isAiModalOpen);
     };
 
@@ -100,19 +172,94 @@ function ChattingPage({ chatData }: ChattingPageProps) {
     };
 
     const handleLeaveChat = () => {
-        disconnectButtonProps?.onclick();
+        // 나가기 메시지 데이터 준비
+        const messageData = {
+            text: `leave room`,
+            timestamp: Date.now(),
+        };
+
+        // JSON 문자열로 변환 후 Uint8Array로 인코딩
+        const payload = new TextEncoder().encode(JSON.stringify(messageData));
+
+        // DataChannel 메시지 옵션 (topic은 'leave')
+        const options = {
+            reliability: true,
+            topic: 'leave',
+        };
+
+        // 나가기 메시지 전송
+        sendLeave(payload, options);
+        console.log('send leave chat');
+
         leaveChatRoom(chatRoomId);
+        setLetterModalOpen(true);
+        setLeaveDialogOpen(false);
+
+        setTimeout(() => {
+            disconnectButtonProps.onClick();
+        }, 1000);
     };
 
+    // 'leave' topic으로 메시지를 전송할 send 함수를 가져옵니다.
+    const { send: sendLeave } = useDataChannel('leave');
+
+    // 'leave' topic 메시지를 수신하여 상대방이 나갔음을 알립니다.
+    useDataChannel('leave', (msg) => {
+        try {
+            const decoded = new TextDecoder().decode(msg.payload);
+            const leaveData = JSON.parse(decoded);
+            console.log(leaveData);
+            if (leaveData.text === 'leave room') {
+                // 상대방이 채팅방을 나갔다는 메시지를 받으면 AlertDialog를 열도록 상태 변경
+                console.log('receive leave chat');
+                setLeaveDialogOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to process leave message', error);
+        }
+    });
+
+    if (connectionState !== 'connected') {
+        return (
+            <>
+                <Toast className="text-white">Connecting...</Toast>
+                {isLetterModalOpen && partnerInfo && (
+                    <LetterFormModal
+                        chatRoomId={chatRoomId}
+                        receiverId={partnerInfo?.userId}
+                    />
+                )}
+            </>
+        );
+    }
+
     return (
-        <LiveKitRoom
-            video={false}
-            audio={false}
-            token={token}
-            serverUrl={LIVEKIT_URL}
-            data-lk-theme="default">
+        <>
+            <AlertDialog
+                open={isLeaveDialogOpen}
+                onOpenChange={setLeaveDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            상대방이 채팅방을 나갔습니다
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            채팅이 종료되었어요.
+                            <br />
+                            채팅방을 나가시겠어요?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>아니오</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLeaveChat}>
+                            네
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             {isMobile ? (
-                <div className="h-screen flex flex-col justify-center items-end relative">
+                <div className="flex flex-col h-dvh justify-center items-end relative">
                     <div className="w-full h-14 bg-black text-white flex justify-between items-center p-2">
                         <div>
                             <Button
@@ -128,7 +275,8 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 />
                             </Button>
                         </div>
-                        <div>
+                        <div className="flex items-center">
+                            <CustomAudioControl />
                             <Button
                                 size="icon"
                                 variant="ghost"
@@ -145,9 +293,7 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                 size="icon"
                                 variant="ghost"
                                 className="dark w-12 h-12"
-
-                                // onClick={handleClickPrevQuestion}
-                            >
+                                onClick={() => console.log('menu click')}>
                                 <Menu
                                     style={{
                                         height: '20px',
@@ -197,11 +343,18 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                     <TextChat chatRoomId={chatRoomId} />
                 </div>
             ) : (
-                <div className="w-full h-screen flex justify-center items-center">
-                    <div className="h-screen max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
-                        <div className="flex justify-center items-end my-10">
-                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6">
-                                <h1 className="text-2xl">
+                <div className="w-full flex justify-center items-center">
+                    <div className="max-w-full w-11/12 grid grid-cols-[minmax(200px,1fr)_minmax(300px,1.5fr)_minmax(200px,1fr)] gap-8">
+                        <div className="flex flex-col justify-end">
+                            <VideoRenderer userId={participants[1]?.identity} />
+                            <AudioRenderer userId={participants[1]?.identity} />
+                            <div className="bg-slate-300 w-full rounded-lg p-4 relative">
+                                <div className="absolute -top-[57px] right-0">
+                                    <ReactionPanel
+                                        userId={participants[1]?.identity}
+                                    />
+                                </div>
+                                <h1 className="text-2xl font-bold mb-4">
                                     {partnerInfo?.planetId
                                         ? getPlanetNameById(
                                               partnerInfo.planetId
@@ -209,121 +362,142 @@ function ChattingPage({ chatData }: ChattingPageProps) {
                                         : ''}
                                     &nbsp;여행자
                                 </h1>
-                                <p>
-                                    나누고 싶은 이야기: {partnerInfo?.concern}
-                                    <br /> 친구의 성향: {partnerInfo?.mbti}
-                                    <br /> 친구의 매너온도:{' '}
-                                    {partnerInfo?.energy}°C
-                                </p>
+                                <div className="mb-8">
+                                    <h2 className="font-bold mb-1">
+                                        나누고 싶은 이야기
+                                    </h2>
+                                    <p className="min-h-28 line-clamp-6 text-sm mb-2">
+                                        {partnerInfo?.concern}
+                                    </p>
+                                    <MbtiTag mbti={partnerInfo?.mbti} />
+                                    <TemperatureTag
+                                        energy={partnerInfo?.energy}
+                                    />
+                                </div>
+                                <div className="invisible">
+                                    <CustomControlBar
+                                        onLeave={handleLeaveChat}
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <div className="flex justify-center items-end my-10 relative">
-                            {!isAiModalOpen ? (
-                                <div
-                                    className="w-full h-32 z-10 absolute top-0 left-0 p-2"
-                                    style={{
-                                        backgroundImage:
-                                            'linear-gradient(180deg, #000000 0%, #0c0c0c88 50%, #66666600 100%)',
-                                    }}>
-                                    <div className="flex gap-4 items-center">
-                                        <Button
-                                            variant="outline"
-                                            className="w-16 h-16"
-                                            onClick={handleAIQuestionButton}>
-                                            <Bot
-                                                style={{
-                                                    height: '32px',
-                                                    width: '32px',
-                                                }}
-                                            />
-                                        </Button>
-                                        <p className="text-white font-medium">
-                                            도움이 필요하신가요? <br /> AI에게
-                                            도움을 요청하세요!
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : AIQuestions.length ? (
-                                <div className="w-full h-48 z-10 absolute top-0 left-0 bg-gray-300 p-2 rounded-lg flex flex-col justify-between">
-                                    <div className="flex gap-4 items-center">
-                                        <Button
-                                            variant="outline"
-                                            className="w-16 h-16"
-                                            onClick={handleAIQuestionButton}>
-                                            <Bot
-                                                style={{
-                                                    height: '32px',
-                                                    width: '32px',
-                                                }}
-                                            />
-                                        </Button>
-                                        <p className="font-medium text-black">
-                                            의 추천 질문!
-                                        </p>
-                                    </div>
-                                    <div className="w-full h-24 bg-white rounded-bl-lg rounded-br-lg p-2 flex justify-between items-center">
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={handleClickPrevQuestion}>
-                                            <ChevronLeft size={20} />
-                                        </Button>
-                                        <div className="px-4 py-2 text-center">
-                                            {
-                                                AIQuestions[
-                                                    currentQuestionIndex
-                                                ].content
-                                            }
+                        <div className="flex flex-col justify-center items-end relative">
+                            <div
+                                className="w-full p-2 flex items-center"
+                                style={{
+                                    backgroundImage:
+                                        'linear-gradient(180deg, #000000 0%, #0c0c0c88 50%, #0000000 100%)',
+                                }}>
+                                <Button
+                                    variant="outline"
+                                    className="w-16 h-16 mr-4"
+                                    onClick={handleAIQuestionButton}>
+                                    <Bot
+                                        style={{
+                                            height: '32px',
+                                            width: '32px',
+                                        }}
+                                    />
+                                </Button>
+                                {!isAiModalOpen ? (
+                                    <p className="text-white font-medium">
+                                        도움이 필요하신가요? <br /> AI에게
+                                        도움을 요청하세요!
+                                    </p>
+                                ) : AIQuestions.length ? (
+                                    <div className="absolute top-0 left-0 z-50 w-full h-48 bg-gray-300 p-2 rounded-lg flex flex-col justify-between">
+                                        <div className="flex gap-4 flex-col">
+                                            <div className="flex items-center">
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-16 h-16 mr-2"
+                                                    onClick={
+                                                        handleAIQuestionButton
+                                                    }>
+                                                    <Bot
+                                                        style={{
+                                                            height: '32px',
+                                                            width: '32px',
+                                                        }}
+                                                    />
+                                                </Button>
+                                                <p className="font-medium text-black">
+                                                    의 추천 질문!
+                                                </p>
+                                            </div>
+                                            <div className="w-full h-24 bg-white rounded-bl-lg rounded-br-lg p-2 flex justify-between items-center">
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={
+                                                        handleClickPrevQuestion
+                                                    }>
+                                                    <ChevronLeft size={20} />
+                                                </Button>
+                                                <div className="px-4 py-2 text-center">
+                                                    {
+                                                        AIQuestions[
+                                                            currentQuestionIndex
+                                                        ].content
+                                                    }
+                                                </div>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={
+                                                        handleClickNextQuestion
+                                                    }>
+                                                    <ChevronRight size={20} />
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={handleClickNextQuestion}>
-                                            <ChevronRight size={20} />
-                                        </Button>
                                     </div>
-                                </div>
-                            ) : (
-                                ''
-                            )}
+                                ) : (
+                                    ''
+                                )}
+                            </div>
                             <TextChat chatRoomId={chatRoomId} />
                         </div>
-                        <div className="flex justify-end items-end my-10 flex-col">
-                            <div className="mb-2">
-                                <ReactionPanel />
-                            </div>
-                            <div className="bg-slate-300 w-full h-2/4 rounded-lg p-6 flex flex-col justify-between relative">
+                        <div className="flex justify-end items-end flex-col relative">
+                            <VideoRenderer userId={participants[0]?.identity} />
+                            <AudioRenderer userId={participants[0]?.identity} />
+                            <div className="bg-slate-300 w-full rounded-lg p-4 flex flex-col justify-between relative">
+                                <div className="absolute -top-[57px] right-0">
+                                    <ReactionPanel
+                                        userId={participants[0]?.identity}
+                                    />
+                                </div>
                                 <div>
-                                    <h1 className="text-2xl">
+                                    <h1 className="text-2xl font-bold mb-4">
                                         {myInfo?.planetId
                                             ? getPlanetNameById(myInfo.planetId)
                                             : ''}
                                         &nbsp;여행자
                                     </h1>
-                                    <p>
-                                        나누고 싶은 이야기: {myInfo?.concern}
-                                        <br /> 나의 성향: {myInfo?.mbti}
-                                        <br /> 나의 매너온도: {myInfo?.energy}
-                                        °C
-                                    </p>
+                                    <div className="mb-8">
+                                        <h2 className="font-bold mb-1">
+                                            나누고 싶은 이야기
+                                        </h2>
+                                        <p className="min-h-28 line-clamp-6 text-sm mb-2">
+                                            {myInfo?.concern}
+                                        </p>
+                                        <MbtiTag mbti={myInfo?.mbti} />
+                                        <TemperatureTag
+                                            energy={myInfo?.energy}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="">
-                                    <Button
-                                        onClick={handleLeaveChat}
-                                        disabled={
-                                            disconnectButtonProps?.disabled
-                                        }
-                                        className="bg-[#009951] hover:bg-[#009951]/80 font-medium">
-                                        <LogOut size={28} />
-                                        나가기
-                                    </Button>
+                                <div>
+                                    <CustomControlBar
+                                        onLeave={handleLeaveChat}
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-        </LiveKitRoom>
+        </>
     );
 }
 

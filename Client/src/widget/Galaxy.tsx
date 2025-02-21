@@ -8,7 +8,7 @@ const colorInside = '#ffffff';
 const colorOutside = '#311599';
 
 function Galaxy() {
-    const count = 20_000;
+    const count = 10_000;
     const branches = 5;
 
     // Leva controls
@@ -150,7 +150,12 @@ function Galaxy() {
                 ]}
                 background={true}
             />
-            <OrbitControls enableDamping minDistance={3} maxDistance={10} />
+            <OrbitControls
+                enableDamping
+                minDistance={3}
+                maxDistance={10}
+                enablePan={false}
+            />
             <points>
                 <bufferGeometry>
                     <bufferAttribute

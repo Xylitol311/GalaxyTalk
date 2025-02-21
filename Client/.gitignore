@@ -26,3 +26,6 @@ package-lock.json
 *.sw?
 
 .env
+
+key.pem
+.cert.pem

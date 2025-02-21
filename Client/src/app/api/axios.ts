@@ -25,6 +25,7 @@ fetcher.interceptors.response.use(
     (error) => {
         // Todo: 에러 처리
         console.error('API 요청 실패:', error);
+
         return Promise.reject(error);
     }
 );

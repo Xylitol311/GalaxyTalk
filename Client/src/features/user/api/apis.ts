@@ -36,3 +36,19 @@ export async function postLogout() {
 
     return data;
 }
+
+export async function postRefresh() {
+    const { data } = await fetcher.post<BaseResponseType>(
+        PATH.API_PATH.OAUTH.REFRESH
+    );
+
+    return data;
+}
+
+export async function putWithdraw() {
+    const { data } = await fetcher.put<BaseResponseType>(
+        PATH.API_PATH.OAUTH.WITHDRAW
+    );
+
+    return data;
+}
