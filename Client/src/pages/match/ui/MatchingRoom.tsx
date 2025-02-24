@@ -210,6 +210,34 @@ export default function MatchingRoom() {
         };
     }, []);
 
+    let concernIndex = 0;
+
+    useEffect(() => {
+        const addMockUser = () => {
+            const mockUser: WaitingUserType = {
+                userId: `mock-${Date.now()}`,
+                concern: MOCK_CONCERNS[concernIndex],
+                mbti: 'INFJ',
+                status: 'WAITING',
+                startTime: `${Date.now() - 2 * 60 * 1000}`,
+            };
+
+            setUserList((prevList) => {
+                if (prevList.length >= 10) return prevList;
+                return [...prevList, mockUser];
+            });
+
+            concernIndex++;
+        };
+
+        const intervalId = setInterval(
+            addMockUser,
+            Math.random() * 1000 + 1000
+        );
+
+        return () => clearInterval(intervalId);
+    }, []);
+
     const handleToHome = () => {
         if (matchData?.matchId) {
             matchApproveMutate({
@@ -271,3 +299,16 @@ export default function MatchingRoom() {
         </>
     );
 }
+
+const MOCK_CONCERNS = [
+    '진로를 어떻게 정해야 할까?',
+    '사람들과 잘 어울리는 법이 궁금해.',
+    '내가 하고 싶은 일이 뭔지 모르겠어.',
+    '자기 계발을 어떻게 시작해야 할까?',
+    '불안한 미래를 어떻게 대비할까?',
+    '사랑과 우정, 무엇이 더 중요할까?',
+    '새로운 도전을 해도 될까?',
+    '현재 직장을 계속 다녀야 할까?',
+    '내 성격이 너무 소극적인 것 같아.',
+    '돈을 잘 모으는 방법이 궁금해.',
+];
