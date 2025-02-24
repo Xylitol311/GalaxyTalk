@@ -112,7 +112,7 @@ export default function TimerConfirm({
                     onInteractOutside={(e) => e.preventDefault()}
                     onEscapeKeyDown={(e) => e.preventDefault()}>
                     <DialogHeader>
-                        <DialogTitle>대화 상대를 찾았어요!</DialogTitle>
+                        <DialogTitle>매칭 상대를 찾았어요!</DialogTitle>
                         <DialogDescription className="flex flex-col items-start gap-5">
                             <div className="flex flex-col items-start mt-3">
                                 <p className="text-black">
