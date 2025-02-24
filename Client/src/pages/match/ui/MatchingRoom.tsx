@@ -217,7 +217,7 @@ export default function MatchingRoom() {
             const mockUser: WaitingUserType = {
                 userId: `mock-${Date.now()}`,
                 concern: MOCK_CONCERNS[concernIndex],
-                mbti: 'INFJ',
+                mbti: MOCK_MBTI[concernIndex],
                 status: 'WAITING',
                 startTime: `${Date.now() - 2 * 60 * 1000}`,
             };
@@ -312,3 +312,16 @@ const MOCK_CONCERNS = [
     '내 성격이 너무 소극적인 것 같아.',
     '돈을 잘 모으는 방법이 궁금해.',
 ];
+
+const MOCK_MBTI = [
+    'ENFJ',
+    'ISTJ',
+    'ENFP',
+    'INTJ',
+    'ESFJ',
+    'INTP',
+    'ISFJ',
+    'ISFP',
+    'ESFP',
+    'ISTP',
+] as const;
