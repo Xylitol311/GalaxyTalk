@@ -219,7 +219,7 @@ export default function MatchingRoom() {
                 concern: MOCK_CONCERNS[concernIndex],
                 mbti: MOCK_MBTI[concernIndex],
                 status: 'WAITING',
-                startTime: `${Date.now() - 2 * 60 * 1000}`,
+                startTime: `${Date.now() * 60 * 1000}`,
             };
 
             setUserList((prevList) => {
