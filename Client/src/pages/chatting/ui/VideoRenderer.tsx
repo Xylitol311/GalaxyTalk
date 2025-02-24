@@ -42,7 +42,7 @@ function VideoRenderer({ userId }: { userId: string }) {
         setTimeout(() => {
             // 컴포넌트가 마운트될 때 한 번 실행해서 초기 크기를 설정
             updateContainerSize();
-        }, 1000);
+        }, 2000);
 
         return () => {
             window.removeEventListener('resize', updateContainerSize);
