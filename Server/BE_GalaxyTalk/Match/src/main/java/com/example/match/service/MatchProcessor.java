@@ -35,6 +35,8 @@ public class MatchProcessor {
         // 1. 매칭 ID 생성 및 상태 업데이트
         String matchId = UUID.randomUUID().toString();
         similarity = (double) Math.round(similarity * 10000) / 100.0;
+        if (similarity >= 100)
+            similarity = 96.8;
         updateMatchStatus(user1, user2, matchId, similarity);
 
         // 2. 대기 큐에서 해당 유저 제거
