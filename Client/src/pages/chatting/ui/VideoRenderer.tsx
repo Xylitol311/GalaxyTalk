@@ -23,7 +23,7 @@ function VideoRenderer({ userId }: { userId: string }) {
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({
-        width: 200,
+        width: 450,
         height: 150,
     });
 
@@ -42,7 +42,7 @@ function VideoRenderer({ userId }: { userId: string }) {
         setTimeout(() => {
             // 컴포넌트가 마운트될 때 한 번 실행해서 초기 크기를 설정
             updateContainerSize();
-        }, 2000);
+        }, 1000);
 
         return () => {
             window.removeEventListener('resize', updateContainerSize);
