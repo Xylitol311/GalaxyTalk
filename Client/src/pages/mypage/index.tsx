@@ -51,7 +51,7 @@ export default function MyPage() {
             {(view === 'profile' ||
                 view === 'reviews' ||
                 view === 'edit-profile') && (
-                <div className="w-full max-w-md bg-gray-900 shadow-xl rounded-xl p-6 pt-2 flex flex-col items-center border border-gray-700">
+                <div className="w-full max-w-md max-h-full bg-gray-900 shadow-xl rounded-xl p-6 pt-2 flex flex-col items-center border border-gray-700">
                     <div className="w-full flex justify-start">
                         <Button
                             variant="link"
@@ -88,8 +88,8 @@ export default function MyPage() {
                     <MenuList items={menuItems} />
 
                     {view === 'reviews' && (
-                        <div className="w-full mt-6 text-center">
-                            <h2 className="text-xl font-semibold text-indigo-300 mb-4">
+                        <div className="relative w-full mt-6 text-center overflow-y-auto">
+                            <h2 className="sticky top-0 text-xl font-semibold text-indigo-300 mb-4 bg-gray-900">
                                 내가 받은 후기
                             </h2>
                             <LetterList />
