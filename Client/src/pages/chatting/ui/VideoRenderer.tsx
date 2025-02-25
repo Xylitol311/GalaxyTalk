@@ -47,7 +47,7 @@ function VideoRenderer({ userId }: { userId: string }) {
         return () => {
             window.removeEventListener('resize', updateContainerSize);
         };
-    }, [isVideoEnabled]);
+    }, [isVideoEnabled, isAudioEnabled]);
 
     // container의 크기를 기준으로 AudioVisualizer에 전달할 값들을 계산
     const newWidth = containerSize.width;
@@ -64,7 +64,6 @@ function VideoRenderer({ userId }: { userId: string }) {
                 <VideoTrack trackRef={camTrackRef} />
             </>
         );
-        return <VideoTrack trackRef={camTrackRef} />;
     }
 
     // placeholder: audio visualizer
