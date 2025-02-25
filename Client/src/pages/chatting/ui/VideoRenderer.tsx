@@ -23,7 +23,7 @@ function VideoRenderer({ userId }: { userId: string }) {
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({
-        width: 450,
+        width: 350,
         height: 150,
     });
 
