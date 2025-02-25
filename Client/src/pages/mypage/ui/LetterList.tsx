@@ -9,18 +9,26 @@ export default function LetterList() {
             {isSuccess &&
                 data.data &&
                 !!data.data.length &&
-                data.data.map((letter) => (
-                    <Card
-                        key={letter.id}
-                        className="p-4 bg-gray-800 shadow-md rounded-lg">
-                        <p className="text-gray-300 mt-2 break-words">
-                            {letter.content}
-                        </p>
-                        <p className="text-gray-500 text-sm mt-2 text-right">
-                            {new Date(letter.createdAt).toLocaleDateString()}
-                        </p>
-                    </Card>
-                ))}
+                [...data.data]
+                    .sort(
+                        (a, b) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime()
+                    )
+                    .map((letter) => (
+                        <Card
+                            key={letter.id}
+                            className="p-4 bg-gray-800 shadow-md rounded-lg">
+                            <p className="text-gray-300 mt-2 break-words">
+                                {letter.content}
+                            </p>
+                            <p className="text-gray-500 text-sm mt-2 text-right">
+                                {new Date(
+                                    letter.createdAt
+                                ).toLocaleDateString()}
+                            </p>
+                        </Card>
+                    ))}
         </div>
     );
 }
