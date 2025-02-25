@@ -12,13 +12,27 @@ function VideoRenderer({ userId }: { userId: string }) {
     const isVideoEnabled =
         camTrackRef && !camTrackRef?.publication?.track?.isMuted ? true : false;
 
+    const partnerCamTrackRef = cameraTracks.find(
+        (trackRef) => trackRef.participant.identity !== userId
+    );
+    const isPartnerVideoEnabled =
+        partnerCamTrackRef && !partnerCamTrackRef?.publication?.track?.isMuted
+            ? true
+            : false;
+
     const micTracks = useTracks([Track.Source.Microphone]);
     const micTrackRef = micTracks.find(
         (trackRef) => trackRef.participant.identity === userId
     );
-
     const isAudioEnabled =
         micTrackRef && !micTrackRef?.publication?.track?.isMuted ? true : false;
+    const partnerMicTrackRef = micTracks.find(
+        (trackRef) => trackRef.participant.identity !== userId
+    );
+    const isPartnerAudioEnabled =
+        partnerMicTrackRef && !partnerMicTrackRef?.publication?.track?.isMuted
+            ? true
+            : false;
 
     // container ref와 크기를 저장할 상태
     const containerRef = useRef(null);
@@ -40,14 +54,18 @@ function VideoRenderer({ userId }: { userId: string }) {
         window.addEventListener('resize', updateContainerSize);
 
         setTimeout(() => {
-            // 컴포넌트가 마운트될 때 한 번 실행해서 초기 크기를 설정
             updateContainerSize();
-        }, 1000);
+        }, 500);
 
         return () => {
             window.removeEventListener('resize', updateContainerSize);
         };
-    }, [isVideoEnabled, isAudioEnabled]);
+    }, [
+        isVideoEnabled,
+        isAudioEnabled,
+        isPartnerVideoEnabled,
+        isPartnerAudioEnabled,
+    ]);
 
     // container의 크기를 기준으로 AudioVisualizer에 전달할 값들을 계산
     const newWidth = containerSize.width;
