@@ -100,18 +100,18 @@ export default function Planet({ userInfo }: PlanetProps) {
                         width: '360px',
                         height: 'auto',
                     }}>
-                    <Card className="bg-white p-6 rounded-xl w-full transform transition-all duration-300 hover:scale-105 hover:shadow-inner">
+                    <Card className="bg-slate-100 p-6 rounded-xl w-full transform transition-all duration-300 hover:scale-105 hover:shadow-inner">
                         <CardContent>
-                            <div className="text-sm font-semibold text-gray-900 mb-2">
+                            <div className="text-xl font-semibold text-black mb-2">
                                 상대방의 고민
                             </div>
-                            <div className="text-xs text-gray-700 mb-2">
+                            <div className="text-md text-gray-900 mb-2">
                                 {userInfo.concern}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-sm text-gray-700">
                                 상대방의 MBTI : {userInfo.mbti}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-sm text-gray-700">
                                 매칭 시작 시간 :{' '}
                                 {formatTimeDifference(+userInfo.startTime)}
                             </div>

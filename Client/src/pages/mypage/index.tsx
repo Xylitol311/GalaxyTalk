@@ -89,7 +89,7 @@ export default function MyPage() {
 
                     {view === 'reviews' && (
                         <div className="relative w-full mt-6 text-center overflow-y-auto">
-                            <h2 className="sticky top-0 text-xl font-semibold text-indigo-300 mb-4 bg-gray-900">
+                            <h2 className="sticky top-0 text-xl font-semibold text-indigo-300 mb-2 pb-2 bg-gray-900">
                                 내가 받은 후기
                             </h2>
                             <LetterList />
