@@ -24,7 +24,7 @@ function AudioVisualizer({
     // 처리된 그룹 평균 데이터를 저장하는 Ref
     const processedDataRef = useRef<number[]>(new Array(groupCount).fill(0));
 
-    // Throttle을 사용해 오디오 데이터를 일정 시간 간격(여기서는 1000ms)마다 처리
+    // Throttle을 사용해 오디오 데이터를 일정 시간 간격(여기서는 100ms)마다 처리
     const processAudioData = throttle((barsOriginal: number[]) => {
         let groupedAverages: number[] = [];
 
@@ -54,7 +54,7 @@ function AudioVisualizer({
         // throttle된 함수는 내부적으로 업데이트 주기를 관리하므로 별도의 클린업 로직은 필요없습니다.
     }, [audioWaves, groupCount, processAudioData]);
 
-    // Canvas에 그리기: 이제 requestAnimationFrame 대신 setInterval을 사용하여 1000ms마다 업데이트
+    // Canvas에 그리기: 이제 requestAnimationFrame 대신 setInterval을 사용하여 100ms마다 업데이트
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
