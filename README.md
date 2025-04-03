@@ -8,7 +8,7 @@
 
 우주 테마의 AI 기반 고민 유사도 점수를 활용한 1:1 매칭 화상 채팅 서비스
 
-![image.png](attachment:8fed37c7-0ccd-4d97-a3a8-822ba5939cc0:image.png)
+![logo.png](doc/logo.png)
 
 > 외로운 별들을 위한 빛나는 만남,
 익명의 마음들이 전하는 따스한 위로,
@@ -111,8 +111,7 @@
     - **헬스체크 및 의존성 관리**: 각 컨테이너에 헬스체크를 설정하여 안정적 운영 보장
 
 ## 구조 및 아키텍쳐
-
-![image.png](attachment:202dfda9-70cc-4f17-bfa1-5e9e57fcb015:image.png)
+![architecture.png](doc/architecture.png)
 
 - 마이크로서비스 아키텍처(MSA) 기반 설계
 - Ubuntu 서버에서 Docker 기반으로 애플리케이션 실행
