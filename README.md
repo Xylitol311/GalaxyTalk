@@ -88,7 +88,7 @@
 
 ## 🏗️ 시스템 아키텍처
 
-![architecture.png](doc/architecture.png)
+![system architecture](doc/system%20architecture.png)
 
 ### 🔐 보안 및 인증
 - **API Gateway 중앙 집중식 인증**: 모든 서비스 요청의 JWT 토큰 검증
@@ -129,6 +129,8 @@
   - **Relaxed Mode**: 글자별 부분 매칭 (4글자 중 일치 개수 비례)
 
 ### 📡 실시간 매칭 프로세스
+
+![sequence diagram](doc/sequence%20diagram.png)
 
 1. **매칭 요청**
    ```
